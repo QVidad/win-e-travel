@@ -114,7 +114,7 @@ function initSmoothScroll() {
 
 // Initialize form handlers
 function initFormHandlers() {
-    // Login form handler
+    // Update login form handler
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
@@ -123,17 +123,30 @@ function initFormHandlers() {
             const password = document.getElementById('password').value;
             
             if (email && password) {
-                showNotification('Login successful! (Demo mode)', 'success');
+                // Extract name from email for demo
+                const userName = email.split('@')[0];
+                localStorage.setItem('userName', userName);
+                localStorage.setItem('userEmail', email);
+                
+                showNotification('Login successful! Redirecting...', 'success');
+                
                 setTimeout(() => {
                     bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+                    // Check if first time login
+                    const onboardingComplete = localStorage.getItem('onboardingComplete');
+                    if (onboardingComplete) {
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        window.location.href = 'welcome.html';
+                    }
                 }, 1000);
             } else {
                 showNotification('Please fill in all fields', 'warning');
             }
         });
     }
-    
-    // Register form handler
+
+    // Update register form handler
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', function(e) {
@@ -148,10 +161,18 @@ function initFormHandlers() {
                     showNotification('Passwords do not match', 'danger');
                     return;
                 }
-                showNotification('Registration successful! (Demo mode)', 'success');
+                
+                // Save user info
+                localStorage.setItem('userName', name);
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('onboardingComplete', 'false');
+                
+                showNotification('Registration successful! Redirecting to welcome page...', 'success');
+                
                 setTimeout(() => {
                     bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
-                }, 1000);
+                    window.location.href = 'welcome.html';
+                }, 1500);
             } else {
                 showNotification('Please fill in all fields', 'warning');
             }
