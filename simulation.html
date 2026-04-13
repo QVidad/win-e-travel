@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure Awaits - WIN e-Travel Training</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <style>
+        .simulation-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            margin: 30px 0;
+        }
+        
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        
+        .simulation-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #eef2f6;
+        }
+        
+        .simulation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        
+        .simulation-card.locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .simulation-card.locked:hover {
+            transform: none;
+        }
+        
+        .simulation-card.completed {
+            border-left: 6px solid #28a745;
+        }
+        
+        .card-image {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .card-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .final-tour-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .final-tour-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        
+        .final-tour-card.locked {
+            opacity: 0.6;
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        
+        .simulation-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+        }
+        
+        .step-item {
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+        
+        .step-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: -50%;
+            width: 100%;
+            height: 3px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+        
+        .step-item.completed:not(:last-child)::after {
+            background: #28a745;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 3px solid #dee2e6;
+            color: #6c757d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 auto 10px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-item.active .step-number {
+            border-color: var(--mmsu-green);
+            background: var(--mmsu-green);
+            color: white;
+        }
+        
+        .step-item.completed .step-number {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+        
+        .guide-mode-btn {
+            background: linear-gradient(135deg, var(--mmsu-gold) 0%, #e6b422 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 18px 40px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .guide-mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(212, 160, 23, 0.3);
+            color: white;
+        }
+        
+        .timer-display {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--mmsu-green);
+        }
+        
+        .tourist-question-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+        
+        .recording-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #dc3545;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .keyword-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .keyword-tag {
+            background: #f8f9fa;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .keyword-tag.covered {
+            background: #28a745;
+            color: white;
+        }
+        
+        .keyword-tag.missed {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body class="simulation-container">
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm py-2">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">
+                <img src="assets/images/WINLogo.png" alt="WIN Logo" style="height: 35px; width: 35px; margin-right: 5px;">
+                <span class="fw-bold" style="color: var(--mmsu-green);">WIN e-Travel</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item text-center mx-2">
+                        <a class="nav-link nav-icon-link" href="dashboard.html">
+                            <i class="fas fa-chart-pie nav-icon"></i>
+                            <span class="nav-label">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item text-center mx-2">
+                        <a class="nav-link nav-icon-link" href="foundation.html">
+                            <i class="fas fa-book-open nav-icon"></i>
+                            <span class="nav-label">Go Beyond Books</span>
+                        </a>
+                    </li>
+                    <li class="nav-item text-center mx-2">
+                        <a class="nav-link nav-icon-link" href="towns.html">
+                            <i class="fas fa-compass nav-icon"></i>
+                            <span class="nav-label">Dare to Discover</span>
+                        </a>
+                    </li>
+                    <li class="nav-item text-center mx-2">
+                        <a class="nav-link nav-icon-link active" href="simulation.html">
+                            <i class="fas fa-mountain nav-icon"></i>
+                            <span class="nav-label">Adventure Awaits</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle fs-4 me-1"></i>
+                        <span id="navUserName">Trainee</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="index.html"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+        
+        <!-- Main View (Simulation Cards) -->
+        <div id="mainView">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <h2 class="fw-bold mb-2">
+                            <i class="fas fa-mountain me-2"></i>
+                            Adventure Awaits
+                        </h2>
+                        <p class="mb-0 opacity-90">Practice your tour guiding skills with speech recognition simulations</p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                        <div class="d-inline-block bg-white bg-opacity-25 rounded-4 px-4 py-2">
+                            <span class="fw-bold" id="simulationsCompleted">1</span>/22 Unlocked
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulation Cards Grid -->
+            <h5 class="fw-bold mb-3">Town Simulations</h5>
+            <div class="simulation-grid" id="simulationGrid">
+                <!-- Cards will be loaded here -->
+            </div>
+
+            <!-- Final Virtual Tour Card -->
+            <div id="finalTourContainer"></div>
+        </div>
+
+        <!-- Simulation Active View -->
+        <div id="simulationView" style="display: none;">
+            <nav class="breadcrumb-nav mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" onclick="showMainView()">Simulations</a></li>
+                    <li class="breadcrumb-item active" id="simulationBreadcrumb">Laoag City Simulation</li>
+                </ol>
+            </nav>
+
+            <!-- Steps Indicator -->
+            <div class="simulation-steps">
+                <div class="step-item active" id="step1">
+                    <div class="step-number">1</div>
+                    <small>Watch Video</small>
+                </div>
+                <div class="step-item" id="step2">
+                    <div class="step-number">2</div>
+                    <small>Guide Mode</small>
+                </div>
+                <div class="step-item" id="step3">
+                    <div class="step-number">3</div>
+                    <small>Tourist Questions</small>
+                </div>
+                <div class="step-item" id="step4">
+                    <div class="step-number">4</div>
+                    <small>Results</small>
+                </div>
+            </div>
+
+            <div id="simulationContent" class="mt-4">
+                <!-- Dynamic content loaded here -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Shared Navigation -->
+    <script src="assets/js/navigation.js"></script>
+    <!-- Simulation JS -->
+    <script src="assets/js/simulation.js"></script>
+</body>
+</html>
