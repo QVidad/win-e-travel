@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initBootstrapComponents();
 });
 
-// Municipality data
+// Municipality data with real image paths
 const municipalitiesData = [
     {
         name: 'Laoag City',
@@ -26,7 +26,8 @@ const municipalitiesData = [
         badge: 'Capital City',
         badgeClass: 'bg-warning text-dark',
         icon: 'fa-crown',
-        imageColor: '1a5f7a'
+        imagePath: 'assets/images/Laoag.jpg',
+        imageAlt: 'Laoag City - Sinking Bell Tower and Cathedral'
     },
     {
         name: 'Paoay',
@@ -36,7 +37,8 @@ const municipalitiesData = [
         badge: 'UNESCO Heritage',
         badgeClass: 'bg-info text-white',
         icon: 'fa-unesco',
-        imageColor: '8B4513'
+        imagePath: 'assets/images/Paoay.jpg',
+        imageAlt: 'Paoay Church - UNESCO World Heritage Site'
     },
     {
         name: 'Pagudpud',
@@ -46,7 +48,8 @@ const municipalitiesData = [
         badge: 'Boracay of the North',
         badgeClass: 'bg-primary text-white',
         icon: 'fa-umbrella-beach',
-        imageColor: '4682B4'
+        imagePath: 'assets/images/Pagudpud.jpg',
+        imageAlt: 'Pagudpud Beach - Saud Beach and Windmills'
     }
 ];
 
@@ -59,8 +62,11 @@ function loadMunicipalities() {
         <div class="col-md-4">
             <div class="card border-0 shadow-sm municipality-card">
                 <div class="position-relative">
-                    <img src="https://placehold.co/600x400/${municipality.imageColor}/ffffff?text=${encodeURIComponent(municipality.name)}" 
-                         class="card-img-top" alt="${municipality.name}" style="height: 200px; object-fit: cover;">
+                    <img src="${municipality.imagePath}" 
+                         class="card-img-top" 
+                         alt="${municipality.imageAlt}" 
+                         style="height: 200px; object-fit: cover;"
+                         onerror="this.src='https://placehold.co/600x400/1a5f7a/ffffff?text=${encodeURIComponent(municipality.name)}'">
                     <span class="position-absolute top-0 end-0 badge ${municipality.badgeClass} m-3 px-3 py-2">
                         <i class="fas ${municipality.icon} me-1"></i>${municipality.badge}
                     </span>
