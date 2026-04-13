@@ -135,6 +135,34 @@ body {
     font-weight: 500;
     font-size: 0.9rem;
 }
+/* Simple Navigation */
+.nav-icon-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 0 !important;
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.nav-icon {
+    font-size: 24px;
+    margin-bottom: 3px;
+}
+
+.nav-label {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.nav-icon-link:hover {
+    color: var(--mmsu-green);
+    transform: translateY(-2px);
+}
+
+.nav-icon-link.active {
+    color: var(--mmsu-green);
+}
 
 /* Smooth scrolling for anchor links */
 html {
