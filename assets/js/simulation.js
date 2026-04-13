@@ -9,7 +9,7 @@ const simulations = [
         name: 'Laoag City',
         description: 'Capital City • Sunshine City',
         image: 'assets/images/laoag.jpg',
-        status: 'completed', // completed, available, locked
+        status: 'completed',
         unlocked: true,
         completed: true,
         videoUrl: 'https://www.youtube.com/embed/VIDEO_ID_LAOAG',
@@ -57,7 +57,125 @@ const townQuestions = {
     ]
 };
 
-// Current simulation state
+// ============================================
+// VOICE SETTINGS (from Welcome Page)
+// ============================================
+
+let selectedVoice = null;
+let speechSynthesis = window.speechSynthesis;
+let availableVoices = [];
+
+// Load voice preference from welcome page
+function loadVoicePreference() {
+    const savedAvatar = localStorage.getItem('selectedAvatar');
+    const customVoice = localStorage.getItem('customVoice');
+    
+    if (availableVoices.length === 0) {
+        availableVoices = speechSynthesis.getVoices();
+    }
+    
+    if (customVoice && availableVoices.length > 0) {
+        selectedVoice = availableVoices.find(v => v.name === customVoice);
+    }
+    
+    if (!selectedVoice && savedAvatar) {
+        setVoiceByGender(savedAvatar);
+    }
+    
+    console.log('Voice loaded:', selectedVoice?.name || 'Default voice');
+    
+    // Update the voice indicator in navbar
+    updateVoiceIndicator();
+}
+
+// Set voice based on gender preference
+function setVoiceByGender(gender) {
+    if (availableVoices.length === 0) {
+        availableVoices = speechSynthesis.getVoices();
+    }
+    
+    let preferredVoice = null;
+    
+    if (gender === 'male') {
+        preferredVoice = availableVoices.find(voice => 
+            voice.name.toLowerCase().includes('male') ||
+            voice.name.toLowerCase().includes('daniel') ||
+            voice.name.toLowerCase().includes('david') ||
+            voice.name.toLowerCase().includes('google uk english male') ||
+            voice.name.toLowerCase().includes('microsoft david')
+        );
+    } else {
+        preferredVoice = availableVoices.find(voice => 
+            voice.name.toLowerCase().includes('female') ||
+            voice.name.toLowerCase().includes('samantha') ||
+            voice.name.toLowerCase().includes('victoria') ||
+            voice.name.toLowerCase().includes('google uk english female') ||
+            voice.name.toLowerCase().includes('microsoft zira')
+        );
+    }
+    
+    if (!preferredVoice) {
+        preferredVoice = availableVoices.find(voice => voice.lang.startsWith('en'));
+    }
+    
+    selectedVoice = preferredVoice;
+}
+
+// Update voice indicator in navbar
+function updateVoiceIndicator() {
+    const indicator = document.getElementById('voiceName');
+    if (indicator) {
+        const avatar = localStorage.getItem('selectedAvatar');
+        let voiceType = 'Default Voice';
+        if (avatar === 'male') {
+            voiceType = 'Male Facilitator';
+        } else if (avatar === 'female') {
+            voiceType = 'Female Facilitator';
+        }
+        indicator.textContent = voiceType;
+    }
+}
+
+// Speak text with selected voice
+function speakText(text, onEndCallback = null) {
+    if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    }
+    
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    if (onEndCallback) {
+        utterance.onend = onEndCallback;
+    }
+    
+    speechSynthesis.speak(utterance);
+}
+
+// Speak tourist question
+function speakTouristQuestion(question, guest, callback) {
+    const fullText = `${guest} asks: ${question}`;
+    speakText(fullText, callback);
+}
+
+// Replay the current question
+function replayQuestion() {
+    if (window.currentQuestionText) {
+        speakText(window.currentQuestionText);
+    }
+}
+
+// ============================================
+// SIMULATION STATE
+// ============================================
+
 let currentSimulation = null;
 let currentStep = 1;
 let videoWatched = false;
@@ -68,7 +186,10 @@ let coveredKeywords = [];
 let missedKeywords = [];
 let guideModeScore = 0;
 
-// Initialize page
+// ============================================
+// INITIALIZATION
+// ============================================
+
 document.addEventListener('DOMContentLoaded', function() {
     loadNavUserName();
     loadSimulationProgress();
@@ -76,7 +197,16 @@ document.addEventListener('DOMContentLoaded', function() {
     renderFinalTourCard();
     updateOverallProgress();
     
-    // Check URL parameters for direct simulation start
+    // Initialize voices
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = function() {
+            availableVoices = speechSynthesis.getVoices();
+            loadVoicePreference();
+        };
+    }
+    loadVoicePreference();
+    
+    // Check URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const townParam = urlParams.get('town');
     if (townParam) {
@@ -93,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function showMainView() {
     if (guideTimerInterval) clearInterval(guideTimerInterval);
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
     document.getElementById('mainView').style.display = 'block';
     document.getElementById('simulationView').style.display = 'none';
     renderSimulationGrid();
@@ -172,7 +303,22 @@ function openSimulation(simId) {
     }
     
     if (sim.completed) {
-        alert(`${sim.name} simulation has already been completed!`);
+        const confirmRetake = confirm(`${sim.name} is already completed. Do you want to retake the simulation?`);
+        if (confirmRetake) {
+            sim.completed = false;
+            sim.status = 'available';
+            
+            const nextSim = simulations.find(s => s.id === sim.id + 1);
+            if (nextSim) {
+                nextSim.unlocked = false;
+                nextSim.status = 'locked';
+            }
+            
+            saveSimulationProgress();
+            renderSimulationGrid();
+            renderFinalTourCard();
+            startSimulation(simId);
+        }
         return;
     }
     
@@ -191,6 +337,9 @@ function startSimulation(simId) {
     coveredKeywords = [];
     missedKeywords = [];
     guideModeScore = 0;
+    
+    // Load voice preference
+    loadVoicePreference();
     
     // Load town-specific questions
     const townKey = currentSimulation.name.toLowerCase().split(' ')[0];
@@ -220,7 +369,6 @@ function showStepContent() {
     const content = document.getElementById('simulationContent');
     
     if (currentStep === 1) {
-        // Step 1: Watch Video
         content.innerHTML = `
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
@@ -228,7 +376,7 @@ function showStepContent() {
                         <i class="fas fa-play-circle text-primary me-2"></i>
                         Step 1: Watch & Learn
                     </h4>
-                    <p class="text-muted mb-3">Watch the training video for ${currentSimulation.name}. You must watch the full video once to proceed.</p>
+                    <p class="text-muted mb-3">Watch the training video for ${currentSimulation.name}.</p>
                     
                     <div class="video-container mb-4">
                         <iframe width="100%" height="400" 
@@ -238,11 +386,6 @@ function showStepContent() {
                         </iframe>
                     </div>
                     
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Pay attention to key facts, attractions, and historical details.
-                    </div>
-                    
                     <button class="btn btn-mmsu btn-lg" onclick="markVideoWatched()">
                         <i class="fas fa-check me-2"></i>I've Watched the Full Video
                     </button>
@@ -250,7 +393,6 @@ function showStepContent() {
             </div>
         `;
     } else if (currentStep === 2) {
-        // Step 2: Guide Mode (5-second demo)
         content.innerHTML = `
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
@@ -258,7 +400,7 @@ function showStepContent() {
                         <i class="fas fa-microphone-alt text-success me-2"></i>
                         Step 2: Guide Mode
                     </h4>
-                    <p class="text-muted mb-3">Deliver your tour guide spiel about ${currentSimulation.name}. The system will detect keywords you mention.</p>
+                    <p class="text-muted mb-3">Deliver your tour guide spiel about ${currentSimulation.name}.</p>
                     
                     <div class="text-center mb-4">
                         <div class="timer-display mb-3" id="guideTimer">0:05</div>
@@ -270,19 +412,13 @@ function showStepContent() {
                     <div id="recordingStatus" class="text-center" style="display: none;">
                         <div class="mb-3">
                             <span class="recording-indicator"></span>
-                            <span class="text-danger fw-bold">Recording in progress... Speak clearly!</span>
+                            <span class="text-danger fw-bold">Recording in progress...</span>
                         </div>
-                    </div>
-                    
-                    <div class="alert alert-warning mt-3">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <strong>Key topics to mention:</strong> Town name, location, history, main attractions, and interesting facts.
                     </div>
                 </div>
             </div>
         `;
     } else if (currentStep === 3) {
-        // Step 3: Tourist Questions
         content.innerHTML = `
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
@@ -290,42 +426,27 @@ function showStepContent() {
                         <i class="fas fa-question-circle text-warning me-2"></i>
                         Step 3: Tourist Questions
                     </h4>
-                    <p class="text-muted mb-3">Answer questions from AI tourists. You have 30 seconds per question.</p>
-                    
                     <div id="questionsContainer"></div>
                 </div>
             </div>
         `;
         showTouristQuestion(0);
     } else if (currentStep === 4) {
-        // Step 4: Results
         const totalKeywords = currentSimulation.keywords.length;
         const coveredCount = coveredKeywords.length;
         const score = Math.round((coveredCount / totalKeywords) * 100);
-        
         const passed = score >= 80;
         
         content.innerHTML = `
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        ${passed ? 
-                            '<i class="fas fa-trophy text-warning fa-4x"></i>' : 
-                            '<i class="fas fa-times-circle text-danger fa-4x"></i>'}
+                        ${passed ? '<i class="fas fa-trophy text-warning fa-4x"></i>' : '<i class="fas fa-times-circle text-danger fa-4x"></i>'}
                     </div>
-                    <h4 class="fw-bold text-center mb-3">
-                        ${passed ? 'Congratulations!' : 'Almost There!'}
-                    </h4>
+                    <h4 class="fw-bold text-center mb-3">${passed ? 'Congratulations!' : 'Almost There!'}</h4>
                     
-                    <div class="row justify-content-center mb-4">
-                        <div class="col-md-6">
-                            <div class="text-center">
-                                <div class="display-1 fw-bold" style="color: ${passed ? '#28a745' : '#dc3545'}">
-                                    ${score}%
-                                </div>
-                                <p class="text-muted">Overall Score</p>
-                            </div>
-                        </div>
+                    <div class="text-center mb-4">
+                        <div class="display-1 fw-bold" style="color: ${passed ? '#28a745' : '#dc3545'}">${score}%</div>
                     </div>
                     
                     <div class="mb-4">
@@ -338,12 +459,6 @@ function showStepContent() {
                         </div>
                     </div>
                     
-                    <p class="text-center mb-4">
-                        ${passed ? 
-                            `Excellent! You've successfully completed the ${currentSimulation.name} simulation!` : 
-                            `You need 80% or higher to pass. Review the video and try again!`}
-                    </p>
-                    
                     <div class="text-center">
                         ${passed ? `
                             <button class="btn btn-success btn-lg px-5" onclick="completeSimulation()">
@@ -353,9 +468,7 @@ function showStepContent() {
                             <button class="btn btn-warning btn-lg px-5 me-3" onclick="retrySimulation()">
                                 <i class="fas fa-redo me-2"></i>Try Again
                             </button>
-                            <button class="btn btn-outline-secondary btn-lg px-5" onclick="showMainView()">
-                                Exit
-                            </button>
+                            <button class="btn btn-outline-secondary btn-lg px-5" onclick="showMainView()">Exit</button>
                         `}
                     </div>
                 </div>
@@ -379,7 +492,6 @@ function startGuideMode() {
     btn.disabled = true;
     status.style.display = 'block';
     
-    // 5-second timer for demo
     let timeLeft = 5;
     
     guideTimerInterval = setInterval(() => {
@@ -390,18 +502,13 @@ function startGuideMode() {
             clearInterval(guideTimerInterval);
             status.style.display = 'none';
             
-            // Simulate keyword detection (randomly cover 60-80% of keywords)
             const allKeywords = currentSimulation.keywords;
-            const coveragePercent = Math.random() * 0.3 + 0.6; // 60-90%
+            const coveragePercent = Math.random() * 0.3 + 0.6;
             const numToCover = Math.floor(allKeywords.length * coveragePercent);
             
             coveredKeywords = [];
-            missedKeywords = [];
-            
-            // Randomly select covered keywords
             const shuffled = [...allKeywords].sort(() => Math.random() - 0.5);
             coveredKeywords = shuffled.slice(0, numToCover).map(k => k.toLowerCase());
-            missedKeywords = allKeywords.filter(k => !coveredKeywords.includes(k.toLowerCase()));
             
             currentStep = 3;
             updateStepIndicators();
@@ -420,19 +527,23 @@ function showTouristQuestion(index) {
                 <i class="fas fa-user-circle fa-3x me-3"></i>
                 <div>
                     <h6 class="mb-1">${question.guest}</h6>
-                    <small class="opacity-75">Question ${index + 1} of ${questions.length}</small>
+                    <small class="opacity-75">
+                        <i class="fas fa-volume-up me-1"></i>Speaking...
+                    </small>
                 </div>
                 <div class="ms-auto">
                     <span class="badge bg-light text-dark px-3 py-2" id="questionTimer">30s</span>
                 </div>
             </div>
             <p class="lead mb-0">"${question.question}"</p>
+            <button class="btn btn-sm btn-outline-light mt-3" onclick="replayQuestion()">
+                <i class="fas fa-redo me-1"></i>Replay Question
+            </button>
         </div>
         
         <div class="mb-3">
             <label class="form-label fw-bold">Your Answer:</label>
-            <textarea class="form-control" id="touristAnswer" rows="3" 
-                      placeholder="Type your answer here..."></textarea>
+            <textarea class="form-control" id="touristAnswer" rows="3" placeholder="Type your answer here..."></textarea>
         </div>
         
         <button class="btn btn-mmsu" onclick="submitTouristAnswer(${index})">
@@ -440,7 +551,9 @@ function showTouristQuestion(index) {
         </button>
     `;
     
-    // 30-second timer
+    window.currentQuestionText = `${question.guest} asks: ${question.question}`;
+    speakTouristQuestion(question.question, question.guest);
+    
     let timeLeft = 30;
     window.questionTimer = setInterval(() => {
         timeLeft--;
@@ -460,19 +573,16 @@ function showTouristQuestion(index) {
 }
 
 function submitTouristAnswer(index) {
-    if (window.questionTimer) {
-        clearInterval(window.questionTimer);
-    }
+    if (window.questionTimer) clearInterval(window.questionTimer);
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
     
     const answer = document.getElementById('touristAnswer')?.value || '';
     const question = questions[index];
     
-    // Check if answer contains any keywords
     const matchedKeywords = question.keywords.filter(kw => 
         answer.toLowerCase().includes(kw.toLowerCase())
     );
     
-    // Add matched keywords to covered list
     matchedKeywords.forEach(kw => {
         if (!coveredKeywords.includes(kw.toLowerCase())) {
             coveredKeywords.push(kw.toLowerCase());
@@ -494,7 +604,6 @@ function completeSimulation() {
     currentSimulation.completed = true;
     currentSimulation.status = 'completed';
     
-    // Unlock next simulation
     const nextSim = simulations.find(s => s.id === currentSimulation.id + 1);
     if (nextSim) {
         nextSim.unlocked = true;
@@ -507,24 +616,19 @@ function completeSimulation() {
     updateOverallProgress();
     
     showMainView();
-    
-    setTimeout(() => {
-        alert(`🎉 Congratulations! You've completed ${currentSimulation.name} simulation!`);
-    }, 200);
+    setTimeout(() => alert(`🎉 Congratulations! You've completed ${currentSimulation.name} simulation!`), 200);
 }
 
 function retrySimulation() {
     currentStep = 1;
     currentQuestionIndex = 0;
     coveredKeywords = [];
-    missedKeywords = [];
     updateStepIndicators();
     showStepContent();
 }
 
 function startFinalTour() {
-    alert('Final Virtual Tour: Full Ilocos Norte simulation would start here! (Demo mode)');
-    // In full version, this would launch the complete Ilocos Norte simulation
+    alert('Final Virtual Tour: Full Ilocos Norte simulation would start here!');
 }
 
 // ============================================
@@ -538,9 +642,7 @@ function updateOverallProgress() {
 
 function saveSimulationProgress() {
     const progress = simulations.map(s => ({
-        id: s.id,
-        completed: s.completed,
-        unlocked: s.unlocked
+        id: s.id, completed: s.completed, unlocked: s.unlocked
     }));
     localStorage.setItem('simulationProgress', JSON.stringify(progress));
 }
@@ -565,8 +667,8 @@ function loadNavUserName() {
     document.getElementById('navUserName').textContent = userName;
 }
 
-// Clean up on page unload
 window.addEventListener('beforeunload', function() {
     if (guideTimerInterval) clearInterval(guideTimerInterval);
     if (window.questionTimer) clearInterval(window.questionTimer);
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
 });
