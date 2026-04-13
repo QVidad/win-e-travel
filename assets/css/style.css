@@ -1,0 +1,172 @@
+:root {
+    --mmsu-green: #0a472e;
+    --mmsu-gold: #d4a017;
+    --accent-teal: #1a5f7a;
+    --light-bg: #f5f7fa;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--light-bg);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--mmsu-green) !important;
+}
+
+.btn-mmsu {
+    background-color: var(--mmsu-green);
+    color: white;
+    border-radius: 30px;
+    padding: 12px 32px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-mmsu:hover {
+    background-color: #0d5e3a;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(10, 71, 46, 0.3);
+}
+
+.btn-gold {
+    background-color: var(--mmsu-gold);
+    color: white;
+    border-radius: 30px;
+    padding: 12px 32px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-gold:hover {
+    background-color: #c48e15;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(212, 160, 23, 0.3);
+}
+
+.btn-outline-mmsu {
+    background: transparent;
+    color: var(--mmsu-green);
+    border: 2px solid var(--mmsu-green);
+    border-radius: 30px;
+    padding: 10px 28px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-mmsu:hover {
+    background-color: var(--mmsu-green);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.footer {
+    background: linear-gradient(145deg, #1a2a3a 0%, #0f1a24 100%);
+    color: #e0e0e0;
+}
+
+.footer a {
+    color: var(--mmsu-gold);
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #e6b422;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+}
+
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15) !important;
+}
+
+.municipality-card {
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.municipality-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.2) !important;
+}
+
+.badge-mmsu {
+    background-color: var(--mmsu-green);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.backdrop-blur {
+    backdrop-filter: blur(10px);
+}
+
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+.badge-mmsu {
+    background-color: var(--mmsu-green);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Animation for modals */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+/* Loading spinner for async operations */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .btn-mmsu, .btn-gold, .btn-outline-mmsu {
+        padding: 10px 24px;
+        font-size: 0.9rem;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+    }
+}

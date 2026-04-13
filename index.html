@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIN e-Travel Training - Interactive Tour Guide Simulation</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg bg-white shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="assets/images/WINLogo.png" alt="WIN Logo" style="height: 40px; width: 40px; margin-right: 5px;">
+                WIN e-Travel Training
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features"><i class="fas fa-star me-1"></i>Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#municipalities"><i class="fas fa-map-marker-alt me-1"></i>Municipalities</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#flow"><i class="fas fa-route me-1"></i>Learning Path</a>
+                    </li>
+                    <li class="nav-item ms-lg-3">
+                        <a href="#" class="btn btn-outline-mmsu" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            <i class="fas fa-sign-in-alt me-1"></i> Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a href="#" class="btn btn-mmsu" data-bs-toggle="modal" data-bs-target="#registerModal">
+                            <i class="fas fa-user-plus me-1"></i> Start Training
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="position-relative overflow-hidden" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); min-height: 90vh;">
+            <!-- Decorative Background Pattern -->
+            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="map-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+                            <circle cx="50" cy="50" r="3" fill="white" opacity="0.3"/>
+                            <path d="M0,50 L100,50 M50,0 L50,100" stroke="white" stroke-width="0.5" opacity="0.1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#map-pattern)"/>
+                </svg>
+            </div>
+
+            <div class="container position-relative" style="z-index: 2; padding-top: 80px; padding-bottom: 80px;">
+                <div class="row align-items-center min-vh-75">
+                    <div class="col-lg-6 text-white mb-5 mb-lg-0">
+                        <div class="d-inline-flex align-items-center bg-white bg-opacity-10 text-white px-4 py-2 rounded-pill mb-4">
+                            <i class="fas fa-vr-cardboard me-2"></i>
+                            <span>Interactive Computer-Based Simulation</span>
+                        </div>
+                        <h1 class="display-4 fw-bold mb-4">
+                            Master Tour Guiding.
+                            <br>
+                            <span class="text-warning">Explore Ilocos Norte.</span>
+                        </h1>
+                        <p class="lead mb-4 opacity-90">
+                            WIN e-Travel Training bridges the gap between classroom theory and real-world tour guiding. 
+                            Practice your delivery, explore 21 municipalities, and develop the skills needed to become 
+                            a confident, industry-ready tour guide.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a href="#" class="btn btn-gold btn-lg" data-bs-toggle="modal" data-bs-target="#registerModal">
+                                <i class="fas fa-play-circle me-2"></i>Begin Training
+                            </a>
+                            <a href="#flow" class="btn btn-outline-light btn-lg">
+                                <i class="fas fa-route me-2"></i>View Learning Path
+                            </a>
+                        </div>
+                        
+                        <!-- Key Stats -->
+                        <div class="row mt-5">
+                            <div class="col-3">
+                                <h3 class="text-warning fw-bold mb-0">21</h3>
+                                <p class="small opacity-75 mb-0">Municipalities</p>
+                            </div>
+                            <div class="col-3">
+                                <h3 class="text-warning fw-bold mb-0">4</h3>
+                                <p class="small opacity-75 mb-0">Core Skills</p>
+                            </div>
+                            <div class="col-3">
+                                <h3 class="text-warning fw-bold mb-0">360°</h3>
+                                <p class="small opacity-75 mb-0">Virtual Tours</p>
+                            </div>
+                            <div class="col-3">
+                                <h3 class="text-warning fw-bold mb-0">Speech</h3>
+                                <p class="small opacity-75 mb-0">Enabled Practice</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 text-center">
+                        <div class="position-relative">
+                            <div class="bg-white bg-opacity-10 rounded-4 p-4 backdrop-blur">
+                                <img src="assets/images/INBackground.jpg" 
+                                     alt="WIN e-Travel Training Interface" 
+                                     class="img-fluid rounded-3 shadow-lg">
+                            </div>
+                            <div class="position-absolute top-0 start-0 bg-warning rounded-3 p-3 shadow" style="margin-left: -15px; margin-top: 30px;">
+                                <i class="fas fa-microphone-alt text-dark fa-lg"></i>
+                            </div>
+                            <div class="position-absolute bottom-0 end-0 bg-success rounded-3 p-3 shadow" style="margin-right: -15px; margin-bottom: 40px;">
+                                <i class="fas fa-trophy text-white fa-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="position-absolute bottom-0 start-0 w-100">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" fill="#f5f7fa">
+                    <path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,100L1360,100C1280,100,1120,100,960,100C800,100,640,100,480,100C320,100,160,100,80,100L0,100Z"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Core Features Section -->
+        <section id="features" class="py-5">
+            <div class="container py-4">
+                <div class="text-center mb-5">
+                    <span class="badge-mmsu mb-3 d-inline-block">
+                        <i class="fas fa-star me-1"></i> Research-Based Training
+                    </span>
+                    <h2 class="display-6 fw-bold mb-3">Developed with Tourism Experts</h2>
+                    <p class="text-muted col-lg-8 mx-auto">
+                        Our training modules are designed based on insights from DOT-accredited tour guides, 
+                        tourism educators, and BSTM students across Ilocos Norte.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Tour Preparation -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm hover-lift">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-success bg-opacity-10 text-success mx-auto">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <h4 class="h5 fw-bold mt-3">Tour Preparation</h4>
+                                <p class="small text-muted">
+                                    Master logistics, destination research, and itinerary planning through interactive modules.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tour Briefing -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm hover-lift">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary bg-opacity-10 text-primary mx-auto">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h4 class="h5 fw-bold mt-3">Tour Briefing</h4>
+                                <p class="small text-muted">
+                                    Practice delivering engaging briefings with timing, humor, and guest engagement techniques.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Destination Storytelling -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm hover-lift">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-warning bg-opacity-10 text-warning mx-auto">
+                                    <i class="fas fa-landmark"></i>
+                                </div>
+                                <h4 class="h5 fw-bold mt-3">Destination Storytelling</h4>
+                                <p class="small text-muted">
+                                    Learn to deliver compelling narratives about Ilocos Norte's rich cultural heritage.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voice & Delivery Training -->
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm hover-lift">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-info bg-opacity-10 text-info mx-auto">
+                                    <i class="fas fa-microphone-alt"></i>
+                                </div>
+                                <h4 class="h5 fw-bold mt-3">Voice & Delivery</h4>
+                                <p class="small text-muted">
+                                    Receive real-time AI feedback on voice modulation, pacing, and posture during simulations.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Flow Section -->
+        <section id="flow" class="py-5 bg-light">
+            <div class="container py-4">
+                <div class="text-center mb-5">
+                    <span class="badge-mmsu mb-3 d-inline-block">
+                        <i class="fas fa-sitemap me-1"></i> Structured Learning
+                    </span>
+                    <h2 class="display-6 fw-bold mb-3">Your Training Journey</h2>
+                    <p class="text-muted col-lg-8 mx-auto">
+                        Follow our research-validated framework designed to build tour guiding competence step by step.
+                    </p>
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="timeline-steps">
+                            <div class="row g-4">
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-success bg-success bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">1</div>
+                                            <h5 class="fw-bold">Orientation</h5>
+                                            <p class="small text-muted">Tour guide roles, ethics, and system navigation</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-primary bg-primary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">2</div>
+                                            <h5 class="fw-bold">Tour Preparation</h5>
+                                            <p class="small text-muted">Research, itinerary planning, logistics</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-warning bg-warning bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">3</div>
+                                            <h5 class="fw-bold">Tour Briefing</h5>
+                                            <p class="small text-muted">Scriptwriting, voice practice, guest engagement</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-info bg-info bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">4</div>
+                                            <h5 class="fw-bold">Storytelling</h5>
+                                            <p class="small text-muted">Destination narratives, cultural context</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-4 justify-content-center">
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-danger bg-danger bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">5</div>
+                                            <h5 class="fw-bold">Guest Scenarios</h5>
+                                            <p class="small text-muted">Handling questions, different guest types</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-secondary bg-secondary bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">6</div>
+                                            <h5 class="fw-bold">Crisis Management</h5>
+                                            <p class="small text-muted">Emergency protocols, problem-solving</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-success bg-success bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">7</div>
+                                            <h5 class="fw-bold">Final Tour</h5>
+                                            <p class="small text-muted">Complete simulation with voice assessment</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center p-4">
+                                            <div class="display-1 fw-bold text-mmsu-green bg-success bg-opacity-10 rounded-circle d-inline-flex justify-content-center align-items-center mb-3" style="width: 70px; height: 70px; font-size: 28px;">8</div>
+                                            <h5 class="fw-bold">Reflection</h5>
+                                            <p class="small text-muted">Feedback, badges, and certification</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Municipalities Preview Section -->
+        <section id="municipalities" class="py-5">
+            <div class="container py-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="display-6 fw-bold mb-2">Explore Ilocos Norte</h2>
+                        <p class="text-muted">21 municipalities and cities waiting to be discovered</p>
+                    </div>
+                    <a href="#" class="btn btn-outline-mmsu" id="viewAllMunicipalities">
+                        View All Municipalities <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+
+                <div class="row g-4" id="municipalitiesContainer">
+                    <!-- Municipalities will be loaded via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Gamification Features -->
+        <section class="py-5 bg-light">
+            <div class="container py-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <span class="badge-mmsu mb-3 d-inline-block">
+                            <i class="fas fa-gamepad me-1"></i> Gamified Learning
+                        </span>
+                        <h2 class="display-6 fw-bold mb-4">Earn Badges. Track Progress. Master Skills.</h2>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-medal fa-2x text-warning me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Achievement Badges</h6>
+                                        <p class="small text-muted mb-0">Unlock recognition for each completed municipality</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-chart-line fa-2x text-success me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Progress Dashboard</h6>
+                                        <p class="small text-muted mb-0">Visualize your skill development over time</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-trophy fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Leaderboard</h6>
+                                        <p class="small text-muted mb-0">Compare performance with fellow trainees</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-certificate fa-2x text-info me-3"></i>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">Micro-Credentials</h6>
+                                        <p class="small text-muted mb-0">Earn certificates recognized by tourism partners</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 text-center">
+                        <img src="https://placehold.co/500x350/1a5f7a/ffffff?text=Badges+and+Achievements" 
+                             alt="Gamification Features" 
+                             class="img-fluid rounded-4 shadow">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-5" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);">
+            <div class="container py-4">
+                <div class="row align-items-center">
+                    <div class="col-lg-8 text-white">
+                        <h2 class="display-6 fw-bold mb-3">Ready to Become a Certified Virtual Tour Guide?</h2>
+                        <p class="lead opacity-90 mb-0">
+                            Join the WIN e-Travel Training program and develop the skills needed for a successful career in Ilocos Norte tourism.
+                        </p>
+                    </div>
+                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                        <a href="#" class="btn btn-gold btn-lg px-5" data-bs-toggle="modal" data-bs-target="#registerModal">
+                            <i class="fas fa-play me-2"></i>Start Training Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="text-white mb-3">
+                        <i class="fas fa-map-signs me-2"></i>WIN e-Travel Training
+                    </h5>
+                    <p class="small opacity-75">
+                        An interactive computer-based simulation training for tour guiding. Bridging classroom theory and real-world practice in Ilocos Norte tourism.
+                    </p>
+                    <p class="small mt-3">
+                        <i class="fas fa-leaf me-1"></i> 
+                        Cultivating Minds, Transforming Futures
+                    </p>
+                </div>
+                <div class="col-lg-3 mb-4">
+                    <h6 class="text-white mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="index.html"><i class="fas fa-chevron-right me-2 small"></i>Home</a></li>
+                        <li class="mb-2"><a href="#" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fas fa-chevron-right me-2 small"></i>Trainee Login</a></li>
+                        <li class="mb-2"><a href="#" data-bs-toggle="modal" data-bs-target="#registerModal"><i class="fas fa-chevron-right me-2 small"></i>Register</a></li>
+                        <li class="mb-2"><a href="#"><i class="fas fa-chevron-right me-2 small"></i>About the Project</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-5 mb-4">
+                    <h6 class="text-white mb-3">Contact MMSU</h6>
+                    <p class="small opacity-75 mb-2">
+                        <i class="fas fa-map-marker-alt me-2"></i>City of Batac, Ilocos Norte, Philippines
+                    </p>
+                    <p class="small opacity-75 mb-2">
+                        <i class="fas fa-phone me-2"></i>(63) 77-600-0459
+                    </p>
+                    <p class="small opacity-75 mb-2">
+                        <i class="fas fa-envelope me-2"></i>op@mmsu.edu.ph
+                    </p>
+                    <div class="mt-3">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="bg-secondary opacity-25 mt-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="small opacity-50 mb-0" id="copyright-year">
+                        &copy; <span></span> Mariano Marcos State University. Developed by CCIS Research Team.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Sign In</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">This is a prototype. Login functionality is simulated.</p>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="email" placeholder="Enter email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Password">
+                        </div>
+                        <button type="submit" class="btn btn-mmsu w-100">Sign In</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <p class="mb-0 small">Don't have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Start Training</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">This is a prototype. Registration is simulated.</p>
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label for="regName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="regName" placeholder="Enter full name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="regEmail" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="regEmail" placeholder="Enter email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="regPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="regPassword" placeholder="Password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="regConfirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="regConfirmPassword" placeholder="Confirm password">
+                        </div>
+                        <button type="submit" class="btn btn-mmsu w-100">Register</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <p class="mb-0 small">Already have an account? <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
