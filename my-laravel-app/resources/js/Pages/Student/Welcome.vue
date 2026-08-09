@@ -1,28 +1,9 @@
 <template>
-    <div>
+    <StudentLayout>
         <!-- Progress Indicator Bar -->
         <div class="progress-indicator">
             <div class="progress-indicator-bar" :style="{ width: scrollProgress + '%' }"></div>
         </div>
-
-        <!-- Navigation Header -->
-        <nav class="navbar navbar-expand-lg bg-white shadow-sm py-3 sticky-top">
-            <div class="container">
-                <Link :href="route('home')" class="navbar-brand d-flex align-items-center">
-                    <img src="/assets/images/WINLogo.png" alt="WIN Logo" style="height: 40px; width: 40px; margin-right: 8px;">
-                    <span class="fw-bold" style="color: var(--mmsu-green);">WIN e-Travel Training</span>
-                </Link>
-                <div class="ms-auto d-flex align-items-center gap-3">
-                    <span class="text-muted">
-                        <i class="fas fa-user-circle me-1 text-success"></i>
-                        <span>{{ userName }}</span>
-                    </span>
-                    <Link :href="route('logout')" method="post" as="button" class="btn btn-outline-mmsu btn-sm">
-                        <i class="fas fa-sign-out-alt me-1"></i> Sign Out
-                    </Link>
-                </div>
-            </div>
-        </nav>
 
         <!-- Welcome Hero -->
         <section class="welcome-hero text-white">
@@ -318,10 +299,11 @@
                 </div>
             </div>
         </footer>
-    </div>
+    </StudentLayout>
 </template>
 
 <script setup>
+import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 

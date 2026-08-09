@@ -23,6 +23,24 @@
                     </div>
                 </div>
 
+                <!-- Show when new user (0% progress) -->
+                <div v-if="overallPercent === 0" class="card border-0 shadow-sm bg-light-subtle p-4 mb-4 rounded-4 border-start border-4 border-success">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px;">
+                                <i class="fas fa-compass fa-xl"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark">New to WIN e-Travel? Start Your First Step!</h5>
+                                <p class="text-muted small mb-0">Begin with <strong>Go Beyond Books</strong> to learn core tour guiding skills and unlock town chapters.</p>
+                            </div>
+                        </div>
+                        <Link :href="route('foundation.index')" class="btn btn-mmsu px-4 rounded-pill fw-bold">
+                            Start Module 1 <i class="fas fa-arrow-right ms-2"></i>
+                        </Link>
+                    </div>
+                </div>
+
                 <!-- Progress Overview Card -->
                 <div class="progress-overview-card">
                     <div class="row align-items-center">
@@ -175,33 +193,28 @@
                 <div class="row g-4">
                     <div class="col-md-6">
                         <div class="card border-0 shadow-sm h-100 rounded-4 bg-white p-4">
-                            <h5 class="fw-bold mb-3 text-dark">
-                                <i class="fas fa-clock text-primary me-2"></i>
-                                Recent Activity
+                            <h5 class="fw-bold mb-4 d-flex align-items-center gap-2 text-dark">
+                                <i class="fas fa-clock text-primary"></i> Recent Activity
                             </h5>
-                            <div id="recentActivity">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-success bg-opacity-10 rounded-3 p-3 me-3">
-                                        <i class="fas fa-check-circle text-success"></i>
+                            <!-- Dynamic Activity List -->
+                            <div v-if="activities && activities.length > 0" class="activity-list">
+                                <div v-for="(item, index) in activities" :key="index" class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="bg-light-subtle rounded-3 p-2 text-primary">
+                                        <i :class="item.icon || 'fas fa-check-circle'"></i>
                                     </div>
                                     <div>
-                                        <p class="mb-0 fw-bold text-dark">Welcome Tour Completed</p>
-                                        <small class="text-muted">Just now</small>
+                                        <div class="fw-bold text-dark">{{ item.title }}</div>
+                                        <small class="text-muted">{{ item.time }}</small>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary bg-opacity-10 rounded-3 p-3 me-3">
-                                        <i class="fas fa-map-marker-alt text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0 fw-bold text-dark">Laoag City Module Explored</p>
-                                        <small class="text-muted">Today</small>
-                                    </div>
+                            </div>
+                            <!-- Empty State for Brand New Accounts -->
+                            <div v-else class="text-center py-4 my-2">
+                                <div class="text-muted opacity-50 mb-2">
+                                    <i class="fas fa-history fa-3x"></i>
                                 </div>
-                                <p class="text-muted small text-center mt-3">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Complete modules to see more activity
-                                </p>
+                                <p class="fw-medium text-dark mb-1">No Recent Activity</p>
+                                <small class="text-muted d-block">Activities will appear here as you complete lessons and quizzes.</small>
                             </div>
                         </div>
                     </div>
@@ -245,14 +258,29 @@ const props = defineProps({
     towns: Array,
     achievements: Array,
     userStats: Object,
+    progress: {
+        type: Object,
+        default: () => ({
+            overallPercentage: 0,
+            completedChapters: 0,
+            totalChapters: 25,
+            foundationCompleted: 0,
+            townsCompleted: 0,
+            simulationsUnlocked: 0,
+        })
+    },
+    activities: {
+        type: Array,
+        default: () => []
+    }
 });
 
-const foundationCompleted = ref(4);
-const discoverCompleted = ref(1);
-const adventureCompleted = ref(0);
+const foundationCompleted = computed(() => props.progress?.foundationCompleted ?? 0);
+const discoverCompleted = computed(() => props.progress?.townsCompleted ?? 0);
+const adventureCompleted = computed(() => props.progress?.simulationsUnlocked ?? 0);
 
-const totalCompletedChapters = computed(() => foundationCompleted.value + discoverCompleted.value + adventureCompleted.value);
-const overallPercent = computed(() => Math.round((totalCompletedChapters.value / 47) * 100));
+const totalCompletedChapters = computed(() => props.progress?.completedChapters ?? (foundationCompleted.value + discoverCompleted.value + adventureCompleted.value));
+const overallPercent = computed(() => props.progress?.overallPercentage ?? Math.round((totalCompletedChapters.value / (props.progress?.totalChapters || 25)) * 100));
 
 const progressCircleStyle = computed(() => {
     const degrees = (overallPercent.value / 100) * 360;
