@@ -24,17 +24,6 @@
                     </Link>
 
                     <Link 
-                        :href="route('admin.teachers.index')" 
-                        class="text-decoration-none text-center small transition-all" 
-                        :class="isRouteActive('/admin/teachers') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
-                    >
-                        <div class="mb-1">
-                            <i class="fas fa-chalkboard-teacher fa-lg" :class="isRouteActive('/admin/teachers') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
-                        </div>
-                        <div>Teachers</div>
-                    </Link>
-
-                    <Link 
                         :href="route('admin.students.index')" 
                         class="text-decoration-none text-center small transition-all" 
                         :class="isRouteActive('/admin/students') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
@@ -122,9 +111,6 @@
             <div class="d-flex justify-content-around">
                 <Link :href="route('admin.dashboard')" class="text-decoration-none small text-center" :class="isRouteActive('/admin/dashboard') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-chart-pie d-block mb-1"></i> Dashboard
-                </Link>
-                <Link :href="route('admin.teachers.index')" class="text-decoration-none small text-center" :class="isRouteActive('/admin/teachers') ? 'fw-bold text-dark' : 'text-muted'">
-                    <i class="fas fa-chalkboard-teacher d-block mb-1"></i> Teachers
                 </Link>
                 <Link :href="route('admin.students.index')" class="text-decoration-none small text-center" :class="isRouteActive('/admin/students') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-user-graduate d-block mb-1"></i> Students
