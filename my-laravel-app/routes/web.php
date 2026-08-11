@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Educator\EducatorDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AchievementController;
@@ -35,15 +37,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Educator Panel CMS Routes (Educator & Admin)
 Route::middleware(['auth', 'role:educator,admin'])->prefix('educator')->name('educator.')->group(function () {
     Route::get('/dashboard', [EducatorDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
     Route::put('/towns/{town}', [EducatorDashboardController::class, 'updateTown'])->name('towns.update');
     Route::put('/destinations/{destination}', [EducatorDashboardController::class, 'updateDestination'])->name('destinations.update');
     Route::post('/media', [EducatorDashboardController::class, 'storeMedia'])->name('media.store');
     Route::put('/content/{section}', [EducatorDashboardController::class, 'updateContentSection'])->name('content.update');
 });
 
-// Admin Panel User Management Routes (Admin Only)
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+// Admin Panel Routes (Admin Only)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
+    Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+
+    Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
+    Route::post('/modules/{module}/toggle-status', [ModuleController::class, 'toggleStatus'])->name('modules.toggle-status');
+    Route::post('/modules/{module}/questions', [ModuleController::class, 'storeQuestion'])->name('modules.questions.store');
+    Route::delete('/modules/questions/{question}', [ModuleController::class, 'deleteQuestion'])->name('modules.questions.destroy');
+
     Route::post('/users', [AdminDashboardController::class, 'storeUser'])->name('users.store');
     Route::put('/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('users.update');
     Route::delete('/users/{user}', [AdminDashboardController::class, 'destroyUser'])->name('users.destroy');
