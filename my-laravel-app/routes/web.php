@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
     Route::get('/foundation', [FoundationController::class, 'index'])->name('foundation.index');
     Route::get('/simulation', [SimulationController::class, 'index'])->name('simulation.index');
+    Route::post('/simulation/validate', [SimulationController::class, 'validateSpeech'])->name('simulation.validate');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
