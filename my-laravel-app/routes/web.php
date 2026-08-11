@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Educator\EducatorDashboardController;
 use App\Http\Controllers\ProfileController;
@@ -50,6 +51,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
     Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+
+    Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+    Route::post('/students/{id}/reset', [StudentController::class, 'resetProgress'])->name('students.reset');
+    Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 
     Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
     Route::post('/modules/{module}/toggle-status', [ModuleController::class, 'toggleStatus'])->name('modules.toggle-status');

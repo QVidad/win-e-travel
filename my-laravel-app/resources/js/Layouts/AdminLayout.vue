@@ -35,10 +35,13 @@
                     </Link>
 
                     <Link 
-                        :href="route('admin.dashboard') + '#students'" 
-                        class="text-decoration-none text-center small transition-all text-muted opacity-75"
+                        :href="route('admin.students.index')" 
+                        class="text-decoration-none text-center small transition-all" 
+                        :class="isRouteActive('/admin/students') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
                     >
-                        <div class="mb-1"><i class="fas fa-user-graduate fa-lg"></i></div>
+                        <div class="mb-1">
+                            <i class="fas fa-user-graduate fa-lg" :class="isRouteActive('/admin/students') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
+                        </div>
                         <div>Students</div>
                     </Link>
 
@@ -123,7 +126,7 @@
                 <Link :href="route('admin.teachers.index')" class="text-decoration-none small text-center" :class="isRouteActive('/admin/teachers') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-chalkboard-teacher d-block mb-1"></i> Teachers
                 </Link>
-                <Link :href="route('admin.dashboard') + '#students'" class="text-decoration-none small text-center text-muted">
+                <Link :href="route('admin.students.index')" class="text-decoration-none small text-center" :class="isRouteActive('/admin/students') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-user-graduate d-block mb-1"></i> Students
                 </Link>
                 <Link :href="route('admin.modules.index')" class="text-decoration-none small text-center" :class="isRouteActive('/admin/modules') ? 'fw-bold text-dark' : 'text-muted'">
