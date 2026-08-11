@@ -9,10 +9,10 @@
                 <div>
                     <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">Curriculum Management</span>
                     <h1 class="display-6 fw-extrabold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
-                        Course Module & Quiz Pool Manager
+                        Curriculum & Module Management
                     </h1>
                     <p class="mb-0 text-white fst-italic fs-6 opacity-90">
-                        "Configure curriculum visibility, draft/published states, audit trail logs, and shared quiz question pools."
+                        "Overview of global learning paths, foundation modules, and municipality chapters."
                     </p>
                 </div>
             </div>
@@ -59,7 +59,7 @@
             </div>
         </div>
 
-        <!-- Tab Navigation (Foundation Modules vs Town Chapters) -->
+        <!-- Tab Navigation (Foundation Modules vs Dare to Discover Towns) -->
         <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-4">
             <ul class="nav nav-pills gap-2">
                 <li class="nav-item">
@@ -79,7 +79,7 @@
                         :class="activeTab === 'towns' ? 'active text-white' : 'text-dark bg-white border'"
                         :style="activeTab === 'towns' ? 'background-color: #0d4b38 !important;' : ''"
                     >
-                        <i class="fas fa-map-marked-alt me-2"></i> Town Chapters ({{ townModules.length }})
+                        <i class="fas fa-map-marked-alt me-2"></i> Dare to Discover Towns ({{ townModules.length }})
                     </button>
                 </li>
             </ul>
@@ -115,7 +115,7 @@
                             </div>
 
                             <div class="form-check form-switch d-flex align-items-center gap-2 m-0 p-0" title="Toggle Draft/Published">
-                                <span class="badge rounded-pill px-2.5 py-1" :class="mod.status === 'published' ? 'bg-success' : 'bg-secondary'">
+                                <span class="badge rounded-pill px-2.5 py-1" :class="mod.status === 'published' ? 'bg-success text-white' : 'bg-warning text-dark'">
                                     {{ mod.status === 'published' ? 'Published' : 'Draft' }}
                                 </span>
                                 <input 
@@ -332,7 +332,7 @@ const displayedModules = computed(() => {
 });
 
 const toggleStatus = (module) => {
-    router.post(route('admin.modules.toggle-status', module.id), {}, {
+    router.patch(route('admin.modules.toggle', module.id), {}, {
         preserveScroll: true,
     });
 };

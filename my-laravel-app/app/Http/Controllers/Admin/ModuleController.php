@@ -37,8 +37,9 @@ class ModuleController extends Controller
     /**
      * Toggle module status between draft and published.
      */
-    public function toggleStatus(Request $request, CourseModule $module): RedirectResponse
+    public function toggleStatus(Request $request, $id): RedirectResponse
     {
+        $module = CourseModule::findOrFail($id);
         $newStatus = $module->status === 'published' ? 'draft' : 'published';
 
         $module->update([
@@ -54,8 +55,10 @@ class ModuleController extends Controller
     /**
      * Store a new multiple-choice question in the module's shared quiz pool.
      */
-    public function storeQuestion(Request $request, CourseModule $module): RedirectResponse
+    public function storeQuestion(Request $request, $id): RedirectResponse
     {
+        $module = CourseModule::findOrFail($id);
+
         $validated = $request->validate([
             'question' => 'required|string|max:1000',
             'options' => 'required|array|min:2|max:6',

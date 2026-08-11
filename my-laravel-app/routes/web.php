@@ -57,6 +57,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy');
 
     Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
+    Route::patch('/modules/{id}/toggle', [ModuleController::class, 'toggleStatus'])->name('modules.toggle');
     Route::post('/modules/{module}/toggle-status', [ModuleController::class, 'toggleStatus'])->name('modules.toggle-status');
     Route::post('/modules/{module}/questions', [ModuleController::class, 'storeQuestion'])->name('modules.questions.store');
     Route::delete('/modules/questions/{question}', [ModuleController::class, 'deleteQuestion'])->name('modules.questions.destroy');
