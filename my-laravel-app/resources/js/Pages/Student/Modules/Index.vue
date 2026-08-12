@@ -7,7 +7,6 @@
                     class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
                     style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
                 >
-                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2 align-self-start">Published Learning Paths</span>
                     <h1 class="display-6 fw-bold text-white mb-2" style="font-weight: 800;">
                         Curriculum & Town Chapters
                     </h1>

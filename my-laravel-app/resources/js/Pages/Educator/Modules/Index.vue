@@ -7,7 +7,6 @@
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">Educator CMS</span>
                     <h1 class="display-6 fw-bold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
                         Educator Course Content & Modules
                     </h1>

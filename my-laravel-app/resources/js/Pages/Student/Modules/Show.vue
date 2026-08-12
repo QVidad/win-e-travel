@@ -26,9 +26,6 @@
                     >
 
                     <div class="card-body p-4 p-md-5 position-relative z-1 d-flex flex-column justify-content-end">
-                        <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2 align-self-start">
-                            {{ module.type === 'foundation' ? 'Foundation Module' : 'Town Chapter' }}
-                        </span>
                         <h1 class="display-5 fw-extrabold text-white mb-2" style="font-weight: 800;">
                             {{ module.title }}
                         </h1>

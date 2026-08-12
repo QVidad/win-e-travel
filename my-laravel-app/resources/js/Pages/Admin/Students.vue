@@ -5,9 +5,6 @@
             class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
             style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
         >
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill" style="font-size: 0.75rem;">Student Analytics</span>
-            </div>
             <h1 class="display-6 fw-bold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
                 Student Directory & Progress Tracker
             </h1>

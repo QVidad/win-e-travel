@@ -7,7 +7,6 @@
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">Educator Portal</span>
                     <h1 class="display-6 fw-extrabold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
                         Faculty CMS & Curriculum Control
                     </h1>
