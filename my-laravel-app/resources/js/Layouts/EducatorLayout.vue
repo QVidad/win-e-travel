@@ -7,7 +7,7 @@
                 <Link class="navbar-brand d-flex align-items-center fw-bold" :href="route('educator.dashboard')">
                     <img src="/assets/images/WINLogo.png" alt="WIN Logo" style="height: 32px;" class="me-2">
                     <span class="fw-bold" style="color: #0d4b38 !important; font-size: 1.25rem;">WIN e-Travel</span>
-                    <span class="badge bg-success ms-2 fs-8 rounded-pill">Educator CMS</span>
+                    <span class="badge bg-success ms-2 fs-8 rounded-pill">Educator Portal</span>
                 </Link>
 
                 <!-- Center: Navigation Tabs with Icons Above Text -->
@@ -20,30 +20,43 @@
                         <div class="mb-1">
                             <i class="fas fa-desktop fa-lg" :class="isRouteActive('/educator/dashboard') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
                         </div>
-                        <div>CMS Content</div>
+                        <div>Dashboard</div>
                     </Link>
 
                     <Link 
                         :href="route('educator.modules.index')" 
                         class="text-decoration-none text-center small transition-all" 
-                        :class="isRouteActive('/educator/modules') || isRouteActive('/admin/modules') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                        :class="isRouteActive('/educator/modules') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
                     >
                         <div class="mb-1">
-                            <i class="fas fa-cubes fa-lg" :class="isRouteActive('/educator/modules') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
+                            <i class="fas fa-book-open fa-lg" :class="isRouteActive('/educator/modules') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
                         </div>
-                        <div>Module Manager</div>
+                        <div>Content & Modules</div>
                     </Link>
 
                     <Link 
-                        :href="route('dashboard')" 
+                        :href="route('educator.quizzes.index')" 
+                        class="text-decoration-none text-center small transition-all" 
+                        :class="isRouteActive('/educator/quizzes') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                    >
+                        <div class="mb-1">
+                            <i class="fas fa-tasks fa-lg" :class="isRouteActive('/educator/quizzes') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
+                        </div>
+                        <div>Quiz Pools</div>
+                    </Link>
+
+                    <Link 
+                        :href="route('admin.students.index')" 
                         class="text-decoration-none text-center small transition-all text-muted opacity-75"
                     >
-                        <div class="mb-1"><i class="fas fa-graduation-cap fa-lg"></i></div>
-                        <div>Student Portal</div>
+                        <div class="mb-1">
+                            <i class="fas fa-user-graduate fa-lg"></i>
+                        </div>
+                        <div>Student Performance</div>
                     </Link>
                 </div>
 
-                <!-- Right: Educator User Avatar Dropdown -->
+                <!-- Right: Educator Profile Dropdown -->
                 <div class="dropdown position-relative me-2" :class="{ show: isProfileMenuOpen }">
                     <button 
                         class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center gap-2 border-0 bg-transparent p-0" 
@@ -73,7 +86,7 @@
                             <div class="text-muted small text-truncate" style="max-width: 190px;">
                                 {{ $page.props.auth?.user ? $page.props.auth.user.email : 'educator@winetravel.com' }}
                             </div>
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill mt-1 fs-8">Educator / Faculty</span>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill mt-1 fs-8">Active Educator</span>
                         </li>
                         
                         <li class="my-1">
@@ -102,6 +115,24 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Sub-nav for Mobile Screens -->
+        <div class="bg-white border-bottom d-md-none py-2 px-3 shadow-xs">
+            <div class="d-flex justify-content-around">
+                <Link :href="route('educator.dashboard')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/dashboard') ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-desktop d-block mb-1"></i> Dashboard
+                </Link>
+                <Link :href="route('educator.modules.index')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/modules') ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-book-open d-block mb-1"></i> Modules
+                </Link>
+                <Link :href="route('educator.quizzes.index')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/quizzes') ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-tasks d-block mb-1"></i> Quiz Pools
+                </Link>
+                <Link :href="route('admin.students.index')" class="text-decoration-none small text-center text-muted">
+                    <i class="fas fa-user-graduate d-block mb-1"></i> Students
+                </Link>
+            </div>
+        </div>
 
         <!-- Main Content Area -->
         <main class="flex-grow-1 p-3 p-md-4">

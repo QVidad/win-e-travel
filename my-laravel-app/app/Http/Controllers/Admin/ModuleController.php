@@ -48,6 +48,8 @@ class ModuleController extends Controller
             'last_modified_at' => now(),
         ]);
 
+        \Illuminate\Support\Facades\Cache::forget('published_student_modules');
+
         $statusText = ucfirst($newStatus);
         return redirect()->back()->with('success', "Module '{$module->title}' status set to {$statusText}.");
     }

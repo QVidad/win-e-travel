@@ -4,11 +4,14 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
-use App\Http\Controllers\Educator\EducatorDashboardController;
+use App\Http\Controllers\Educator\DashboardController as EducatorDashboardController;
+use App\Http\Controllers\Educator\ModuleController as EducatorModuleController;
+use App\Http\Controllers\Educator\QuizController as EducatorQuizController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AchievementController;
 use App\Http\Controllers\Student\FoundationController;
 use App\Http\Controllers\Student\HomeController;
+use App\Http\Controllers\Student\ModuleController as StudentModuleController;
 use App\Http\Controllers\Student\SimulationController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\TownController;
@@ -23,6 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/welcome', [WelcomeController::class, 'index'])->name('welcome');
     Route::get('/student/welcome', [WelcomeController::class, 'index'])->name('student.welcome');
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/student/modules', [StudentModuleController::class, 'index'])->name('student.modules.index');
+    Route::get('/student/modules/{id}', [StudentModuleController::class, 'show'])->name('student.modules.show');
     Route::get('/towns', [TownController::class, 'index'])->name('towns.index');
     Route::get('/towns/{slug}', [TownController::class, 'show'])->name('towns.show');
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
@@ -36,13 +41,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Educator Panel CMS Routes (Educator & Admin)
-Route::middleware(['auth', 'role:educator,admin'])->prefix('educator')->name('educator.')->group(function () {
+Route::middleware(['auth'])->prefix('educator')->name('educator.')->group(function () {
     Route::get('/dashboard', [EducatorDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
-    Route::put('/towns/{town}', [EducatorDashboardController::class, 'updateTown'])->name('towns.update');
-    Route::put('/destinations/{destination}', [EducatorDashboardController::class, 'updateDestination'])->name('destinations.update');
-    Route::post('/media', [EducatorDashboardController::class, 'storeMedia'])->name('media.store');
-    Route::put('/content/{section}', [EducatorDashboardController::class, 'updateContentSection'])->name('content.update');
+    Route::get('/modules', [EducatorModuleController::class, 'index'])->name('modules.index');
+    Route::get('/modules/{id}/edit', [EducatorModuleController::class, 'edit'])->name('modules.edit');
+    Route::put('/modules/{id}', [EducatorModuleController::class, 'update'])->name('modules.update');
+
+    Route::get('/quizzes', [EducatorQuizController::class, 'index'])->name('quizzes.index');
+    Route::post('/quizzes', [EducatorQuizController::class, 'store'])->name('quizzes.store');
+    Route::delete('/quizzes/{id}', [EducatorQuizController::class, 'destroy'])->name('quizzes.destroy');
 });
 
 // Admin Panel Routes (Admin Only)
