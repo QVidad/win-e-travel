@@ -1,45 +1,54 @@
 <template>
     <EducatorLayout>
-        <!-- Header & Breadcrumbs -->
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-            <div>
-                <Link :href="route('educator.modules.index')" class="text-decoration-none text-muted small fw-bold mb-1 d-inline-block">
-                    <i class="fas fa-arrow-left me-1"></i> Back to Modules List
-                </Link>
-                <div class="d-flex align-items-center gap-2">
-                    <h2 class="fw-bold text-dark mb-0">{{ form.title }}</h2>
-                    <span 
-                        class="badge rounded-pill px-3 py-1 fw-bold fs-8" 
-                        :class="module.type === 'foundation' ? 'bg-primary text-white' : 'bg-success text-white'"
+        <!-- Dark Green Gradient Hero Banner Section -->
+        <div 
+            class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
+            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
+        >
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <Link :href="route('educator.modules.index')" class="text-decoration-none text-white-50 small fw-bold mb-2 d-inline-block">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Modules List
+                    </Link>
+                    <h1 class="display-6 fw-bold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
+                        {{ form.title }}
+                    </h1>
+                    <div class="d-flex align-items-center gap-2">
+                        <span 
+                            class="badge rounded-pill px-3 py-1 fw-bold fs-8 text-dark shadow-sm" 
+                            :class="module.type === 'foundation' ? 'bg-info' : 'bg-success'"
+                        >
+                            {{ module.type === 'foundation' ? 'Foundation Module' : 'Town Chapter' }}
+                        </span>
+                        <span class="badge rounded-pill px-3 py-1 fw-bold fs-8 border border-white text-white">
+                            {{ form.status === 'published' ? 'Published' : 'Draft' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Action Switcher -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="text-end d-none d-md-block me-3">
+                        <small class="text-white-50 fs-8 d-block">
+                            <i class="fas fa-history me-1"></i>
+                            <span v-if="module.updated_by && module.updated_by.name">
+                                Last edited by <strong>{{ module.updated_by.name }}</strong><br>on {{ formatDate(module.last_modified_at || module.updated_at) }}
+                            </span>
+                            <span v-else>
+                                Last modified on<br>{{ formatDate(module.updated_at) }}
+                            </span>
+                        </small>
+                    </div>
+
+                    <button 
+                        @click="submit" 
+                        class="btn text-dark bg-white rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2" 
+                        :disabled="form.processing"
                     >
-                        {{ module.type === 'foundation' ? 'Foundation Module' : 'Town Chapter' }}
-                    </span>
+                        <i class="fas fa-save text-success"></i>
+                        <span>Save Changes</span>
+                    </button>
                 </div>
-            </div>
-
-            <!-- Audit Tag & Action Switcher -->
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end d-none d-md-block">
-                    <small class="text-muted fs-8 d-block">
-                        <i class="fas fa-history me-1"></i>
-                        <span v-if="module.updated_by && module.updated_by.name">
-                            Last edited by <strong>{{ module.updated_by.name }}</strong> on {{ formatDate(module.last_modified_at || module.updated_at) }}
-                        </span>
-                        <span v-else>
-                            Last modified on {{ formatDate(module.updated_at) }}
-                        </span>
-                    </small>
-                </div>
-
-                <button 
-                    @click="submit" 
-                    class="btn text-white rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2" 
-                    style="background-color: #0d4b38;"
-                    :disabled="form.processing"
-                >
-                    <i class="fas fa-save"></i>
-                    <span>Save Changes</span>
-                </button>
             </div>
         </div>
 
