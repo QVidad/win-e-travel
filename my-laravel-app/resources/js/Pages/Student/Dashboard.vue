@@ -1,7 +1,7 @@
 <template>
     <StudentLayout>
-        <div class="dashboard-container py-4">
-            <div class="container">
+        <div class="dashboard-container">
+            <div>
                 <!-- Welcome Banner matching dashboard.html -->
                 <div class="welcome-banner">
                     <div class="row align-items-center">
@@ -24,7 +24,7 @@
                 </div>
 
                 <!-- Show when new user (0% progress) -->
-                <div v-if="overallPercent === 0" class="card border-0 shadow-sm bg-light-subtle p-4 mb-4 rounded-4 border-start border-4 border-success">
+                <div v-if="overallPercent === 0" class="card border-0 shadow-sm bg-white p-4 mb-4 rounded-4 border-start border-4 border-success">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px;">
@@ -304,10 +304,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.dashboard-container {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-    min-height: 100vh;
-}
 
 .welcome-banner {
     background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);

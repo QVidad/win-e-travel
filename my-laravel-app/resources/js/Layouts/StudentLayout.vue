@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column min-vh-100">
+    <div class="d-flex flex-column min-vh-100 bg-light">
         <nav class="navbar navbar-expand-lg bg-white border-bottom py-2 shadow-sm">
             <div class="container-fluid px-4">
                 <!-- Left: Brand Logo -->
@@ -108,8 +108,10 @@
         </nav>
 
         <!-- Main Content Area -->
-        <main class="flex-grow-1">
-            <slot />
+        <main class="flex-grow-1 p-3 p-md-4">
+            <div class="container-fluid max-w-7xl">
+                <slot />
+            </div>
         </main>
     </div>
 </template>
@@ -149,3 +151,11 @@ onUnmounted(() => {
     document.removeEventListener('click', closeMenuOnOutsideClick);
 });
 </script>
+
+<style scoped>
+.max-w-7xl {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>

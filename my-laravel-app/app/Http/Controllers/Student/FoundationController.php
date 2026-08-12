@@ -11,10 +11,12 @@ class FoundationController extends Controller
 {
     public function index(): Response
     {
-        $overview = ContentSection::where('page_key', 'foundation')->where('section_key', 'overview')->first();
+        $foundationModules = \App\Models\CourseModule::where('type', 'foundation')
+            ->orderBy('order')
+            ->get();
 
         return Inertia::render('Student/Foundation', [
-            'overview' => $overview,
+            'foundationModules' => $foundationModules,
         ]);
     }
 }

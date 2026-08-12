@@ -1,97 +1,129 @@
 <template>
     <StudentLayout>
-        <div class="py-4 bg-light min-vh-100">
-            <div class="container max-w-5xl">
-                <!-- Back Navigation Header -->
-                <div class="mb-4 d-flex justify-content-between align-items-center">
-                    <Link :href="route('dashboard')" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold">
-                        <i class="fas fa-arrow-left me-1"></i> Return to Student Dashboard
-                    </Link>
+        <div>
+            <!-- Back Navigation -->
+            <div class="mb-4">
+                <Link :href="route('foundation.index')" class="text-decoration-none text-secondary fw-bold hover-text-primary transition-all">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Go Beyond Books
+                </Link>
+            </div>
 
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-bold">
-                        Published Curriculum
+            <div v-if="activeView === 'module'">
+                <!-- Hero Banner -->
+                <div class="welcome-banner text-white mb-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 30px; padding: 35px 40px;">
+                    <div class="row align-items-center position-relative z-1">
+                        <div class="col-md-10">
+                            <h2 class="fw-bold mb-2 display-6">Module {{ module.id }}: {{ module.title }}</h2>
+                            <p class="fs-5 opacity-75 mb-0">Complete all {{ lessons.length }} lessons to unlock the End-of-Module Evaluation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overview / Description -->
+                <div class="card border-0 shadow-sm rounded-4 bg-white mb-5 position-relative overflow-hidden">
+                    <!-- Green left border accent -->
+                    <div class="position-absolute top-0 start-0 h-100 bg-success" style="width: 5px;"></div>
+                    
+                    <div class="card-body p-4 p-md-5 ms-2">
+                        <div class="text-dark fs-6 lh-lg opacity-90" style="white-space: pre-line;">
+                            {{ module.description }}
+                            
+                            <span v-if="module.key_spots"><br><br><strong>Key Areas:</strong><br>{{ module.key_spots }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lessons List -->
+                <h4 class="fw-bold text-dark mb-3">Lessons</h4>
+                <div class="d-flex flex-column gap-3 mb-5">
+                    <div 
+                        v-for="(lesson, index) in lessons" 
+                        :key="index"
+                        class="card border-0 shadow-sm rounded-4 transition-all"
+                        :class="index + 1 <= unlockedLessonLevel ? 'cursor-pointer hover-lift' : 'opacity-75 bg-light-subtle'"
+                        :style="index + 1 > unlockedLessonLevel ? 'cursor: not-allowed;' : ''"
+                        @click="startLessonQuiz(index)"
+                    >
+                        <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1">Lesson {{ index + 1 }}: {{ lesson.title }}</h5>
+                                <p class="mb-0 text-secondary small">Quick Check • {{ lesson.questions }} questions • 90% to pass</p>
+                            </div>
+                            <div class="text-secondary fs-5">
+                                <i v-if="index + 1 < unlockedLessonLevel" class="fas fa-check-circle text-success"></i>
+                                <i v-else-if="index + 1 === unlockedLessonLevel" class="fas fa-chevron-right text-dark"></i>
+                                <i v-else class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- End-of-Module Evaluation -->
+                    <div 
+                        class="card border-0 shadow-sm rounded-4 transition-all mt-2"
+                        :class="unlockedLessonLevel > lessons.length ? 'cursor-pointer hover-lift' : 'opacity-75'"
+                        :style="unlockedLessonLevel <= lessons.length ? 'background-color: #8fa0aa; cursor: not-allowed;' : 'background: linear-gradient(90deg, #8b93d6 0%, #9b88c4 100%); cursor: pointer;'"
+                        @click="startFinalEvaluation"
+                    >
+                        <div class="card-body p-4 d-flex align-items-center justify-content-between text-white">
+                            <div>
+                                <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                    <i class="fas fa-trophy" :class="unlockedLessonLevel > lessons.length ? 'text-warning' : 'text-white'"></i> 
+                                    End-of-Module Evaluation
+                                </h5>
+                                <p class="mb-0 opacity-90 small">25 questions • 90% required to pass and unlock next module</p>
+                            </div>
+                            <div class="fs-4">
+                                <i v-if="unlockedLessonLevel > lessons.length" class="fas fa-play-circle"></i>
+                                <i v-else class="fas fa-lock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mock Quiz View for Lessons & Final Eval -->
+            <div v-else class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                    <button @click="activeView = 'module'" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold">
+                        <i class="fas fa-times me-1"></i> Exit Assessment
+                    </button>
+                    <span class="badge bg-primary rounded-pill px-3 py-2 fw-bold">
+                        {{ activeAssessmentType === 'lesson' ? `Lesson ${activeLessonIndex + 1} Quick Check` : 'End-of-Module Evaluation' }}
                     </span>
                 </div>
+                
+                <div v-if="!quizFinished" class="card-body p-4 p-md-5">
+                    <span class="badge bg-light text-primary border border-primary-subtle mb-3 px-3 py-1 rounded-pill">Question 1 of 5</span>
+                    <h4 class="fw-bold text-dark mb-4">What is the most critical aspect of this topic?</h4>
 
-                <!-- Dynamic Hero Card with Cover Image -->
-                <div 
-                    class="card border-0 text-white shadow-sm overflow-hidden mb-4 rounded-4 position-relative"
-                    style="min-height: 240px; background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);"
-                >
-                    <img 
-                        v-if="module.cover_image" 
-                        :src="module.cover_image" 
-                        alt="Cover Image" 
-                        class="w-100 h-100 position-absolute top-0 start-0 object-fit-cover opacity-25"
-                    >
+                    <div class="d-flex flex-column gap-3">
+                        <div
+                            v-for="(opt, idx) in ['Proper communication with guests', 'Ignoring the itinerary', 'Rushing through sites']"
+                            :key="idx"
+                            class="p-3 border rounded-3 cursor-pointer transition-all option-card"
+                            :class="{ 'border-success bg-success bg-opacity-10 shadow-sm': selectedOption === idx }"
+                            @click="selectedOption = idx"
+                        >
+                            <strong class="me-2" :class="selectedOption === idx ? 'text-success' : 'text-secondary'">{{ String.fromCharCode(65 + idx) }}.</strong> 
+                            <span :class="selectedOption === idx ? 'text-dark fw-bold' : 'text-dark'">{{ opt }}</span>
+                        </div>
+                    </div>
 
-                    <div class="card-body p-4 p-md-5 position-relative z-1 d-flex flex-column justify-content-end">
-                        <h1 class="display-5 fw-extrabold text-white mb-2" style="font-weight: 800;">
-                            {{ module.title }}
-                        </h1>
-                        <p v-if="module.subtitle" class="lead text-white opacity-90 fst-italic mb-0">
-                            "{{ module.subtitle }}"
-                        </p>
+                    <div class="mt-5 text-end">
+                        <button @click="finishQuiz" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm" :disabled="selectedOption === null">
+                            Submit Final Answer
+                        </button>
                     </div>
                 </div>
 
-                <!-- Main Module Content Section -->
-                <div class="row g-4 mb-4">
-                    <div class="col-lg-8">
-                        <!-- Overview / Learning Objectives -->
-                        <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
-                            <h4 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                                <i class="fas fa-book-open text-success" style="color: #0d4b38 !important;"></i>
-                                <span>Overview & Learning Objectives</span>
-                            </h4>
-                            <div class="text-dark lead fs-6 lh-lg opacity-90" style="white-space: pre-line;">
-                                {{ module.description || 'No detailed overview provided for this module.' }}
-                            </div>
-                        </div>
-
-                        <!-- Key Spots & Itinerary Highlights -->
-                        <div v-if="module.key_spots" class="card border-0 shadow-sm rounded-4 bg-white p-4">
-                            <h4 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                                <i class="fas fa-map-marked-alt text-warning"></i>
-                                <span>Key Spots & Itinerary Highlights</span>
-                            </h4>
-                            <div class="text-dark fs-6 lh-lg opacity-90" style="white-space: pre-line;">
-                                {{ module.key_spots }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Sidebar: Progress & Quiz Action -->
-                    <div class="col-lg-4">
-                        <div class="card border-0 shadow-sm rounded-4 bg-white p-4 sticky-top" style="top: 90px;">
-                            <h5 class="fw-bold text-dark mb-3">Module Progress & Mastery</h5>
-
-                            <div class="p-3 bg-light rounded-3 mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="small fw-bold text-dark">Required Score:</span>
-                                    <span class="badge bg-warning text-dark rounded-pill fw-bold">90% Passing Rule</span>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small text-muted">Your Best Attempt:</span>
-                                    <span class="fw-bold" :class="userProgress && userProgress.passed ? 'text-success' : 'text-dark'">
-                                        {{ userProgress ? userProgress.score_percentage + '%' : 'Not Attempted' }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <button 
-                                v-if="module.questions && module.questions.length > 0" 
-                                class="btn text-white w-100 rounded-pill py-2.5 fw-bold shadow-sm"
-                                style="background-color: #0d4b38;"
-                                @click="startQuiz"
-                            >
-                                <i class="fas fa-edit me-1"></i> Start Module Quiz ({{ module.questions.length }} Qs)
-                            </button>
-                            <button v-else class="btn btn-secondary w-100 rounded-pill py-2.5 fw-bold" disabled>
-                                No Quiz Pool Questions Available
-                            </button>
-                        </div>
-                    </div>
+                <div v-else class="card-body p-5 text-center">
+                    <i class="fas fa-check-circle text-success display-2 mb-4"></i>
+                    <h2 class="fw-bold text-dark mb-2">Assessment Passed!</h2>
+                    <p class="text-secondary mb-5 fs-5">You have successfully mastered this section's concepts.</p>
+                    
+                    <button @click="returnToModule" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-sm fs-5">
+                        Continue Learning <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -99,6 +131,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 
@@ -113,13 +146,74 @@ const props = defineProps({
     },
 });
 
-const startQuiz = () => {
-    alert(`Starting randomized quiz pool for ${props.module.title}. Score ≥ 90% required to complete.`);
+const activeView = ref('module'); // 'module' | 'quiz'
+const activeAssessmentType = ref('lesson'); // 'lesson' | 'final'
+const activeLessonIndex = ref(0);
+const unlockedLessonLevel = ref(1);
+const selectedOption = ref(null);
+const quizFinished = ref(false);
+
+// Mock lessons array
+const lessons = [
+    { title: 'General Preparation Before the Tour', questions: 5 },
+    { title: 'Researching Your Incoming Group', questions: 5 },
+    { title: 'Coordinating with Suppliers', questions: 5 },
+    { title: 'Site Familiarization', questions: 5 }
+];
+
+const startLessonQuiz = (index) => {
+    if (index + 1 <= unlockedLessonLevel.value) {
+        activeView.value = 'quiz';
+        activeAssessmentType.value = 'lesson';
+        activeLessonIndex.value = index;
+        selectedOption.value = null;
+        quizFinished.value = false;
+    }
+};
+
+const startFinalEvaluation = () => {
+    if (unlockedLessonLevel.value > lessons.length) {
+        activeView.value = 'quiz';
+        activeAssessmentType.value = 'final';
+        selectedOption.value = null;
+        quizFinished.value = false;
+    }
+};
+
+const finishQuiz = () => {
+    quizFinished.value = true;
+};
+
+const returnToModule = () => {
+    if (activeAssessmentType.value === 'lesson' && activeLessonIndex.value + 1 === unlockedLessonLevel.value) {
+        unlockedLessonLevel.value++;
+    } else if (activeAssessmentType.value === 'final') {
+        alert("Module fully completed! You can now proceed to the next module.");
+    }
+    activeView.value = 'module';
 };
 </script>
 
 <style scoped>
-.max-w-5xl {
-    max-width: 64rem;
+.max-w-4xl {
+    max-width: 56rem;
+}
+
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+}
+
+.hover-text-primary:hover {
+    color: var(--mmsu-green) !important;
+}
+
+.option-card:hover {
+    border-color: #cbd5e1 !important;
+    background-color: #f8fafc;
 }
 </style>
