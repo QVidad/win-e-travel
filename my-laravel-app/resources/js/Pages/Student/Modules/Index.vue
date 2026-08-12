@@ -5,7 +5,7 @@
                 <!-- Hero Header -->
                 <div 
                     class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-                    style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
+                    style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
                 >
                     <h1 class="display-6 fw-bold text-white mb-2" style="font-weight: 800;">
                         Curriculum & Town Chapters

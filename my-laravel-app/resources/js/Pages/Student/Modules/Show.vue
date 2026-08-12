@@ -16,7 +16,7 @@
                 <!-- Dynamic Hero Card with Cover Image -->
                 <div 
                     class="card border-0 text-white shadow-sm overflow-hidden mb-4 rounded-4 position-relative"
-                    style="min-height: 240px; background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%);"
+                    style="min-height: 240px; background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);"
                 >
                     <img 
                         v-if="module.cover_image" 

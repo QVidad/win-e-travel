@@ -274,3 +274,8 @@ html {
         font-size: 28px;
     }
 }
+
+/* Ensure table headers have a visible light-grey background */
+.table-light, .table-light th, .table-light td {
+    background-color: #f1f5f9 !important;
+}

@@ -58,115 +58,123 @@
             </div>
         </div>
 
-        <!-- Tab Navigation (Foundation Modules vs Dare to Discover Towns) -->
-        <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-4">
-            <ul class="nav nav-pills gap-2">
-                <li class="nav-item">
-                    <button 
-                        @click="activeTab = 'foundation'" 
-                        class="nav-link rounded-pill px-4 fw-bold transition-all" 
-                        :class="activeTab === 'foundation' ? 'active text-white' : 'text-dark bg-white border'"
-                        :style="activeTab === 'foundation' ? 'background-color: #0d4b38 !important;' : ''"
-                    >
-                        <i class="fas fa-book-open me-2"></i> Foundation Modules ({{ foundationModules.length }})
-                    </button>
-                </li>
-                <li class="nav-item">
-                    <button 
-                        @click="activeTab = 'towns'" 
-                        class="nav-link rounded-pill px-4 fw-bold transition-all" 
-                        :class="activeTab === 'towns' ? 'active text-white' : 'text-dark bg-white border'"
-                        :style="activeTab === 'towns' ? 'background-color: #0d4b38 !important;' : ''"
-                    >
-                        <i class="fas fa-map-marked-alt me-2"></i> Dare to Discover Towns ({{ townModules.length }})
-                    </button>
-                </li>
-            </ul>
-
-            <div class="position-relative d-none d-md-block">
-                <input 
-                    v-model="searchQuery" 
-                    type="text" 
-                    class="form-control form-control-sm ps-4 rounded-pill" 
-                    placeholder="Search module title..."
-                    style="min-width: 240px;"
-                >
-                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-2.5 text-muted small"></i>
-            </div>
-        </div>
-
-        <!-- Module Grid View -->
-        <div class="row g-4 mb-5">
-            <div 
-                v-for="mod in displayedModules" 
-                :key="mod.id" 
-                class="col-md-6 col-lg-4"
-            >
-                <div class="card border-0 shadow-sm rounded-4 h-100 bg-white transition-all hover-lift overflow-hidden">
-                    <div class="card-body p-4 d-flex flex-column">
-                        <!-- Module Header & Status Switch -->
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div 
-                                class="rounded-circle d-flex align-items-center justify-content-center text-white" 
-                                style="width: 46px; height: 46px; background-color: #0d4b38;"
+        <!-- Standardized Table Card -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+            <!-- Header: Title, Tabs & Search -->
+            <div class="card-header bg-white py-3 px-4 d-flex flex-row justify-content-between align-items-center gap-3 border-bottom overflow-auto">
+                <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2 text-nowrap">
+                    <i class="fas fa-book" style="color: #0d4b38;"></i>
+                    <span>Curriculum Modules</span>
+                </h5>
+                
+                <div class="d-flex flex-row align-items-center gap-3 flex-nowrap">
+                    <ul class="nav nav-pills gap-2 m-0 p-0 flex-nowrap">
+                        <li class="nav-item">
+                            <button 
+                                @click="activeTab = 'foundation'" 
+                                class="btn rounded-pill px-3 fw-bold transition-all d-flex align-items-center gap-2 text-nowrap" 
+                                :class="activeTab === 'foundation' ? 'text-white' : 'btn-light text-dark border'"
+                                :style="activeTab === 'foundation' ? 'background-color: #0d4b38 !important;' : ''"
                             >
-                                <i :class="mod.icon || 'fas fa-book'"></i>
-                            </div>
+                                <i class="fas fa-book-open"></i> <span>Foundation ({{ foundationModules.length }})</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button 
+                                @click="activeTab = 'towns'" 
+                                class="btn rounded-pill px-3 fw-bold transition-all d-flex align-items-center gap-2 text-nowrap" 
+                                :class="activeTab === 'towns' ? 'text-white' : 'btn-light text-dark border'"
+                                :style="activeTab === 'towns' ? 'background-color: #0d4b38 !important;' : ''"
+                            >
+                                <i class="fas fa-map-marked-alt"></i> <span>Towns ({{ townModules.length }})</span>
+                            </button>
+                        </li>
+                    </ul>
 
-                            <div class="form-check form-switch d-flex align-items-center gap-2 m-0 p-0" title="Toggle Draft/Published">
-                                <span class="badge rounded-pill px-2.5 py-1" :class="mod.status === 'published' ? 'bg-success text-white' : 'bg-warning text-dark'">
-                                    {{ mod.status === 'published' ? 'Published' : 'Draft' }}
-                                </span>
-                                <input 
-                                    class="form-check-input ms-0" 
-                                    type="checkbox" 
-                                    role="switch"
-                                    :checked="mod.status === 'published'"
-                                    @change="toggleStatus(mod)"
-                                    style="cursor: pointer; width: 2.2em; height: 1.2em;"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Title & Description -->
-                        <h5 class="fw-bold text-dark mb-1">{{ mod.title }}</h5>
-                        <p class="text-muted small mb-3 flex-grow-1" style="min-height: 40px;">
-                            {{ mod.description }}
-                        </p>
-
-                        <!-- Question Pool Badge -->
-                        <div class="d-flex align-items-center justify-content-between bg-light rounded-3 p-2 px-3 mb-3">
-                            <small class="fw-bold text-dark">
-                                <i class="fas fa-question-circle text-primary me-1"></i> Question Pool
-                            </small>
-                            <span class="badge bg-primary rounded-pill">{{ mod.questions ? mod.questions.length : 0 }} Qs</span>
-                        </div>
-
-                        <!-- Audit Trail Badge -->
-                        <div class="pt-2 border-top mt-auto">
-                            <small class="text-muted fs-8 d-block text-truncate">
-                                <i class="fas fa-history me-1 text-secondary"></i>
-                                <span v-if="mod.updated_by && mod.updated_by.name">
-                                    Last updated by <strong>{{ mod.updated_by.name }}</strong> on {{ formatDate(mod.last_modified_at || mod.updated_at) }}
-                                </span>
-                                <span v-else>
-                                    Updated on {{ formatDate(mod.updated_at) }}
-                                </span>
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Card Footer Actions -->
-                    <div class="card-footer bg-light border-0 px-4 py-3 text-end">
-                        <button 
-                            @click="openQuestionPoolModal(mod)" 
-                            class="btn btn-sm text-white rounded-pill px-3 fw-bold shadow-xs" 
-                            style="background-color: #0d4b38;"
-                        >
-                            <i class="fas fa-tasks me-1"></i> Manage Quiz Pool
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden border" style="min-width: 300px;">
+                        <span class="input-group-text bg-white border-0 ps-3"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" v-model="searchQuery" class="form-control border-0 ps-2" placeholder="Search module title...">
+                        <button class="btn text-white px-4 fw-medium border-0" style="background-color: #0d4b38;">
+                            Search
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- Table Body -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Module Details</th>
+                            <th>Question Pool</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="displayedModules.length === 0">
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="fas fa-folder-open fa-2x text-light mb-2 d-block"></i>
+                                No modules found in this category.
+                            </td>
+                        </tr>
+                        <tr v-for="mod in displayedModules" :key="mod.id">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div 
+                                        class="rounded-circle d-flex align-items-center justify-content-center text-white me-3" 
+                                        style="width: 40px; height: 40px; background-color: #0d4b38;"
+                                    >
+                                        <i :class="mod.icon || 'fas fa-book'"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold d-block text-dark">{{ mod.title }}</span>
+                                        <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">{{ mod.description }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold">
+                                    {{ mod.questions ? mod.questions.length : 0 }} Qs
+                                </span>
+                            </td>
+                            <td>
+                                <div class="form-check form-switch m-0 p-0 d-flex align-items-center gap-2">
+                                    <input 
+                                        class="form-check-input ms-0 mt-0" 
+                                        type="checkbox" 
+                                        role="switch"
+                                        :checked="mod.status === 'published'"
+                                        @change="toggleStatus(mod)"
+                                        style="cursor: pointer;"
+                                    >
+                                    <span class="badge rounded-pill px-3 py-1" :class="mod.status === 'published' ? 'bg-success text-white' : 'bg-warning text-dark'">
+                                        {{ mod.status === 'published' ? 'Published' : 'Draft' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted d-block">
+                                    <span v-if="mod.updated_by && mod.updated_by.name">{{ mod.updated_by.name }}<br></span>
+                                    {{ formatDate(mod.last_modified_at || mod.updated_at) }}
+                                </small>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button @click="openQuestionPoolModal(mod)" class="btn btn-sm btn-outline-primary me-2 rounded-circle" title="Manage Quiz Pool">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
+                                <button @click="openEditModal(mod)" class="btn btn-sm btn-outline-secondary me-2 rounded-circle" title="Edit Module">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button @click="deleteModule(mod)" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete Module">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 

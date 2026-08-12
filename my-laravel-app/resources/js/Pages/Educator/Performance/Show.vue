@@ -11,7 +11,7 @@
 
         <!-- Student Profile Header -->
         <div class="card border-0 shadow-sm mb-4 overflow-hidden text-white" style="border-radius: 20px;">
-            <div class="py-4 px-4 px-md-5" style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%);">
+            <div class="py-4 px-4 px-md-5" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);">
                 <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
                     <div class="d-flex align-items-center mb-3 mb-md-0">
                         <img :src="student.avatar || '/assets/images/default-avatar.png'" class="rounded-circle shadow-sm me-4 border border-white border-3" style="width: 80px; height: 80px; object-fit: cover;">
@@ -78,15 +78,15 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="px-4 py-3 text-muted small fw-bold text-uppercase">Module</th>
-                                <th class="py-3 text-muted small fw-bold text-uppercase text-center">Score</th>
-                                <th class="py-3 text-muted small fw-bold text-uppercase text-center">Status</th>
-                                <th class="px-4 py-3 text-muted small fw-bold text-uppercase text-end">Completion Date</th>
+                                <th class="ps-4">Module Details</th>
+                                <th class="text-center">Score</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-end pe-4">Completion Date</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="module in modules" :key="module.id">
-                                <td class="px-4 py-3">
+                                <td class="ps-4">
                                     <div class="fw-bold text-dark">{{ module.code }}: {{ module.title }}</div>
                                 </td>
                                 <td class="py-3 text-center">
@@ -101,11 +101,11 @@
                                     <span class="text-muted small" v-else>—</span>
                                 </td>
                                 <td class="py-3 text-center">
-                                    <span class="badge rounded-pill px-3" :class="getStatusBadgeClass(module.status)">
+                                    <span class="badge rounded-pill px-3 py-1" :class="getStatusBadgeClass(module.status)">
                                         {{ module.status }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-end text-muted small">
+                                <td class="text-end pe-4 text-muted small">
                                     {{ module.completed_at || '—' }}
                                 </td>
                             </tr>

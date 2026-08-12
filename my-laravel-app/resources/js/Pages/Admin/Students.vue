@@ -3,7 +3,7 @@
         <!-- Dark Green Gradient Hero Banner Section -->
         <div 
             class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
+            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
         >
             <h1 class="display-6 fw-bold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
                 Student Directory & Progress Tracker
@@ -55,45 +55,50 @@
         <!-- Student Roster Card -->
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
             <!-- Search Bar & Filter Pills -->
-            <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-3 border-bottom">
-                <!-- Filter Pills: [ All ], [ In Progress ], [ Certified ] -->
-                <div class="d-flex align-items-center gap-2">
-                    <button 
-                        @click="activeFilter = 'all'" 
-                        class="btn btn-sm rounded-pill px-3 fw-bold transition-all"
-                        :class="activeFilter === 'all' ? 'text-white' : 'btn-light text-dark border'"
-                        :style="activeFilter === 'all' ? 'background-color: #0d4b38 !important;' : ''"
-                    >
-                        All ({{ students.length }})
-                    </button>
-                    <button 
-                        @click="activeFilter = 'in_progress'" 
-                        class="btn btn-sm rounded-pill px-3 fw-bold transition-all"
-                        :class="activeFilter === 'in_progress' ? 'text-white' : 'btn-light text-dark border'"
-                        :style="activeFilter === 'in_progress' ? 'background-color: #0d4b38 !important;' : ''"
-                    >
-                        In Progress
-                    </button>
-                    <button 
-                        @click="activeFilter = 'certified'" 
-                        class="btn btn-sm rounded-pill px-3 fw-bold transition-all"
-                        :class="activeFilter === 'certified' ? 'text-white' : 'btn-light text-dark border'"
-                        :style="activeFilter === 'certified' ? 'background-color: #0d4b38 !important;' : ''"
-                    >
-                        Certified
-                    </button>
-                </div>
+            <div class="card-header bg-white py-3 px-4 d-flex flex-row justify-content-between align-items-center gap-3 border-bottom overflow-auto">
+                <!-- Title -->
+                <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2 text-nowrap">
+                    <i class="fas fa-user-graduate" style="color: #0d4b38;"></i>
+                    <span>Student Roster & Progress</span>
+                </h5>
+                
+                <div class="d-flex flex-row align-items-center gap-3 flex-nowrap">
+                    <!-- Filter Pills -->
+                    <div class="d-flex flex-row align-items-center gap-2 flex-nowrap">
+                        <button 
+                            @click="activeFilter = 'all'" 
+                            class="btn rounded-pill px-3 fw-bold transition-all text-nowrap"
+                            :class="activeFilter === 'all' ? 'text-white' : 'btn-light text-dark border'"
+                            :style="activeFilter === 'all' ? 'background-color: #0d4b38 !important;' : ''"
+                        >
+                            All ({{ students.length }})
+                        </button>
+                        <button 
+                            @click="activeFilter = 'in_progress'" 
+                            class="btn rounded-pill px-3 fw-bold transition-all text-nowrap"
+                            :class="activeFilter === 'in_progress' ? 'text-white' : 'btn-light text-dark border'"
+                            :style="activeFilter === 'in_progress' ? 'background-color: #0d4b38 !important;' : ''"
+                        >
+                            In Progress
+                        </button>
+                        <button 
+                            @click="activeFilter = 'certified'" 
+                            class="btn rounded-pill px-3 fw-bold transition-all text-nowrap"
+                            :class="activeFilter === 'certified' ? 'text-white' : 'btn-light text-dark border'"
+                            :style="activeFilter === 'certified' ? 'background-color: #0d4b38 !important;' : ''"
+                        >
+                            Certified
+                        </button>
+                    </div>
 
-                <!-- Search Input -->
-                <div class="position-relative">
-                    <input 
-                        v-model="searchQuery" 
-                        type="text" 
-                        class="form-control form-control-sm ps-4 rounded-pill" 
-                        placeholder="Search student name or email..."
-                        style="min-width: 250px;"
-                    >
-                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-2.5 text-muted small"></i>
+                    <!-- Enhanced Search Input -->
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden border" style="min-width: 300px;">
+                        <span class="input-group-text bg-white border-0 ps-3"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" v-model="searchQuery" class="form-control border-0 ps-2" placeholder="Search student name or email...">
+                        <button class="btn text-white px-4 fw-medium border-0" style="background-color: #0d4b38;">
+                            Search
+                        </button>
+                    </div>
                 </div>
             </div>
 

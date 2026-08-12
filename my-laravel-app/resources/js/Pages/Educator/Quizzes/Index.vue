@@ -3,7 +3,7 @@
         <!-- Hero Banner Section -->
         <div 
             class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
+            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
@@ -36,9 +36,12 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label small fw-bold text-muted mb-1">Search Question Stem</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" v-model="searchQuery" class="form-control border-start-0 ps-0" placeholder="Search questions by keyword...">
+                    <div class="input-group shadow-sm rounded-pill overflow-hidden border">
+                        <span class="input-group-text bg-white border-0 ps-3"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" v-model="searchQuery" class="form-control border-0 ps-2" placeholder="Search question keyword...">
+                        <button class="btn text-white px-4 fw-medium border-0" style="background-color: #0d4b38;">
+                            Search
+                        </button>
                     </div>
                 </div>
                 <div class="col-md-3 text-md-end">

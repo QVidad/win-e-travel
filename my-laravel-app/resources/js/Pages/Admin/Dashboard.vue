@@ -3,7 +3,7 @@
         <!-- Dark Teal Hero Banner Section (Target Hero Design System) -->
         <div 
             class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
+            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
@@ -82,15 +82,12 @@
                     <i class="fas fa-users" style="color: #0d4b38;"></i>
                     <span>User Directory & Role Permissions</span>
                 </h5>
-                <div class="position-relative">
-                    <input 
-                        v-model="searchQuery" 
-                        type="text" 
-                        class="form-control form-control-sm ps-4 rounded-pill" 
-                        placeholder="Search name or email..."
-                        style="min-width: 250px;"
-                    >
-                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-2.5 text-muted small"></i>
+                <div class="input-group shadow-sm rounded-pill overflow-hidden border" style="min-width: 300px;">
+                    <span class="input-group-text bg-white border-0 ps-3"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" v-model="searchQuery" class="form-control border-0 ps-2" placeholder="Search name or email...">
+                    <button class="btn text-white px-4 fw-medium border-0" style="background-color: #0d4b38;">
+                        Search
+                    </button>
                 </div>
             </div>
 

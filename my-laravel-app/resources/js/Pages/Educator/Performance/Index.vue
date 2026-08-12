@@ -5,7 +5,7 @@
         <!-- Hero Banner Section -->
         <div 
             class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
+            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
@@ -145,10 +145,10 @@
         <div v-if="activeTab === 'roster'">
             <div class="card border-0 shadow-sm rounded-4 bg-white">
                 <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                        <h5 class="fw-bold mb-0"><i class="fas fa-list me-2 text-success"></i>Student Class Roster</h5>
+                    <div class="d-flex flex-row justify-content-between align-items-center gap-3 overflow-auto pb-1">
+                        <h5 class="fw-bold mb-0 text-nowrap"><i class="fas fa-list me-2 text-success"></i>Student Class Roster</h5>
                         
-                        <div class="d-flex flex-column flex-md-row gap-2">
+                        <div class="d-flex flex-row gap-2 flex-nowrap align-items-center">
                             <!-- Year Filter -->
                             <select v-model="filterYear" class="form-select bg-light border-0 shadow-sm" style="min-width: 150px;">
                                 <option value="">All Registration Years</option>
@@ -163,9 +163,12 @@
                             </select>
 
                             <!-- Search -->
-                            <div class="input-group shadow-sm">
-                                <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
-                                <input type="text" class="form-control bg-light border-0" placeholder="Search students..." v-model="searchQuery">
+                            <div class="input-group shadow-sm rounded-pill overflow-hidden border" style="min-width: 300px;">
+                                <span class="input-group-text bg-white border-0 ps-3"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" class="form-control border-0 ps-2" placeholder="Search students..." v-model="searchQuery">
+                                <button class="btn text-white px-4 fw-medium border-0" style="background-color: #0d4b38;">
+                                    Search
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -175,50 +178,98 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="px-4 py-3 text-muted small fw-bold text-uppercase">Student</th>
-                                    <th class="py-3 text-muted small fw-bold text-uppercase text-center">Progress</th>
-                                    <th class="py-3 text-muted small fw-bold text-uppercase text-center">Avg Score</th>
-                                    <th class="py-3 text-muted small fw-bold text-uppercase text-center">Attempts</th>
-                                    <th class="px-4 py-3 text-muted small fw-bold text-uppercase text-end">Status</th>
-                                    <th class="px-4 py-3 text-muted small fw-bold text-uppercase text-end">Action</th>
+                                    <th class="ps-4">Student Name & Email</th>
+                                    <th style="min-width: 180px;">Overall Progress</th>
+                                    <th>Avg Score</th>
+                                    <th>Attempts</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="student in filteredRoster" :key="student.id">
-                                    <td class="px-4 py-3">
-                                        <div class="d-flex align-items-center">
-                                            <img :src="student.avatar || '/assets/images/default-avatar.png'" class="rounded-circle me-3 border shadow-sm" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <!-- Student Name & Email -->
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img 
+                                                :src="student.avatar || '/assets/images/default-avatar.png'" 
+                                                alt="Student Avatar"
+                                                class="rounded-circle border"
+                                                style="width: 40px; height: 40px; object-fit: cover;"
+                                            >
                                             <div>
-                                                <div class="fw-bold text-dark">{{ student.name }}</div>
-                                                <div class="small text-muted">{{ student.email }} &bull; Class of {{ student.year_registered }}</div>
+                                                <span class="fw-bold text-dark d-block">{{ student.name }}</span>
+                                                <small class="text-muted">{{ student.email }} &bull; Class of {{ student.year_registered }}</small>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3 text-center">
-                                        <span class="fw-bold">{{ student.completed_chapters }}</span> <span class="text-muted small">/ {{ student.total_chapters }}</span>
+
+                                    <!-- Overall Progress -->
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 8px; border-radius: 10px;">
+                                                <div 
+                                                    class="progress-bar"
+                                                    :class="student.completed_chapters === student.total_chapters && student.total_chapters > 0 ? 'bg-success' : 'bg-primary'"
+                                                    role="progressbar" 
+                                                    :style="{ width: (student.total_chapters > 0 ? (student.completed_chapters / student.total_chapters) * 100 : 0) + '%' }"
+                                                    :aria-valuenow="student.total_chapters > 0 ? (student.completed_chapters / student.total_chapters) * 100 : 0" 
+                                                    aria-valuemin="0" 
+                                                    aria-valuemax="100"
+                                                ></div>
+                                            </div>
+                                            <span class="fw-bold text-dark fs-7">
+                                                {{ student.completed_chapters }} / {{ student.total_chapters }}
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td class="py-3 text-center">
-                                        <span class="badge rounded-pill shadow-sm" :class="getBadgeClass(student.badge_color)">
+
+                                    <!-- Average Score -->
+                                    <td>
+                                        <span class="badge rounded-pill px-3 py-1" :class="getBadgeClass(student.badge_color)">
                                             {{ student.average_score }}%
                                         </span>
                                     </td>
-                                    <td class="py-3 text-center text-muted fw-medium">
-                                        {{ student.total_attempts }}
+
+                                    <!-- Attempts -->
+                                    <td>
+                                        <span class="fw-medium text-dark">{{ student.total_attempts }}</span>
                                     </td>
-                                    <td class="px-4 py-3 text-end">
-                                        <span class="badge shadow-sm" :class="student.status === 'Eligible' ? 'bg-success' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle'">
+
+                                    <!-- Status -->
+                                    <td>
+                                        <span 
+                                            class="badge rounded-pill px-3 py-1"
+                                            :class="{
+                                                'bg-success': student.status === 'Eligible',
+                                                'bg-warning text-dark': student.status === 'In Progress'
+                                            }"
+                                        >
+                                            <i 
+                                                class="fas me-1" 
+                                                :class="{
+                                                    'fa-award': student.status === 'Eligible',
+                                                    'fa-hourglass-half': student.status === 'In Progress'
+                                                }"
+                                            ></i>
                                             {{ student.status }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-end">
-                                        <Link :href="route('educator.performance.show', student.id)" class="btn btn-sm btn-light text-primary border rounded-pill px-3 fw-bold shadow-sm transition-all hover-lift">
-                                            View <i class="fas fa-chevron-right ms-1 small"></i>
+
+                                    <!-- Actions -->
+                                    <td class="text-end pe-4">
+                                        <Link 
+                                            :href="route('educator.performance.show', student.id)" 
+                                            class="btn btn-sm btn-outline-info rounded-circle" 
+                                            title="View Details"
+                                        >
+                                            <i class="fas fa-eye"></i>
                                         </Link>
                                     </td>
                                 </tr>
                                 <tr v-if="filteredRoster.length === 0">
                                     <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="fas fa-users-slash fa-3x mb-3 text-light"></i>
+                                        <i class="fas fa-users-slash fa-3x mb-3 text-light d-block"></i>
                                         <h6 class="fw-bold text-dark">No Students Found</h6>
                                         <p class="mb-0 small">Try adjusting your filters or search query.</p>
                                     </td>

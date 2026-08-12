@@ -97,12 +97,7 @@
                             </Link>
                         </li>
 
-                        <li v-if="$page.props.auth?.user?.role === 'admin'" class="my-1">
-                            <Link :href="route('admin.dashboard')" class="dropdown-item rounded-3 py-2 px-2 d-flex align-items-center text-dark fw-medium" @click="isProfileMenuOpen = false">
-                                <i class="fas fa-user-shield me-3 fa-lg text-danger" style="width: 20px;"></i>
-                                <span>Admin Panel</span>
-                            </Link>
-                        </li>
+
                         
                         <li class="my-1"><hr class="dropdown-divider my-1"></li>
                         

@@ -3,7 +3,7 @@
         <!-- Dark Green Hero Banner -->
         <div 
             class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0d4b38 0%, #155e46 100%); border-radius: 20px;"
+            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
