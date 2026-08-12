@@ -37,7 +37,7 @@ class CourseModule extends Model
 
     public function questions(): HasMany
     {
-        return $this->hasMany(QuizQuestion::class);
+        return $this->hasMany(QuizQuestion::class, 'module_id');
     }
 
     public function progress(): HasMany

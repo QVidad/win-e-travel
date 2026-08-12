@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Educator\DashboardController as EducatorDashboardController;
 use App\Http\Controllers\Educator\ModuleController as EducatorModuleController;
+use App\Http\Controllers\Educator\PerformanceController;
 use App\Http\Controllers\Educator\QuizController as EducatorQuizController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\AchievementController;
@@ -49,7 +50,10 @@ Route::middleware(['auth'])->prefix('educator')->name('educator.')->group(functi
 
     Route::get('/quizzes', [EducatorQuizController::class, 'index'])->name('quizzes.index');
     Route::post('/quizzes', [EducatorQuizController::class, 'store'])->name('quizzes.store');
+    Route::put('/quizzes/{id}', [EducatorQuizController::class, 'update'])->name('quizzes.update');
     Route::delete('/quizzes/{id}', [EducatorQuizController::class, 'destroy'])->name('quizzes.destroy');
+    
+    Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
 });
 
 // Admin Panel Routes (Admin Only)

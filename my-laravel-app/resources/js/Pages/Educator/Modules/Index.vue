@@ -89,7 +89,7 @@
                             <small class="fw-bold text-dark">
                                 <i class="fas fa-question-circle text-primary me-1"></i> Question Bank
                             </small>
-                            <span class="badge bg-primary rounded-pill">{{ mod.questions ? mod.questions.length : 0 }} Questions Pool</span>
+                            <span class="badge bg-primary rounded-pill">{{ mod.questions ? mod.questions.length : 0 }} Questions Bank</span>
                         </div>
 
                         <!-- Audit Log Badge -->

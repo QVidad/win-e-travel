@@ -69,8 +69,15 @@ class CourseModuleSeeder extends Seeder
             // Add sample questions to the pool for each foundation module
             if ($module->questions()->count() === 0) {
                 QuizQuestion::create([
+                    'module_id' => $module->id,
                     'course_module_id' => $module->id,
+                    'question_text' => 'What is the primary duty of care of a licensed tour guide during site visits?',
                     'question' => 'What is the primary duty of care of a licensed tour guide during site visits?',
+                    'option_a' => 'Ensuring tourist health, emergency preparedness, and safety protocols.',
+                    'option_b' => 'Focusing strictly on selling souvenirs to guests.',
+                    'option_c' => 'Ignoring schedule timing to take extended breaks.',
+                    'option_d' => 'Allowing guests to wander unsupervised in restricted areas.',
+                    'correct_option' => 'a',
                     'options' => [
                         'Ensuring tourist health, emergency preparedness, and safety protocols.',
                         'Focusing strictly on selling souvenirs to guests.',
@@ -83,8 +90,15 @@ class CourseModuleSeeder extends Seeder
                 ]);
 
                 QuizQuestion::create([
+                    'module_id' => $module->id,
                     'course_module_id' => $module->id,
+                    'question_text' => 'How should a tour guide handle unexpected itinerary disruptions due to severe weather?',
                     'question' => 'How should a tour guide handle unexpected itinerary disruptions due to severe weather?',
+                    'option_a' => 'Cancel the entire tour immediately without offering alternatives.',
+                    'option_b' => 'Execute an approved contingency plan and clearly communicate adjustments to guests.',
+                    'option_c' => 'Blame local authorities publicly.',
+                    'option_d' => 'Force guests to continue outdoor activities regardless of danger.',
+                    'correct_option' => 'b',
                     'options' => [
                         'Cancel the entire tour immediately without offering alternatives.',
                         'Execute an approved contingency plan and clearly communicate adjustments to guests.',
@@ -141,8 +155,15 @@ class CourseModuleSeeder extends Seeder
 
             if ($mod->questions()->count() === 0) {
                 QuizQuestion::create([
+                    'module_id' => $mod->id,
                     'course_module_id' => $mod->id,
+                    'question_text' => "What is the primary cultural or historical significance of {$t['name']}?",
                     'question' => "What is the primary cultural or historical significance of {$t['name']}?",
+                    'option_a' => $t['title'],
+                    'option_b' => "Industrial heavy manufacturing district of North Luzon.",
+                    'option_c' => "Subtropical high-altitude alpine ski resort.",
+                    'option_d' => "Deep-sea oceanic research station.",
+                    'correct_option' => 'a',
                     'options' => [
                         $t['title'],
                         "Industrial heavy manufacturing district of North Luzon.",

@@ -42,15 +42,16 @@
                         <div class="mb-1">
                             <i class="fas fa-tasks fa-lg" :class="isRouteActive('/educator/quizzes') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
                         </div>
-                        <div>Quiz Pools</div>
+                        <div>Quiz Banks</div>
                     </Link>
 
                     <Link 
-                        :href="route('admin.students.index')" 
-                        class="text-decoration-none text-center small transition-all text-muted opacity-75"
+                        :href="route('educator.performance.index')" 
+                        class="text-decoration-none text-center small transition-all"
+                        :class="isRouteActive('/educator/performance') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
                     >
                         <div class="mb-1">
-                            <i class="fas fa-user-graduate fa-lg"></i>
+                            <i class="fas fa-user-graduate fa-lg" :class="isRouteActive('/educator/performance') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
                         </div>
                         <div>Student Performance</div>
                     </Link>
@@ -126,9 +127,9 @@
                     <i class="fas fa-book-open d-block mb-1"></i> Modules
                 </Link>
                 <Link :href="route('educator.quizzes.index')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/quizzes') ? 'fw-bold text-dark' : 'text-muted'">
-                    <i class="fas fa-tasks d-block mb-1"></i> Quiz Pools
+                    <i class="fas fa-tasks d-block mb-1"></i> Quiz Banks
                 </Link>
-                <Link :href="route('admin.students.index')" class="text-decoration-none small text-center text-muted">
+                <Link :href="route('educator.performance.index')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/performance') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-user-graduate d-block mb-1"></i> Students
                 </Link>
             </div>

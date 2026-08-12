@@ -21,7 +21,7 @@
                         <i class="fas fa-edit me-1"></i> Edit Content
                     </Link>
                     <Link :href="route('educator.quizzes.index')" class="btn btn-outline-light px-4 py-2 rounded-pill fw-bold shadow-sm">
-                        <i class="fas fa-tasks me-1"></i> Quiz Pools
+                        <i class="fas fa-tasks me-1"></i> Quiz Banks
                     </Link>
                 </div>
             </div>
@@ -138,7 +138,7 @@
                                 <i class="fas fa-tasks"></i>
                             </div>
                             <div>
-                                <h6 class="fw-bold mb-0">Quiz Question Pool</h6>
+                                <h6 class="fw-bold mb-0">Quiz Question Bank</h6>
                                 <small class="text-muted">Add multiple-choice items</small>
                             </div>
                         </Link>
