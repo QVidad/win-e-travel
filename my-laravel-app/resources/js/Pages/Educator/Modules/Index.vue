@@ -54,7 +54,7 @@
         <!-- Module Cards Grid -->
         <div class="row g-4 mb-5">
             <div 
-                v-for="mod in displayedModules" 
+                v-for="(mod, index) in displayedModules" 
                 :key="mod.id" 
                 class="col-md-6 col-lg-4"
             >
@@ -62,11 +62,21 @@
                     <div class="card-body p-4 d-flex flex-column">
                         <!-- Module Category Icon & Status Badge -->
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div 
-                                class="rounded-circle d-flex align-items-center justify-content-center text-white" 
-                                style="width: 46px; height: 46px; background-color: #0d4b38;"
-                            >
-                                <i :class="mod.icon || 'fas fa-book'"></i>
+                            <div class="d-flex align-items-center gap-2">
+                                <div 
+                                    class="rounded-circle d-flex align-items-center justify-content-center text-white" 
+                                    style="width: 46px; height: 46px; background-color: #0d4b38;"
+                                >
+                                    <i :class="mod.icon || 'fas fa-book'"></i>
+                                </div>
+                                <div v-if="!searchQuery" class="d-flex gap-1 ms-1">
+                                    <button @click="moveModule(index, -1)" class="btn btn-sm btn-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" :disabled="index === 0 || isUpdatingOrder" title="Move Earlier">
+                                        <i class="fas fa-arrow-left fa-xs text-secondary"></i>
+                                    </button>
+                                    <button @click="moveModule(index, 1)" class="btn btn-sm btn-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" :disabled="index === displayedModules.length - 1 || isUpdatingOrder" title="Move Later">
+                                        <i class="fas fa-arrow-right fa-xs text-secondary"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <span class="badge rounded-pill px-3 py-1" :class="mod.status === 'published' ? 'bg-success text-white' : 'bg-warning text-dark'">
@@ -126,7 +136,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
 
 const props = defineProps({
@@ -150,6 +160,37 @@ const displayedModules = computed(() => {
         (m.description && m.description.toLowerCase().includes(searchQuery.value.toLowerCase()))
     );
 });
+
+const isUpdatingOrder = ref(false);
+
+const moveModule = (index, direction) => {
+    if (searchQuery.value) return; 
+    if (isUpdatingOrder.value) return;
+    
+    const sourceList = activeTab.value === 'foundation' ? props.foundationModules : props.townModules;
+    if (index + direction < 0 || index + direction >= sourceList.length) return;
+    
+    isUpdatingOrder.value = true;
+    
+    const newList = [...sourceList];
+    const temp = newList[index];
+    newList[index] = newList[index + direction];
+    newList[index + direction] = temp;
+    
+    const payload = newList.map((item, idx) => ({
+        id: item.id,
+        order: idx + 1
+    }));
+    
+    router.post(route('educator.modules.reorder'), {
+        modules: payload
+    }, {
+        preserveScroll: true,
+        onFinish: () => {
+            isUpdatingOrder.value = false;
+        }
+    });
+};
 
 const formatDate = (dateStr) => {
     if (!dateStr) return '';

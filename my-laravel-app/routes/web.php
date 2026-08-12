@@ -47,6 +47,7 @@ Route::middleware(['auth'])->prefix('educator')->name('educator.')->group(functi
     Route::get('/modules', [EducatorModuleController::class, 'index'])->name('modules.index');
     Route::get('/modules/{id}/edit', [EducatorModuleController::class, 'edit'])->name('modules.edit');
     Route::put('/modules/{id}', [EducatorModuleController::class, 'update'])->name('modules.update');
+    Route::post('/modules/reorder', [EducatorModuleController::class, 'reorder'])->name('modules.reorder');
 
     Route::get('/quizzes', [EducatorQuizController::class, 'index'])->name('quizzes.index');
     Route::post('/quizzes', [EducatorQuizController::class, 'store'])->name('quizzes.store');

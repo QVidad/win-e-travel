@@ -87,6 +87,37 @@ class ModuleController extends Controller
 
         Cache::forget('published_student_modules');
 
-        return redirect()->route('educator.modules.index')->with('success', "Module '{$module->title}' updated successfully.");
+        return redirect()->route('educator.modules.index')
+            ->with('success', 'Module updated successfully.');
+    }
+
+    /**
+     * Reorder modules sequence.
+     */
+    public function reorder(Request $request): RedirectResponse
+    {
+        \Illuminate\Support\Facades\Log::info('Reorder method hit', $request->all());
+
+        try {
+            $validated = $request->validate([
+                'modules' => 'required|array',
+                'modules.*.id' => 'required|exists:course_modules,id',
+                'modules.*.order' => 'required|integer',
+            ]);
+            
+            \Illuminate\Support\Facades\Log::info('Validation passed', $validated);
+
+            foreach ($validated['modules'] as $moduleData) {
+                CourseModule::where('id', $moduleData['id'])->update(['order' => $moduleData['order']]);
+            }
+
+            return redirect()->back()->with('success', 'Module sequence updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Illuminate\Support\Facades\Log::error('Reorder validation failed', $e->errors());
+            throw $e;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Reorder exception: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
