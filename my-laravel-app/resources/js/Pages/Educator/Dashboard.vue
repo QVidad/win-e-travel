@@ -142,7 +142,7 @@
                             </div>
                         </Link>
 
-                        <Link :href="route('admin.students.index')" class="p-3 rounded-4 bg-light text-decoration-none text-dark d-flex align-items-center gap-3 hover-lift border">
+                        <Link :href="route('educator.performance.index')" class="p-3 rounded-4 bg-light text-decoration-none text-dark d-flex align-items-center gap-3 hover-lift border">
                             <div class="rounded-circle text-white p-2.5 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; background-color: #0d4b38;">
                                 <i class="fas fa-user-graduate"></i>
                             </div>

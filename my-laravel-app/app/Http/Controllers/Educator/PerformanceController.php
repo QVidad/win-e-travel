@@ -101,6 +101,62 @@ class PerformanceController extends Controller
         ]);
     }
 
+    public function export()
+    {
+        $students = User::where('role', 'student')->get();
+        $studentIds = $students->pluck('id');
+        $allProgress = ModuleProgress::whereIn('user_id', $studentIds)->get();
+        $totalModules = CourseModule::where('status', 'published')->count();
+        
+        $roster = $students->map(function ($student) use ($allProgress, $totalModules) {
+            $studentProgress = $allProgress->where('user_id', $student->id);
+            $attempts = $studentProgress->count();
+            $avgScore = $attempts > 0 ? round($studentProgress->avg('score_percentage')) : 0;
+            $completedChapters = $studentProgress->where('score_percentage', '>=', 90)->count();
+            $status = ($totalModules > 0 && $completedChapters >= $totalModules) ? 'Eligible' : 'In Progress';
+            
+            return [
+                'Name' => $student->name,
+                'Email' => $student->email,
+                'Completed Modules' => $completedChapters . '/' . $totalModules,
+                'Average Score (%)' => $avgScore,
+                'Total Attempts' => $attempts,
+                'Status' => $status,
+                'Registration Year' => $student->created_at->format('Y'),
+            ];
+        });
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=student_performance_report.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['Name', 'Email', 'Completed Modules', 'Average Score (%)', 'Total Attempts', 'Status', 'Registration Year'];
+
+        $callback = function() use($roster, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($roster as $row) {
+                fputcsv($file, [
+                    $row['Name'],
+                    $row['Email'],
+                    $row['Completed Modules'],
+                    $row['Average Score (%)'],
+                    $row['Total Attempts'],
+                    $row['Status'],
+                    $row['Registration Year'],
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function show($id)
     {
         $student = User::where('role', 'student')->findOrFail($id);

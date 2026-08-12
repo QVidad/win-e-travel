@@ -53,6 +53,7 @@ Route::middleware(['auth'])->prefix('educator')->name('educator.')->group(functi
     Route::put('/quizzes/{id}', [EducatorQuizController::class, 'update'])->name('quizzes.update');
     Route::delete('/quizzes/{id}', [EducatorQuizController::class, 'destroy'])->name('quizzes.destroy');
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
+    Route::get('/performance/export', [PerformanceController::class, 'export'])->name('performance.export');
     Route::get('/performance/{id}', [PerformanceController::class, 'show'])->name('performance.show');
 });
 

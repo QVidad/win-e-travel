@@ -149,6 +149,11 @@
                         <h5 class="fw-bold mb-0 text-nowrap"><i class="fas fa-list me-2 text-success"></i>Student Class Roster</h5>
                         
                         <div class="d-flex flex-row gap-2 flex-nowrap align-items-center">
+                            <!-- Export Button -->
+                            <a :href="route('educator.performance.export')" target="_blank" class="btn btn-outline-success border-success-subtle shadow-sm rounded-3 d-flex align-items-center gap-2 fw-medium me-2" style="white-space: nowrap;">
+                                <i class="fas fa-download"></i> Export CSV
+                            </a>
+
                             <!-- Year Filter -->
                             <select v-model="filterYear" class="form-select bg-light border-0 shadow-sm" style="min-width: 150px;">
                                 <option value="">All Registration Years</option>
