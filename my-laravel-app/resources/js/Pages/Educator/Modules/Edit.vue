@@ -179,6 +179,40 @@
                     </div>
                 </div>
 
+                <!-- 5. Lessons Management -->
+                <div class="mb-4 pt-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <label class="form-label fw-bold text-dark mb-0">Module Lessons</label>
+                        <button type="button" @click="openLessonModal()" class="btn btn-sm btn-success rounded-pill fw-bold shadow-sm px-3">
+                            <i class="fas fa-plus me-1"></i> Add Lesson
+                        </button>
+                    </div>
+                    
+                    <div v-if="!module.lessons || module.lessons.length === 0" class="text-muted small p-3 bg-light rounded-3 text-center border">
+                        No lessons added yet. Add lessons to attach specific quick-check quizzes to them.
+                    </div>
+                    <div v-else class="list-group border-0">
+                        <div v-for="(lesson, index) in module.lessons" :key="lesson.id" class="list-group-item d-flex justify-content-between align-items-center bg-white p-3 border shadow-sm mb-2 rounded-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-light text-muted fw-bold rounded-circle d-flex align-items-center justify-content-center border" style="width: 32px; height: 32px;">
+                                    {{ index + 1 }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ lesson.title }}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" @click="openLessonModal(lesson)" class="btn btn-sm btn-outline-primary rounded-circle">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" @click="deleteLesson(lesson.id)" class="btn btn-sm btn-outline-danger rounded-circle">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Submit Button Bar -->
                 <div class="pt-4 border-top d-flex justify-content-end gap-3">
                     <Link :href="route('educator.modules.index')" class="btn btn-light rounded-pill px-4">Cancel</Link>
@@ -193,12 +227,34 @@
                 </div>
             </form>
         </div>
+
+        <!-- Lesson Modal -->
+        <div v-if="showLessonModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1055;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="fw-bold text-dark">{{ editingLesson ? 'Edit Lesson' : 'Add New Lesson' }}</h5>
+                        <button type="button" class="btn-close" @click="closeLessonModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label small fw-bold text-muted">Lesson Title</label>
+                        <input v-model="lessonForm.title" type="text" class="form-control rounded-3" placeholder="e.g. General Preparation Before the Tour">
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" @click="closeLessonModal">Cancel</button>
+                        <button type="button" @click="saveLesson" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #0d4b38;" :disabled="!lessonForm.title">
+                            Save Lesson
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </EducatorLayout>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { useForm, Link } from '@inertiajs/vue3';
+import { useForm, Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
 
 const props = defineProps({
@@ -245,6 +301,47 @@ const formatDate = (dateStr) => {
         hour: '2-digit',
         minute: '2-digit',
     });
+};
+
+// --- Lesson Management Logic ---
+const showLessonModal = ref(false);
+const editingLesson = ref(null);
+const lessonForm = ref({ title: '' });
+
+const openLessonModal = (lesson = null) => {
+    editingLesson.value = lesson;
+    lessonForm.value.title = lesson ? lesson.title : '';
+    showLessonModal.value = true;
+};
+
+const closeLessonModal = () => {
+    showLessonModal.value = false;
+    editingLesson.value = null;
+    lessonForm.value.title = '';
+};
+
+const saveLesson = () => {
+    if (!lessonForm.value.title) return;
+    
+    if (editingLesson.value) {
+        // Update
+        router.put(route('educator.modules.lessons.update', { module: props.module.id, lesson: editingLesson.value.id }), {
+            title: lessonForm.value.title
+        }, { preserveScroll: true, onSuccess: closeLessonModal });
+    } else {
+        // Create
+        router.post(route('educator.modules.lessons.store', props.module.id), {
+            title: lessonForm.value.title
+        }, { preserveScroll: true, onSuccess: closeLessonModal });
+    }
+};
+
+const deleteLesson = (lessonId) => {
+    if (confirm('Are you sure you want to delete this lesson?')) {
+        router.delete(route('educator.modules.lessons.destroy', { module: props.module.id, lesson: lessonId }), {
+            preserveScroll: true
+        });
+    }
 };
 </script>
 

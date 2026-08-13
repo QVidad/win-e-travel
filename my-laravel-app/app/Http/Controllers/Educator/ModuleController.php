@@ -41,7 +41,9 @@ class ModuleController extends Controller
      */
     public function edit($id): Response
     {
-        $module = CourseModule::with(['updatedBy', 'questions'])->findOrFail($id);
+        $module = CourseModule::with(['updatedBy', 'questions', 'lessons' => function($query) {
+            $query->orderBy('order');
+        }])->findOrFail($id);
 
         return Inertia::render('Educator/Modules/Edit', [
             'module' => $module,

@@ -13,6 +13,7 @@ class QuizQuestion extends Model
     protected $fillable = [
         'module_id',
         'course_module_id',
+        'module_lesson_id',
         'question_text',
         'question',
         'option_a',
@@ -44,6 +45,11 @@ class QuizQuestion extends Model
     public function courseModule(): BelongsTo
     {
         return $this->belongsTo(CourseModule::class, 'module_id');
+    }
+
+    public function moduleLesson(): BelongsTo
+    {
+        return $this->belongsTo(ModuleLesson::class, 'module_lesson_id');
     }
 
     public function creator(): BelongsTo

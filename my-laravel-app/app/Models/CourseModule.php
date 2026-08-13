@@ -45,6 +45,11 @@ class CourseModule extends Model
         return $this->hasMany(ModuleProgress::class);
     }
 
+    public function lessons(): HasMany
+    {
+        return $this->hasMany(ModuleLesson::class, 'course_module_id');
+    }
+
     public function isPublished(): bool
     {
         return $this->status === 'published';

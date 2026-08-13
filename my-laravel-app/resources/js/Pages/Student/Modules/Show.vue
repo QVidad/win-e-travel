@@ -60,20 +60,20 @@
                     <!-- End-of-Module Evaluation -->
                     <div 
                         class="card border-0 shadow-sm rounded-4 transition-all mt-2"
-                        :class="unlockedLessonLevel > lessons.length ? 'cursor-pointer hover-lift' : 'opacity-75'"
-                        :style="unlockedLessonLevel <= lessons.length ? 'background-color: #8fa0aa; cursor: not-allowed;' : 'background: linear-gradient(90deg, #8b93d6 0%, #9b88c4 100%); cursor: pointer;'"
+                        :class="isEvaluationUnlocked ? 'cursor-pointer hover-lift' : 'opacity-75'"
+                        :style="isEvaluationUnlocked ? 'background: linear-gradient(90deg, #8b93d6 0%, #9b88c4 100%); cursor: pointer;' : 'background-color: #8fa0aa; cursor: not-allowed;'"
                         @click="startFinalEvaluation"
                     >
                         <div class="card-body p-4 d-flex align-items-center justify-content-between text-white">
                             <div>
                                 <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
-                                    <i class="fas fa-trophy" :class="unlockedLessonLevel > lessons.length ? 'text-warning' : 'text-white'"></i> 
+                                    <i class="fas fa-trophy" :class="isEvaluationUnlocked ? 'text-warning' : 'text-white'"></i> 
                                     End-of-Module Evaluation
                                 </h5>
                                 <p class="mb-0 opacity-90 small">25 questions • 90% required to pass and unlock next module</p>
                             </div>
                             <div class="fs-4">
-                                <i v-if="unlockedLessonLevel > lessons.length" class="fas fa-play-circle"></i>
+                                <i v-if="isEvaluationUnlocked" class="fas fa-play-circle"></i>
                                 <i v-else class="fas fa-lock"></i>
                             </div>
                         </div>
@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 
@@ -153,13 +153,19 @@ const unlockedLessonLevel = ref(1);
 const selectedOption = ref(null);
 const quizFinished = ref(false);
 
-// Mock lessons array
-const lessons = [
-    { title: 'General Preparation Before the Tour', questions: 5 },
-    { title: 'Researching Your Incoming Group', questions: 5 },
-    { title: 'Coordinating with Suppliers', questions: 5 },
-    { title: 'Site Familiarization', questions: 5 }
-];
+// Dynamic lessons from database
+const lessons = computed(() => {
+    if (!props.module.lessons) return [];
+    return props.module.lessons.map(lesson => ({
+        id: lesson.id,
+        title: lesson.title,
+        questions: lesson.questions ? lesson.questions.length : 0
+    }));
+});
+
+const isEvaluationUnlocked = computed(() => {
+    return lessons.value.length > 0 && unlockedLessonLevel.value > lessons.value.length;
+});
 
 const startLessonQuiz = (index) => {
     if (index + 1 <= unlockedLessonLevel.value) {
@@ -172,11 +178,13 @@ const startLessonQuiz = (index) => {
 };
 
 const startFinalEvaluation = () => {
-    if (unlockedLessonLevel.value > lessons.length) {
+    if (isEvaluationUnlocked.value) {
         activeView.value = 'quiz';
         activeAssessmentType.value = 'final';
         selectedOption.value = null;
         quizFinished.value = false;
+    } else {
+        alert("The End-of-Module Evaluation is locked. You must complete all lessons first before taking this evaluation.");
     }
 };
 

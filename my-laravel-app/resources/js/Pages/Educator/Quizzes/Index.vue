@@ -154,12 +154,24 @@
                             <!-- Module Selection -->
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-dark">Target Module <span class="text-danger">*</span></label>
-                                <select v-model="questionForm.module_id" class="form-select rounded-3" required>
+                                <select v-model="questionForm.module_id" class="form-select rounded-3" @change="questionForm.module_lesson_id = ''" required>
                                     <option value="" disabled>Select target module bank...</option>
                                     <option v-for="mod in modules" :key="mod.id" :value="mod.id">
                                         {{ mod.title }}
                                     </option>
                                 </select>
+                            </div>
+
+                            <!-- Lesson Selection (Optional) -->
+                            <div class="mb-3" v-if="selectedModuleLessons.length > 0">
+                                <label class="form-label small fw-bold text-dark">Target Lesson (Optional)</label>
+                                <select v-model="questionForm.module_lesson_id" class="form-select rounded-3">
+                                    <option value="">End-of-Module Evaluation (No specific lesson)</option>
+                                    <option v-for="lesson in selectedModuleLessons" :key="lesson.id" :value="lesson.id">
+                                        {{ lesson.title }}
+                                    </option>
+                                </select>
+                                <small class="text-muted d-block mt-1">If left blank, this question will appear in the final End-of-Module Evaluation.</small>
                             </div>
 
                             <!-- Question Stem -->
@@ -276,9 +288,15 @@ const showModal = ref(false);
 const isEditing = ref(false);
 const currentEditId = ref(null);
 
+const selectedModuleLessons = computed(() => {
+    if (!questionForm.module_id) return [];
+    const module = props.modules.find(m => m.id === questionForm.module_id);
+    return module?.lessons || [];
+});
+
 const questionForm = useForm({
     module_id: '',
-    course_module_id: '',
+    module_lesson_id: '',
     question_text: '',
     option_a: '',
     option_b: '',
@@ -354,7 +372,7 @@ const openAddModal = () => {
     currentEditId.value = null;
     questionForm.reset();
     questionForm.module_id = selectedModuleId.value !== 'all' ? selectedModuleId.value : (props.modules[0]?.id || '');
-    questionForm.course_module_id = questionForm.module_id;
+    questionForm.module_lesson_id = '';
     questionForm.correct_option = 'a';
     showModal.value = true;
 };
@@ -373,7 +391,7 @@ const openEditModal = (item) => {
     }
 
     questionForm.module_id = item.module_id;
-    questionForm.course_module_id = item.module_id;
+    questionForm.module_lesson_id = item.module_lesson_id || '';
     questionForm.question_text = item.question_text || item.question || '';
     questionForm.option_a = opts.a;
     questionForm.option_b = opts.b;

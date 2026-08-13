@@ -17,7 +17,7 @@ class QuizController extends Controller
      */
     public function index(Request $request): Response
     {
-        $modules = CourseModule::with(['questions', 'updatedBy'])->orderBy('order')->get();
+        $modules = CourseModule::with(['questions', 'updatedBy', 'lessons'])->orderBy('order')->get();
 
         return Inertia::render('Educator/Quizzes/Index', [
             'modules' => $modules,
@@ -33,6 +33,7 @@ class QuizController extends Controller
         $validated = $request->validate([
             'module_id' => 'nullable|exists:course_modules,id',
             'course_module_id' => 'nullable|exists:course_modules,id',
+            'module_lesson_id' => 'nullable|exists:module_lessons,id',
             'question_text' => 'nullable|string|max:1000',
             'question' => 'nullable|string|max:1000',
             'option_a' => 'nullable|string|max:255',
@@ -119,6 +120,7 @@ class QuizController extends Controller
         $validated = $request->validate([
             'module_id' => 'nullable|exists:course_modules,id',
             'course_module_id' => 'nullable|exists:course_modules,id',
+            'module_lesson_id' => 'nullable|exists:module_lessons,id',
             'question_text' => 'nullable|string|max:1000',
             'question' => 'nullable|string|max:1000',
             'option_a' => 'nullable|string|max:255',
@@ -179,6 +181,7 @@ class QuizController extends Controller
             'options' => $optionsCombined,
             'correct_answer_index' => $idx,
             'explanation' => $validated['explanation'] ?? null,
+            'module_lesson_id' => $validated['module_lesson_id'] ?? null,
         ]);
 
         $module = CourseModule::find($moduleId);

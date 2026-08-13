@@ -41,7 +41,9 @@ class ModuleController extends Controller
     public function show($id): Response
     {
         $module = CourseModule::where('status', 'published')
-            ->with(['questions'])
+            ->with(['questions', 'lessons.questions' => function ($q) {
+                $q->orderBy('id');
+            }])
             ->where(function ($query) use ($id) {
                 $query->where('id', $id)->orWhere('code', $id);
             })
@@ -65,6 +67,7 @@ class ModuleController extends Controller
                 'icon' => $module->icon,
                 'status' => $module->status,
                 'questions' => $module->questions,
+                'lessons' => $module->lessons,
             ],
             'userProgress' => $progress,
         ]);

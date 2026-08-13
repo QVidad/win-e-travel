@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\Educator\DashboardController as EducatorDashboardController;
+use App\Http\Controllers\Educator\LessonController;
 use App\Http\Controllers\Educator\ModuleController as EducatorModuleController;
 use App\Http\Controllers\Educator\PerformanceController;
 use App\Http\Controllers\Educator\QuizController as EducatorQuizController;
@@ -48,6 +49,11 @@ Route::middleware(['auth'])->prefix('educator')->name('educator.')->group(functi
     Route::get('/modules/{id}/edit', [EducatorModuleController::class, 'edit'])->name('modules.edit');
     Route::put('/modules/{id}', [EducatorModuleController::class, 'update'])->name('modules.update');
     Route::post('/modules/reorder', [EducatorModuleController::class, 'reorder'])->name('modules.reorder');
+
+    Route::post('/modules/{module}/lessons', [LessonController::class, 'store'])->name('modules.lessons.store');
+    Route::put('/modules/{module}/lessons/{lesson}', [LessonController::class, 'update'])->name('modules.lessons.update');
+    Route::delete('/modules/{module}/lessons/{lesson}', [LessonController::class, 'destroy'])->name('modules.lessons.destroy');
+    Route::post('/modules/{module}/lessons/reorder', [LessonController::class, 'reorder'])->name('modules.lessons.reorder');
 
     Route::get('/quizzes', [EducatorQuizController::class, 'index'])->name('quizzes.index');
     Route::post('/quizzes', [EducatorQuizController::class, 'store'])->name('quizzes.store');
