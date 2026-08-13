@@ -199,7 +199,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold text-dark">{{ lesson.title }}</div>
-                                    <small class="text-secondary fs-8">Quick Check: {{ lesson.quiz_question_count || 5 }} Questions</small>
+                                    <small class="text-secondary fs-8">Quick Check: {{ lesson.quiz_question_count > 0 ? lesson.quiz_question_count + ' Questions' : 'No Quiz' }}</small>
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
@@ -282,7 +282,7 @@
                                     <input 
                                         v-model="lessonForm.quiz_question_count" 
                                         type="number" 
-                                        min="1"
+                                        min="0"
                                         max="100"
                                         class="form-control rounded-3" 
                                         :class="lessonError ? 'is-invalid border-danger' : ''"
@@ -434,7 +434,7 @@ const form = useForm({
     cover_image: props.module.cover_image || '',
     cover_image_file: null,
     status: props.module.status || 'published',
-    quiz_question_count: props.module.quiz_question_count || 5,
+    quiz_question_count: props.module.quiz_question_count ?? 0,
 });
 
 const handleFileUpload = (event) => {
@@ -477,7 +477,7 @@ const currentLessonBankCount = computed(() => {
 const lessonForm = ref({
     title: '',
     content: '',
-    quiz_question_count: 5,
+    quiz_question_count: 0,
     key_points: [
         { title: '', description: '', icon: 'fas fa-check' }
     ]
@@ -497,14 +497,14 @@ const openLessonModal = (lesson = null) => {
         lessonForm.value = {
             title: lesson.title || '',
             content: lesson.content || '',
-            quiz_question_count: lesson.quiz_question_count || 5,
+            quiz_question_count: lesson.quiz_question_count ?? 0,
             key_points: parsedPoints.length > 0 ? parsedPoints : [{ title: '', description: '', icon: 'fas fa-check' }]
         };
     } else {
         lessonForm.value = {
             title: '',
             content: '',
-            quiz_question_count: 5,
+            quiz_question_count: 0,
             key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
         };
     }
@@ -526,7 +526,7 @@ const closeLessonModal = () => {
     lessonForm.value = {
         title: '',
         content: '',
-        quiz_question_count: 5,
+        quiz_question_count: 0,
         key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
     };
 };

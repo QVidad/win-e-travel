@@ -189,10 +189,12 @@
                     <!-- Footer Row with Quick Check Action -->
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div>
-                            <h6 class="fw-bold text-dark mb-1">Quick Check</h6>
-                            <p class="text-secondary small mb-0">5 questions • 90% required to pass</p>
+                            <h6 class="fw-bold text-dark mb-1">{{ currentLessonTopic.quiz_question_count > 0 ? 'Quick Check' : 'Lesson Completion' }}</h6>
+                            <p v-if="currentLessonTopic.quiz_question_count > 0" class="text-secondary small mb-0">{{ currentLessonTopic.quiz_question_count }} questions • 90% required to pass</p>
+                            <p v-else class="text-secondary small mb-0">No quiz for this lesson. Simply mark as complete to proceed.</p>
                         </div>
                         <button 
+                            v-if="currentLessonTopic.quiz_question_count > 0"
                             @click="startLessonQuizFromTopic" 
                             class="btn text-white rounded-pill px-4 py-2-5 fw-bold shadow-sm d-flex align-items-center gap-2 transition-all hover-lift"
                             :style="getAssessmentDetails(activeLessonIndex)?.passed ? 'background-color: #10b981; opacity: 0.9; cursor: not-allowed;' : 'background-color: #0a472e;'"
@@ -202,6 +204,19 @@
                             <i v-else class="fas fa-play"></i>
                             <span>
                                 {{ getAssessmentDetails(activeLessonIndex)?.passed ? 'Quick Check Passed' : (getAssessmentDetails(activeLessonIndex) ? 'Retake Quick Check' : 'Take Quick Check') }}
+                            </span>
+                        </button>
+                        <button 
+                            v-else
+                            @click="markLessonCompleteWithoutQuiz" 
+                            class="btn text-white rounded-pill px-4 py-2-5 fw-bold shadow-sm d-flex align-items-center gap-2 transition-all hover-lift"
+                            :style="getAssessmentDetails(activeLessonIndex)?.passed ? 'background-color: #10b981; opacity: 0.9; cursor: not-allowed;' : 'background-color: #0a472e;'"
+                            :disabled="getAssessmentDetails(activeLessonIndex)?.passed"
+                        >
+                            <i v-if="getAssessmentDetails(activeLessonIndex)?.passed" class="fas fa-check-circle"></i>
+                            <i v-else class="fas fa-check"></i>
+                            <span>
+                                {{ getAssessmentDetails(activeLessonIndex)?.passed ? 'Completed' : 'Mark as Complete' }}
                             </span>
                         </button>
                     </div>
@@ -503,6 +518,7 @@ const currentLessonTopic = computed(() => {
             return {
                 title: lesson.title,
                 description: lesson.content || `Master the essential concepts for ${lesson.title}.`,
+                quiz_question_count: lesson.quiz_question_count ?? 5,
                 points: educatorPoints.length > 0 ? educatorPoints : [
                     {
                         icon: 'fas fa-compass',
@@ -707,6 +723,28 @@ const openLessonTopic = (index) => {
     } else {
         alert("This lesson is locked. Complete the previous lesson first.");
     }
+};
+
+const markLessonCompleteWithoutQuiz = () => {
+    const details = getAssessmentDetails(activeLessonIndex.value);
+    if (details && details.passed) return;
+
+    const lessonKey = 'lesson_' + activeLessonIndex.value;
+    completedAttempts.value[lessonKey] = {
+        score: 100, // Conceptually passed
+        passed: true,
+        correctCount: 0,
+        totalQuestions: 0
+    };
+    
+    // Auto unlock next lesson if applicable
+    if (activeLessonIndex.value + 1 === unlockedLessonLevel.value) {
+        unlockedLessonLevel.value += 1;
+    }
+    
+    saveProgressToServer();
+    
+    activeView.value = 'module';
 };
 
 const startLessonQuizFromTopic = () => {

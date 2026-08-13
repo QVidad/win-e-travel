@@ -77,7 +77,7 @@ class ModuleController extends Controller
             'cover_image' => 'nullable|string|max:500',
             'cover_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'status' => 'required|in:draft,published',
-            'quiz_question_count' => 'required|integer|min:1|max:100',
+            'quiz_question_count' => 'required|integer|min:0|max:100',
         ]);
 
         $bankCount = QuizQuestion::where('module_id', $id)->whereNull('module_lesson_id')->count();

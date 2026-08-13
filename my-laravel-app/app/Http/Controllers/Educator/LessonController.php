@@ -20,7 +20,7 @@ class LessonController extends Controller
             'key_points.*.description' => 'nullable|string',
             'key_points.*.icon' => 'nullable|string|max:100',
             'order' => 'nullable|integer',
-            'quiz_question_count' => 'nullable|integer|min:1|max:100',
+            'quiz_question_count' => 'nullable|integer|min:0|max:100',
         ]);
 
         $requestedCount = (int)($validated['quiz_question_count'] ?? 5);
@@ -58,7 +58,7 @@ class LessonController extends Controller
             'key_points.*.title' => 'nullable|string|max:255',
             'key_points.*.description' => 'nullable|string',
             'key_points.*.icon' => 'nullable|string|max:100',
-            'quiz_question_count' => 'required|integer|min:1|max:100',
+            'quiz_question_count' => 'required|integer|min:0|max:100',
         ]);
 
         $requestedCount = (int)$validated['quiz_question_count'];
