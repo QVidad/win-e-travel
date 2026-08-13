@@ -14,7 +14,13 @@ class ModuleLesson extends Model
     protected $fillable = [
         'course_module_id',
         'title',
+        'content',
+        'key_points',
         'order',
+    ];
+
+    protected $casts = [
+        'key_points' => 'array',
     ];
 
     public function courseModule(): BelongsTo

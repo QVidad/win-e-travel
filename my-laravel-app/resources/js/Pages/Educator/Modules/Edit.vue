@@ -230,20 +230,111 @@
 
         <!-- Lesson Modal -->
         <div v-if="showLessonModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1055;">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content rounded-4 border-0 shadow">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="fw-bold text-dark">{{ editingLesson ? 'Edit Lesson' : 'Add New Lesson' }}</h5>
+                    <div class="modal-header border-bottom p-4">
+                        <h5 class="fw-bold text-dark mb-0">{{ editingLesson ? 'Edit Lesson Content' : 'Add New Lesson' }}</h5>
                         <button type="button" class="btn-close" @click="closeLessonModal"></button>
                     </div>
-                    <div class="modal-body">
-                        <label class="form-label small fw-bold text-muted">Lesson Title</label>
-                        <input v-model="lessonForm.title" type="text" class="form-control rounded-3" placeholder="e.g. General Preparation Before the Tour">
+                    <div class="modal-body p-4 max-h-75vh overflow-y-auto">
+                        <!-- Lesson Title -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">Lesson Title <span class="text-danger">*</span></label>
+                            <input 
+                                v-model="lessonForm.title" 
+                                type="text" 
+                                class="form-control rounded-3" 
+                                placeholder="e.g. General Preparation Before the Tour"
+                                required
+                            >
+                        </div>
+
+                        <!-- Lesson Description / Overview -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">Topic Overview & Introduction Paragraph</label>
+                            <textarea 
+                                v-model="lessonForm.content" 
+                                class="form-control rounded-3" 
+                                rows="4" 
+                                placeholder="Describe the lesson context (e.g. Even if you've guided the same tour many times, no two are ever the same...)"
+                            ></textarea>
+                            <small class="text-muted">This overview will be displayed to students when they open this lesson topic.</small>
+                        </div>
+
+                        <!-- Key Topics & Subtopics List -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label fw-bold text-dark mb-0">Key Subtopic Points & Guidelines</label>
+                                <button type="button" @click="addKeyPoint" class="btn btn-sm btn-outline-success rounded-pill fw-bold">
+                                    <i class="fas fa-plus me-1"></i> Add Subtopic
+                                </button>
+                            </div>
+
+                            <div v-if="lessonForm.key_points.length === 0" class="text-muted small p-3 bg-light rounded-3 text-center border">
+                                No key points added. Click "Add Subtopic" to include key bullet points.
+                            </div>
+
+                            <div class="d-flex flex-column gap-3">
+                                <div 
+                                    v-for="(point, pIdx) in lessonForm.key_points" 
+                                    :key="pIdx"
+                                    class="p-3 border rounded-3 bg-light-subtle position-relative"
+                                >
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-secondary rounded-pill px-3 py-1 fs-8 fw-bold">Point #{{ pIdx + 1 }}</span>
+                                        <button 
+                                            type="button" 
+                                            @click="removeKeyPoint(pIdx)" 
+                                            class="btn btn-sm btn-link text-danger p-0 text-decoration-none"
+                                            title="Remove Point"
+                                        >
+                                            <i class="fas fa-trash me-1"></i> Remove
+                                        </button>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold text-muted mb-1">Icon Class</label>
+                                            <input 
+                                                v-model="point.icon" 
+                                                type="text" 
+                                                class="form-control form-control-sm rounded-2" 
+                                                placeholder="e.g. fas fa-walking"
+                                            >
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label small fw-bold text-muted mb-1">Subtopic Title</label>
+                                            <input 
+                                                v-model="point.title" 
+                                                type="text" 
+                                                class="form-control form-control-sm rounded-2" 
+                                                placeholder="e.g. Know the tour style"
+                                            >
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label small fw-bold text-muted mb-1">Description / Guideline</label>
+                                            <textarea 
+                                                v-model="point.description" 
+                                                class="form-control form-control-sm rounded-2" 
+                                                rows="2" 
+                                                placeholder="Walking tours require stamina and weather planning..."
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-footer border-0 pt-0">
+                    <div class="modal-footer border-top p-4">
                         <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" @click="closeLessonModal">Cancel</button>
-                        <button type="button" @click="saveLesson" class="btn text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #0d4b38;" :disabled="!lessonForm.title">
-                            Save Lesson
+                        <button 
+                            type="button" 
+                            @click="saveLesson" 
+                            class="btn text-white rounded-pill px-4 fw-bold shadow-sm" 
+                            style="background-color: #0d4b38;" 
+                            :disabled="!lessonForm.title"
+                        >
+                            <i class="fas fa-save me-1"></i> Save Lesson Content
                         </button>
                     </div>
                 </div>
@@ -306,33 +397,72 @@ const formatDate = (dateStr) => {
 // --- Lesson Management Logic ---
 const showLessonModal = ref(false);
 const editingLesson = ref(null);
-const lessonForm = ref({ title: '' });
+const lessonForm = ref({
+    title: '',
+    content: '',
+    key_points: [
+        { title: '', description: '', icon: 'fas fa-check' }
+    ]
+});
 
 const openLessonModal = (lesson = null) => {
     editingLesson.value = lesson;
-    lessonForm.value.title = lesson ? lesson.title : '';
+    if (lesson) {
+        let parsedPoints = [];
+        if (Array.isArray(lesson.key_points)) {
+            parsedPoints = JSON.parse(JSON.stringify(lesson.key_points));
+        } else if (typeof lesson.key_points === 'string') {
+            try { parsedPoints = JSON.parse(lesson.key_points); } catch(e) { parsedPoints = []; }
+        }
+        
+        lessonForm.value = {
+            title: lesson.title || '',
+            content: lesson.content || '',
+            key_points: parsedPoints.length > 0 ? parsedPoints : [{ title: '', description: '', icon: 'fas fa-check' }]
+        };
+    } else {
+        lessonForm.value = {
+            title: '',
+            content: '',
+            key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
+        };
+    }
     showLessonModal.value = true;
+};
+
+const addKeyPoint = () => {
+    lessonForm.value.key_points.push({ title: '', description: '', icon: 'fas fa-check' });
+};
+
+const removeKeyPoint = (index) => {
+    lessonForm.value.key_points.splice(index, 1);
 };
 
 const closeLessonModal = () => {
     showLessonModal.value = false;
     editingLesson.value = null;
-    lessonForm.value.title = '';
+    lessonForm.value = {
+        title: '',
+        content: '',
+        key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
+    };
 };
 
 const saveLesson = () => {
     if (!lessonForm.value.title) return;
     
+    const payload = {
+        title: lessonForm.value.title,
+        content: lessonForm.value.content,
+        key_points: lessonForm.value.key_points.filter(p => p.title || p.description)
+    };
+
     if (editingLesson.value) {
         // Update
-        router.put(route('educator.modules.lessons.update', { module: props.module.id, lesson: editingLesson.value.id }), {
-            title: lessonForm.value.title
-        }, { preserveScroll: true, onSuccess: closeLessonModal });
+        router.put(route('educator.modules.lessons.update', { module: props.module.id, lesson: editingLesson.value.id }), payload, { preserveScroll: true, onSuccess: closeLessonModal });
     } else {
         // Create
-        router.post(route('educator.modules.lessons.store', props.module.id), {
-            title: lessonForm.value.title
-        }, { preserveScroll: true, onSuccess: closeLessonModal });
+        router.post(route('educator.modules.lessons.store', props.module.id), payload, { preserveScroll: true, onSuccess: closeLessonModal });
     }
 };
 
@@ -351,5 +481,8 @@ const deleteLesson = (lessonId) => {
 }
 .max-w-5xl {
     max-width: 64rem;
+}
+.max-h-75vh {
+    max-height: 75vh;
 }
 </style>

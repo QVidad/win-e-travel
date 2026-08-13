@@ -1,12 +1,32 @@
 <template>
     <StudentLayout>
         <div>
-            <!-- Back Navigation -->
-            <div class="mb-4">
-                <Link :href="route('foundation.index')" class="text-decoration-none text-secondary fw-bold hover-text-primary transition-all">
-                    <i class="fas fa-arrow-left me-2"></i> Back to Go Beyond Books
-                </Link>
-            </div>
+            <!-- Breadcrumb Navigation -->
+            <nav class="mb-4" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 align-items-center">
+                    <li class="breadcrumb-item">
+                        <Link :href="route('foundation.index')" class="text-decoration-none text-secondary fw-semibold hover-text-primary">
+                            <i class="fas fa-book-open me-1"></i> Go Beyond Books
+                        </Link>
+                    </li>
+                    <li class="breadcrumb-item" :class="{ 'active text-dark fw-bold': activeView === 'module' }">
+                        <button 
+                            v-if="activeView !== 'module'" 
+                            @click="activeView = 'module'" 
+                            class="btn btn-link p-0 text-decoration-none text-secondary fw-semibold hover-text-primary border-0 bg-transparent align-baseline"
+                        >
+                            Module {{ module.id }}: {{ module.title }}
+                        </button>
+                        <span v-else>Module {{ module.id }}: {{ module.title }}</span>
+                    </li>
+                    <li v-if="activeView === 'lesson_info'" class="breadcrumb-item active text-dark fw-bold" aria-current="page">
+                        Lesson {{ activeLessonIndex + 1 }}: {{ currentLessonTopic.title }}
+                    </li>
+                    <li v-else-if="activeView === 'quiz'" class="breadcrumb-item active text-dark fw-bold" aria-current="page">
+                        {{ activeAssessmentType === 'lesson' ? `Lesson ${activeLessonIndex + 1} Quick Check` : 'End-of-Module Evaluation' }}
+                    </li>
+                </ol>
+            </nav>
 
             <div v-if="activeView === 'module'">
                 <!-- Hero Banner -->
@@ -42,12 +62,12 @@
                         class="card border-0 shadow-sm rounded-4 transition-all"
                         :class="index + 1 <= unlockedLessonLevel ? 'cursor-pointer hover-lift' : 'opacity-75 bg-light-subtle'"
                         :style="index + 1 > unlockedLessonLevel ? 'cursor: not-allowed;' : ''"
-                        @click="startLessonQuiz(index)"
+                        @click="openLessonTopic(index)"
                     >
                         <div class="card-body p-4 d-flex align-items-center justify-content-between">
                             <div>
                                 <h5 class="fw-bold text-dark mb-1">Lesson {{ index + 1 }}: {{ lesson.title }}</h5>
-                                <p class="mb-0 text-secondary small">Quick Check • {{ lesson.questions }} questions • 90% to pass</p>
+                                <p class="mb-0 text-secondary small">Quick Check • {{ lesson.questions || 5 }} questions • 90% to pass</p>
                             </div>
                             <div class="text-secondary fs-5">
                                 <i v-if="index + 1 < unlockedLessonLevel" class="fas fa-check-circle text-success"></i>
@@ -77,6 +97,81 @@
                                 <i v-else class="fas fa-lock"></i>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lesson Topic View -->
+            <div v-else-if="activeView === 'lesson_info'">
+                <!-- Top Hero Banner for Lesson matching system UI design -->
+                <div class="welcome-banner text-white mb-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 30px; padding: 35px 40px;">
+                    <div class="row align-items-center position-relative z-1">
+                        <div class="col-md-7">
+                            <h2 class="fw-bold mb-2 display-6">{{ currentLessonTopic.title }}</h2>
+                            <p class="fs-5 opacity-75 mb-0">Module {{ module.id }}: {{ module.title }} • Lesson {{ activeLessonIndex + 1 }} of {{ lessons.length }}</p>
+                        </div>
+                        <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                            <!-- Display Student Quiz Score when completed -->
+                            <div v-if="getLessonScore(activeLessonIndex) !== null" class="d-inline-flex flex-column align-items-md-end bg-white bg-opacity-10 rounded-4 p-3 px-4 border border-white border-opacity-20 shadow-sm">
+                                <span class="fs-8 text-uppercase tracking-wider opacity-75 fw-bold mb-1 text-white">
+                                    <i class="fas fa-trophy text-warning me-1"></i> Quick Check Score
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="display-6 fw-bold text-warning">{{ getLessonScore(activeLessonIndex) }}%</span>
+                                    <span class="badge bg-success rounded-pill px-3 py-1 fs-8 fw-bold">PASSED</span>
+                                </div>
+                            </div>
+                            <!-- Status when not taken yet -->
+                            <div v-else class="d-inline-flex flex-column align-items-md-end bg-white bg-opacity-10 rounded-4 p-3 px-4 border border-white border-opacity-20 text-white">
+                                <span class="fs-8 text-uppercase tracking-wider opacity-75 fw-bold mb-1 text-white">
+                                    <i class="fas fa-clipboard-check text-warning me-1"></i> Status
+                                </span>
+                                <span class="fs-6 fw-bold text-white opacity-90">Not Taken Yet (90% required)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson Content Card -->
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5 mb-4 position-relative">
+                    <!-- Intro description paragraph -->
+                    <p class="text-secondary fs-6 lh-base mb-4" style="white-space: pre-line;">
+                        {{ currentLessonTopic.description }}
+                    </p>
+
+                    <!-- Key Topics / Guidelines with Icons -->
+                    <div class="d-flex flex-column gap-4 my-4">
+                        <div 
+                            v-for="(point, pIdx) in currentLessonTopic.points" 
+                            :key="pIdx"
+                            class="d-flex align-items-start gap-3"
+                        >
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0 mt-1" style="width: 38px; height: 38px;">
+                                <i :class="point.icon || 'fas fa-check'" class="text-success fs-6"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">{{ point.title }}</h6>
+                                <p class="text-secondary small mb-0 lh-base">{{ point.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-10">
+
+                    <!-- Footer Row with Quick Check Action -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1">Quick Check</h6>
+                            <p class="text-secondary small mb-0">5 questions • 90% required to pass</p>
+                        </div>
+                        <button 
+                            @click="startLessonQuizFromTopic" 
+                            class="btn text-white rounded-pill px-4 py-2-5 fw-bold shadow-sm d-flex align-items-center gap-2 transition-all hover-lift"
+                            style="background-color: #0a472e;"
+                        >
+                            <i class="fas fa-play"></i>
+                            <span>Take Quick Check</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -146,7 +241,7 @@ const props = defineProps({
     },
 });
 
-const activeView = ref('module'); // 'module' | 'quiz'
+const activeView = ref('module'); // 'module' | 'lesson_info' | 'quiz'
 const activeAssessmentType = ref('lesson'); // 'lesson' | 'final'
 const activeLessonIndex = ref(0);
 const unlockedLessonLevel = ref(1);
@@ -159,6 +254,8 @@ const lessons = computed(() => {
     return props.module.lessons.map(lesson => ({
         id: lesson.id,
         title: lesson.title,
+        content: lesson.content,
+        key_points: lesson.key_points,
         questions: lesson.questions ? lesson.questions.length : 0
     }));
 });
@@ -167,14 +264,174 @@ const isEvaluationUnlocked = computed(() => {
     return lessons.value.length > 0 && unlockedLessonLevel.value > lessons.value.length;
 });
 
-const startLessonQuiz = (index) => {
-    if (index + 1 <= unlockedLessonLevel.value) {
-        activeView.value = 'quiz';
-        activeAssessmentType.value = 'lesson';
-        activeLessonIndex.value = index;
-        selectedOption.value = null;
-        quizFinished.value = false;
+const currentLessonTopic = computed(() => {
+    const lesson = lessons.value[activeLessonIndex.value];
+    const lessonTitle = lesson ? lesson.title : `Lesson ${activeLessonIndex.value + 1}`;
+
+    // 1. Check if educator has created content or key points for this lesson
+    if (lesson) {
+        let educatorPoints = [];
+        if (Array.isArray(lesson.key_points)) {
+            educatorPoints = lesson.key_points;
+        } else if (typeof lesson.key_points === 'string') {
+            try { educatorPoints = JSON.parse(lesson.key_points); } catch(e) {}
+        }
+
+        if (lesson.content || educatorPoints.length > 0) {
+            return {
+                title: lesson.title,
+                description: lesson.content || `Master the essential concepts for ${lesson.title}.`,
+                points: educatorPoints.length > 0 ? educatorPoints : [
+                    {
+                        icon: 'fas fa-compass',
+                        title: 'Know the Core Principles',
+                        description: 'Understand the fundamental guidelines, safety standards, and historical background.'
+                    }
+                ]
+            };
+        }
     }
+
+    const topicsMap = {
+        'General Preparation Before the Tour': {
+            title: 'General Preparation Before the Tour',
+            description: "Even if you've guided the same tour many times, no two are ever the same. Weather, traffic, guest expectations, and site conditions can change overnight. Being prepared means you're ready for anything — from sudden route changes to unexpected guest needs.",
+            points: [
+                {
+                    icon: 'fas fa-walking',
+                    title: 'Know the tour style',
+                    description: 'Walking tours require stamina and weather planning. Coach tours need precise timing to avoid delays. Museum or cultural tours demand accurate knowledge and respectful conduct.'
+                },
+                {
+                    icon: 'fas fa-map-marked-alt',
+                    title: 'Review the itinerary',
+                    description: 'Things change. Check each stop, travel time, and sequence. Identify areas that may require flexibility.'
+                },
+                {
+                    icon: 'fas fa-briefcase',
+                    title: "Understand employer's standards",
+                    description: 'Dress codes, documentation, and specific service expectations vary by operator. Always represent your company professionally.'
+                }
+            ]
+        },
+        'Researching Your Incoming Group': {
+            title: 'Researching Your Incoming Group',
+            description: 'Understanding your guests before they arrive allows you to tailor your commentary, pacing, and interaction style to their cultural background, interests, and age demographics.',
+            points: [
+                {
+                    icon: 'fas fa-users',
+                    title: 'Demographics & Interest Mapping',
+                    description: 'Identify whether your group consists of eco-tourists, history enthusiasts, families, or corporate delegates.'
+                },
+                {
+                    icon: 'fas fa-globe',
+                    title: 'Cultural Norms & Dietary Restrictions',
+                    description: 'Respect dietary needs, religious customs, and language preferences.'
+                },
+                {
+                    icon: 'fas fa-wheelchair',
+                    title: 'Special Assistance Needs',
+                    description: 'Plan ahead for accessibility requirements and senior mobility support.'
+                }
+            ]
+        },
+        'Coordinating with Suppliers': {
+            title: 'Coordinating with Suppliers',
+            description: 'Seamless tours rely on strong communication with drivers, restaurant owners, local heritage caretakers, and municipal tourism officers.',
+            points: [
+                {
+                    icon: 'fas fa-bus',
+                    title: 'Driver & Transport Alignment',
+                    description: 'Confirm pickup points, route options, parking zones, and emergency contact channels.'
+                },
+                {
+                    icon: 'fas fa-utensils',
+                    title: 'Meal & Attraction Vouchers',
+                    description: 'Verify group headcounts and meal reservations prior to arrival at local dining spots.'
+                },
+                {
+                    icon: 'fas fa-phone-alt',
+                    title: 'Site Capacity & Operating Hours',
+                    description: 'Call ahead to confirm opening hours, weather alerts, and site capacity limits.'
+                }
+            ]
+        },
+        'Site Familiarization & Safety Check': {
+            title: 'Site Familiarization & Safety Check',
+            description: 'Conducting site walk-throughs ensures you are aware of emergency exits, rest facilities, first-aid locations, and potential hazards.',
+            points: [
+                {
+                    icon: 'fas fa-exclamation-triangle',
+                    title: 'Hazard Identification',
+                    description: 'Note slippery pathways, steep steps, or high-density crowd points.'
+                },
+                {
+                    icon: 'fas fa-first-aid',
+                    title: 'Emergency Exit Points',
+                    description: 'Locate nearest medical stations, assembly points, and emergency contacts.'
+                },
+                {
+                    icon: 'fas fa-restroom',
+                    title: 'Facility Spotting',
+                    description: 'Identify clean restrooms, water refill stations, and shaded rest spots for guests.'
+                }
+            ]
+        }
+    };
+
+    if (topicsMap[lessonTitle]) {
+        return topicsMap[lessonTitle];
+    }
+
+    return {
+        title: lessonTitle,
+        description: `Master the essential competencies for ${lessonTitle}. Being prepared means you are ready to deliver authentic, informative, and engaging experiences for your tour group.`,
+        points: [
+            {
+                icon: 'fas fa-compass',
+                title: 'Know the Core Principles',
+                description: 'Understand the fundamental guidelines, safety standards, and historical background.'
+            },
+            {
+                icon: 'fas fa-list-check',
+                title: 'Review Key Operational Steps',
+                description: 'Verify timing, group coordination, and site contingencies before starting.'
+            },
+            {
+                icon: 'fas fa-user-shield',
+                title: 'Maintain Professional Standards',
+                description: 'Represent local tourism values with accuracy, hospitality, and respect.'
+            }
+        ]
+    };
+});
+
+const lessonScores = ref({});
+
+const getLessonScore = (index) => {
+    if (lessonScores.value[index] !== undefined) {
+        return lessonScores.value[index];
+    }
+    if (index + 1 < unlockedLessonLevel.value) {
+        return 100;
+    }
+    return null;
+};
+
+const openLessonTopic = (index) => {
+    if (index + 1 <= unlockedLessonLevel.value) {
+        activeLessonIndex.value = index;
+        activeView.value = 'lesson_info';
+    } else {
+        alert("This lesson is locked. Complete the previous lesson first.");
+    }
+};
+
+const startLessonQuizFromTopic = () => {
+    activeView.value = 'quiz';
+    activeAssessmentType.value = 'lesson';
+    selectedOption.value = null;
+    quizFinished.value = false;
 };
 
 const startFinalEvaluation = () => {
@@ -190,6 +447,10 @@ const startFinalEvaluation = () => {
 
 const finishQuiz = () => {
     quizFinished.value = true;
+    if (activeAssessmentType.value === 'lesson') {
+        const score = (selectedOption.value === 0) ? 100 : 80;
+        lessonScores.value[activeLessonIndex.value] = score;
+    }
 };
 
 const returnToModule = () => {

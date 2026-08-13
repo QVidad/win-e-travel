@@ -13,11 +13,18 @@ class LessonController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'order' => 'integer'
+            'content' => 'nullable|string',
+            'key_points' => 'nullable|array',
+            'key_points.*.title' => 'nullable|string|max:255',
+            'key_points.*.description' => 'nullable|string',
+            'key_points.*.icon' => 'nullable|string|max:100',
+            'order' => 'nullable|integer'
         ]);
 
         $lesson = $module->lessons()->create([
             'title' => $validated['title'],
+            'content' => $validated['content'] ?? null,
+            'key_points' => $validated['key_points'] ?? [],
             'order' => $validated['order'] ?? ($module->lessons()->max('order') + 1)
         ]);
 
@@ -31,10 +38,19 @@ class LessonController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255'
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'key_points' => 'nullable|array',
+            'key_points.*.title' => 'nullable|string|max:255',
+            'key_points.*.description' => 'nullable|string',
+            'key_points.*.icon' => 'nullable|string|max:100',
         ]);
 
-        $lesson->update($validated);
+        $lesson->update([
+            'title' => $validated['title'],
+            'content' => $validated['content'] ?? null,
+            'key_points' => $validated['key_points'] ?? [],
+        ]);
 
         return redirect()->back()->with('success', 'Lesson updated successfully.');
     }
