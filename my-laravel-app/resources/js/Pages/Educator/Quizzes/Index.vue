@@ -23,30 +23,38 @@
         </div>
 
         <!-- Module Selector & Search Filter Bar -->
-        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+        <div class="card border-0 shadow-sm rounded-4 p-3.5 mb-4 bg-white">
             <div class="row g-3 align-items-center">
-                <div class="col-md-5">
-                    <label class="form-label small fw-bold text-muted mb-1">Select Module Quiz Bank</label>
-                    <select v-model="selectedModuleId" class="form-select border-1 rounded-3">
-                        <option value="all">All Modules ({{ totalQuestions }} Total Questions)</option>
-                        <option v-for="mod in modules" :key="mod.id" :value="mod.id">
-                            {{ mod.title }} ({{ mod.questions ? mod.questions.length : 0 }} Qs)
-                        </option>
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold text-muted mb-1">Select Module / Lesson Bank</label>
+                    <select v-model="selectedBank" class="form-select border-1 rounded-3">
+                        <option value="all">All Modules ({{ totalQuestionsCount }} Total Questions)</option>
+                        <optgroup v-for="mod in modules" :key="mod.id" :label="'Module ' + mod.id + ': ' + mod.title">
+                            <option :value="'module_' + mod.id">Entire Module (All Scopes)</option>
+                            <option v-for="lesson in mod.lessons" :key="lesson.id" :value="'lesson_' + mod.id + '_' + lesson.id">
+                                &#8627; Lesson: {{ lesson.title }}
+                            </option>
+                        </optgroup>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted mb-1">Filter Assessment Scope</label>
+                    <select v-model="selectedScope" class="form-select border-1 rounded-3">
+                        <option value="all">All Scopes (Quick Checks & Evaluations)</option>
+                        <option value="lesson">Lesson Quick Checks Only</option>
+                        <option value="evaluation">End-of-Module Evaluations Only</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label class="form-label small fw-bold text-muted mb-1">Search Question Stem</label>
                     <div class="input-group shadow-sm rounded-pill overflow-hidden border">
                         <span class="input-group-text bg-white border-0 ps-3"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" v-model="searchQuery" class="form-control border-0 ps-2" placeholder="Search question keyword...">
-                        <button class="btn text-white px-4 fw-medium border-0" style="background-color: #0d4b38;">
-                            Search
-                        </button>
+                        <input type="text" v-model="searchQuery" class="form-control border-0 ps-2" placeholder="Search keyword...">
                     </div>
                 </div>
-                <div class="col-md-3 text-md-end">
-                    <span class="badge bg-success-subtle text-success fw-bold p-2.5 rounded-pill border border-success-subtle">
-                        <i class="fas fa-layer-group me-1"></i> {{ currentBankCount }} Questions Bank
+                <div class="col-md-2 text-md-end pt-md-3">
+                    <span class="badge bg-success-subtle text-success fw-bold p-2.5 rounded-pill border border-success-subtle d-inline-block">
+                        <i class="fas fa-layer-group me-1"></i> {{ filteredQuestions.length }} Items Shown
                     </span>
                 </div>
             </div>
@@ -74,7 +82,14 @@
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill fs-8 fw-semibold px-3 py-1">
-                            <i class="fas fa-book me-1"></i> {{ item.module_title }}
+                            <i class="fas fa-book me-1"></i> Module {{ item.module_id }}: {{ item.module_title }}
+                        </span>
+                        <span 
+                            class="badge rounded-pill fs-8 fw-bold px-3 py-1"
+                            :class="item.module_lesson_id ? 'bg-primary bg-opacity-10 text-primary border border-primary-subtle' : 'bg-info bg-opacity-10 text-info border border-info-subtle'"
+                        >
+                            <i class="fas me-1" :class="item.module_lesson_id ? 'fa-check-double' : 'fa-trophy'"></i>
+                            {{ item.scope_label }}
                         </span>
                         <span class="badge bg-light text-muted border rounded-pill fs-8 px-2.5 py-1">
                             Item #{{ idx + 1 }}
@@ -151,27 +166,19 @@
 
                     <form @submit.prevent="submitQuestionForm">
                         <div class="modal-body p-4">
-                            <!-- Module Selection -->
+                            <!-- Unified Bank Selection -->
                             <div class="mb-3">
-                                <label class="form-label small fw-bold text-dark">Target Module <span class="text-danger">*</span></label>
-                                <select v-model="questionForm.module_id" class="form-select rounded-3" @change="questionForm.module_lesson_id = ''" required>
-                                    <option value="" disabled>Select target module bank...</option>
-                                    <option v-for="mod in modules" :key="mod.id" :value="mod.id">
-                                        {{ mod.title }}
-                                    </option>
+                                <label class="form-label small fw-bold text-dark">Target Module / Lesson Scope <span class="text-danger">*</span></label>
+                                <select v-model="modalSelectedBank" class="form-select rounded-3" required>
+                                    <option value="" disabled>Select target module or lesson...</option>
+                                    <optgroup v-for="mod in modules" :key="mod.id" :label="'Module ' + mod.id + ': ' + mod.title">
+                                        <option :value="'module_' + mod.id">End-of-Module Evaluation (Final Exam)</option>
+                                        <option v-for="lesson in mod.lessons" :key="lesson.id" :value="'lesson_' + mod.id + '_' + lesson.id">
+                                            &#8627; Quick Check: {{ lesson.title }}
+                                        </option>
+                                    </optgroup>
                                 </select>
-                            </div>
-
-                            <!-- Lesson Selection (Optional) -->
-                            <div class="mb-3" v-if="selectedModuleLessons.length > 0">
-                                <label class="form-label small fw-bold text-dark">Target Lesson (Optional)</label>
-                                <select v-model="questionForm.module_lesson_id" class="form-select rounded-3">
-                                    <option value="">End-of-Module Evaluation (No specific lesson)</option>
-                                    <option v-for="lesson in selectedModuleLessons" :key="lesson.id" :value="lesson.id">
-                                        {{ lesson.title }}
-                                    </option>
-                                </select>
-                                <small class="text-muted d-block mt-1">If left blank, this question will appear in the final End-of-Module Evaluation.</small>
+                                <small class="text-muted d-block mt-1">Select whether this question belongs to the final exam or a specific lesson's quick check.</small>
                             </div>
 
                             <!-- Question Stem -->
@@ -282,15 +289,17 @@ const props = defineProps({
     },
 });
 
-const selectedModuleId = ref('all');
+const selectedBank = ref('all');
+const selectedScope = ref('all'); // 'all' | 'lesson' | 'evaluation'
 const searchQuery = ref('');
 const showModal = ref(false);
 const isEditing = ref(false);
 const currentEditId = ref(null);
+const modalSelectedBank = ref('');
 
 const selectedModuleLessons = computed(() => {
     if (!questionForm.module_id) return [];
-    const module = props.modules.find(m => m.id === questionForm.module_id);
+    const module = props.modules.find(m => m.id == questionForm.module_id);
     return module?.lessons || [];
 });
 
@@ -309,34 +318,66 @@ const questionForm = useForm({
 const allQuestionsList = computed(() => {
     const list = [];
     (props.modules || []).forEach(m => {
+        // Module-level evaluation questions
         if (m.questions && m.questions.length > 0) {
             m.questions.forEach(q => {
                 list.push({
                     ...q,
                     module_id: m.id,
                     module_title: m.title,
+                    scope_label: 'End-of-Module Evaluation',
+                    is_lesson_quiz: false,
                 });
+            });
+        }
+        // Lesson-level quick check questions
+        if (m.lessons && m.lessons.length > 0) {
+            m.lessons.forEach(l => {
+                if (l.questions && l.questions.length > 0) {
+                    l.questions.forEach(q => {
+                        list.push({
+                            ...q,
+                            module_id: m.id,
+                            module_title: m.title,
+                            lesson_id: l.id,
+                            lesson_title: l.title,
+                            scope_label: `Quick Check: ${l.title}`,
+                            is_lesson_quiz: true,
+                        });
+                    });
+                }
             });
         }
     });
     return list;
 });
 
-const filteredQuestions = computed(() => {
-    return allQuestionsList.value.filter(q => {
-        const matchesModule = selectedModuleId.value === 'all' || q.module_id == selectedModuleId.value;
-        const stem = q.question_text || q.question || '';
-        const matchesSearch = stem.toLowerCase().includes(searchQuery.value.toLowerCase());
-        return matchesModule && matchesSearch;
-    });
+const totalQuestionsCount = computed(() => {
+    return allQuestionsList.value.length;
 });
 
-const currentBankCount = computed(() => {
-    if (selectedModuleId.value === 'all') {
-        return allQuestionsList.value.length;
-    }
-    const targetModule = props.modules.find(m => m.id == selectedModuleId.value);
-    return targetModule && targetModule.questions ? targetModule.questions.length : 0;
+const filteredQuestions = computed(() => {
+    return allQuestionsList.value.filter(q => {
+        let matchesBank = false;
+        if (selectedBank.value === 'all') {
+            matchesBank = true;
+        } else if (selectedBank.value.startsWith('module_')) {
+            const modId = selectedBank.value.split('_')[1];
+            matchesBank = q.module_id == modId;
+        } else if (selectedBank.value.startsWith('lesson_')) {
+            const parts = selectedBank.value.split('_');
+            const modId = parts[1];
+            const lessId = parts[2];
+            matchesBank = q.module_id == modId && q.lesson_id == lessId;
+        }
+
+        const matchesScope = selectedScope.value === 'all' 
+            || (selectedScope.value === 'lesson' && q.is_lesson_quiz) 
+            || (selectedScope.value === 'evaluation' && !q.is_lesson_quiz);
+        const stem = q.question_text || q.question || '';
+        const matchesSearch = stem.toLowerCase().includes(searchQuery.value.toLowerCase());
+        return matchesBank && matchesScope && matchesSearch;
+    });
 });
 
 const getOptionsMap = (item) => {
@@ -371,8 +412,15 @@ const openAddModal = () => {
     isEditing.value = false;
     currentEditId.value = null;
     questionForm.reset();
-    questionForm.module_id = selectedModuleId.value !== 'all' ? selectedModuleId.value : (props.modules[0]?.id || '');
-    questionForm.module_lesson_id = '';
+    
+    if (selectedBank.value.startsWith('module_')) {
+        modalSelectedBank.value = selectedBank.value;
+    } else if (selectedBank.value.startsWith('lesson_')) {
+        modalSelectedBank.value = selectedBank.value;
+    } else {
+        modalSelectedBank.value = props.modules[0] ? `module_${props.modules[0].id}` : '';
+    }
+    
     questionForm.correct_option = 'a';
     showModal.value = true;
 };
@@ -390,8 +438,12 @@ const openEditModal = (item) => {
         correct = reverseMap[item.correct_answer_index] || 'a';
     }
 
-    questionForm.module_id = item.module_id;
-    questionForm.module_lesson_id = item.module_lesson_id || '';
+    if (item.module_lesson_id) {
+        modalSelectedBank.value = `lesson_${item.module_id}_${item.module_lesson_id}`;
+    } else {
+        modalSelectedBank.value = `module_${item.module_id}`;
+    }
+
     questionForm.question_text = item.question_text || item.question || '';
     questionForm.option_a = opts.a;
     questionForm.option_b = opts.b;
@@ -408,6 +460,15 @@ const closeModal = () => {
 };
 
 const submitQuestionForm = () => {
+    if (modalSelectedBank.value.startsWith('module_')) {
+        questionForm.module_id = modalSelectedBank.value.split('_')[1];
+        questionForm.module_lesson_id = null;
+    } else if (modalSelectedBank.value.startsWith('lesson_')) {
+        const parts = modalSelectedBank.value.split('_');
+        questionForm.module_id = parts[1];
+        questionForm.module_lesson_id = parts[2];
+    }
+
     questionForm.course_module_id = questionForm.module_id;
     if (isEditing.value && currentEditId.value) {
         questionForm.put(route('educator.quizzes.update', currentEditId.value), {

@@ -414,8 +414,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 
 const props = defineProps({
@@ -442,6 +442,33 @@ const userAnswers = ref({});
 const showExitConfirmModal = ref(false);
 const completedAttempts = ref({}); // { 'lesson_0': { score: 100, passed: true }, 'final': { score: 90, passed: true } }
 const latestAttemptResult = ref(null);
+const currentQuestions = ref([]);
+
+onMounted(() => {
+    if (props.userProgress && props.userProgress.lesson_data) {
+        const data = props.userProgress.lesson_data;
+        if (data.completedAttempts) completedAttempts.value = data.completedAttempts;
+        if (data.lessonScores) lessonScores.value = data.lessonScores;
+        if (data.unlockedLessonLevel) unlockedLessonLevel.value = data.unlockedLessonLevel;
+    }
+});
+
+const saveProgressToServer = () => {
+    const payload = {
+        lesson_data: {
+            completedAttempts: completedAttempts.value,
+            lessonScores: lessonScores.value,
+            unlockedLessonLevel: unlockedLessonLevel.value
+        },
+        score_percentage: completedAttempts.value['final'] ? completedAttempts.value['final'].score : 0,
+        passed: completedAttempts.value['final'] ? completedAttempts.value['final'].passed : false
+    };
+    
+    router.post(route('student.modules.progress', props.module.id), payload, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
 
 // Dynamic lessons from database
 const lessons = computed(() => {
@@ -638,111 +665,40 @@ const isAssessmentCompleted = (type, index = null) => {
     return completedAttempts.value[key] !== undefined;
 };
 
-// Current Assessment Questions Generator
-const currentQuestions = computed(() => {
-    if (activeAssessmentType.value === 'lesson') {
-        const lesson = props.module.lessons ? props.module.lessons[activeLessonIndex.value] : null;
-        if (lesson && lesson.questions && lesson.questions.length > 0) {
-            return lesson.questions.map((q, idx) => {
-                const rawOptions = (Array.isArray(q.options) && q.options.length > 0)
-                    ? q.options
-                    : [q.option_a, q.option_b, q.option_c, q.option_d].filter(Boolean);
-                
-                let correctIdx = 0;
-                if (q.correct_answer_index !== undefined && q.correct_answer_index !== null) {
-                    correctIdx = Number(q.correct_answer_index);
-                } else if (q.correct_option) {
-                    const char = String(q.correct_option).toLowerCase();
-                    correctIdx = char === 'b' ? 1 : char === 'c' ? 2 : char === 'd' ? 3 : 0;
-                }
-
-                return {
-                    id: q.id,
-                    text: q.question_text || q.question || `Question ${idx + 1}`,
-                    options: rawOptions.length > 0 ? rawOptions : ['Option A', 'Option B', 'Option C', 'Option D'],
-                    correctIndex: correctIdx
-                };
-            });
+const loadQuestionsForQuiz = (questionsArray, limit = null) => {
+    if (!questionsArray || questionsArray.length === 0) return [];
+    
+    let pool = questionsArray.map((q, idx) => {
+        const rawOptions = (Array.isArray(q.options) && q.options.length > 0)
+            ? q.options
+            : [q.option_a, q.option_b, q.option_c, q.option_d].filter(Boolean);
+        
+        let correctIdx = 0;
+        if (q.correct_answer_index !== undefined && q.correct_answer_index !== null) {
+            correctIdx = Number(q.correct_answer_index);
+        } else if (q.correct_option) {
+            const char = String(q.correct_option).toLowerCase();
+            correctIdx = char === 'b' ? 1 : char === 'c' ? 2 : char === 'd' ? 3 : 0;
         }
-        return [
-            {
-                text: 'What is the primary responsibility of a tour guide before starting a tour?',
-                options: ['Ensuring tourist safety and reviewing the itinerary', 'Buying souvenirs for guests', 'Ignoring weather forecasts', 'Changing ticket prices'],
-                correctIndex: 0
-            },
-            {
-                text: 'Why is it important to research your incoming guest group in advance?',
-                options: ['To tailor commentary and accommodate dietary/accessibility needs', 'To cancel the tour early', 'To skip historical landmarks', 'To force everyone to buy extra meals'],
-                correctIndex: 0
-            },
-            {
-                text: 'How should a tour guide coordinate with transport drivers and local suppliers?',
-                options: ['Confirm pickup times, route options, and contact channels in advance', 'Arrive unannounced without reservation', 'Let guests drive the bus', 'Ignore supplier schedules'],
-                correctIndex: 0
-            },
-            {
-                text: 'What is the first step during site familiarization before guests arrive?',
-                options: ['Identify emergency exit paths, rest facilities, and potential hazards', 'Leave the site immediately', 'Start selling merchandise', 'Take a nap'],
-                correctIndex: 0
-            },
-            {
-                text: 'How should unexpected delays or route changes be handled during a live tour?',
-                options: ['Execute contingency plans and communicate clearly with guests', 'Panic and abandon the group', 'Blame guests for the delay', 'Refuse to answer questions'],
-                correctIndex: 0
-            }
-        ];
-    } else {
-        if (props.module.questions && props.module.questions.length > 0) {
-            return props.module.questions.map((q, idx) => {
-                const rawOptions = (Array.isArray(q.options) && q.options.length > 0)
-                    ? q.options
-                    : [q.option_a, q.option_b, q.option_c, q.option_d].filter(Boolean);
 
-                let correctIdx = 0;
-                if (q.correct_answer_index !== undefined && q.correct_answer_index !== null) {
-                    correctIdx = Number(q.correct_answer_index);
-                } else if (q.correct_option) {
-                    const char = String(q.correct_option).toLowerCase();
-                    correctIdx = char === 'b' ? 1 : char === 'c' ? 2 : char === 'd' ? 3 : 0;
-                }
+        return {
+            id: q.id,
+            text: q.question_text || q.question || `Question ${idx + 1}`,
+            options: rawOptions.length > 0 ? rawOptions : ['Option A', 'Option B', 'Option C', 'Option D'],
+            correctIndex: correctIdx
+        };
+    });
 
-                return {
-                    id: q.id,
-                    text: q.question_text || q.question || `Evaluation Question ${idx + 1}`,
-                    options: rawOptions.length > 0 ? rawOptions : ['Option A', 'Option B', 'Option C', 'Option D'],
-                    correctIndex: correctIdx
-                };
-            });
-        }
-        return [
-            {
-                text: 'What is the cornerstone duty of care for a DOT-accredited tour guide?',
-                options: ['Prioritizing tourist health, emergency readiness, and safety protocols', 'Maximizing personal tips', 'Rushing through site commentary', 'Ignoring guest feedback'],
-                correctIndex: 0
-            },
-            {
-                text: 'In crisis management, what is the best initial action during a minor medical issue?',
-                options: ['Contact local first-aid responders and follow established emergency protocols', 'Ignore the guest and keep walking', 'Tell the group the tour is over', 'Offer unapproved medication'],
-                correctIndex: 0
-            },
-            {
-                text: 'How should historical facts and cultural narratives be presented to visitors?',
-                options: ['Accurately, respectfully, and engagingly without fabrication', 'By inventing fictional stories as real history', 'By skipping all historical details', 'By arguing with guests about beliefs'],
-                correctIndex: 0
-            },
-            {
-                text: 'What is essential when concluding a tour at the final destination?',
-                options: ['Conducting debriefing, collecting feedback, and ensuring all guests depart safely', 'Leaving guests at the site without assistance', 'Refusing to answer final questions', 'Demanding extra cash tips'],
-                correctIndex: 0
-            },
-            {
-                text: 'Why is group dynamics management vital during multi-stop municipality tours?',
-                options: ['It maintains tour pacing, inclusivity, and guest satisfaction', 'It allows aggressive guests to dominate the tour', 'It eliminates rest stops', 'It ensures no guest enjoys the experience'],
-                correctIndex: 0
-            }
-        ];
+    for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-});
+
+    if (limit && limit > 0) {
+        return pool.slice(0, limit);
+    }
+    return pool;
+};
 
 const openLessonTopic = (index) => {
     if (index + 1 <= unlockedLessonLevel.value) {
@@ -759,7 +715,24 @@ const startLessonQuizFromTopic = () => {
         alert(`You have already passed this Quick Check with a score of ${details.correctCount}/${details.totalQuestions}. Passed exams cannot be retaken.`);
         return;
     }
+    
     activeAssessmentType.value = 'lesson';
+    const lesson = props.module.lessons[activeLessonIndex.value];
+    const limit = lesson.quiz_question_count || 5;
+    
+    if (lesson.questions && lesson.questions.length > 0) {
+        currentQuestions.value = loadQuestionsForQuiz(lesson.questions, limit);
+    } else {
+        const fallback = [
+            { text: 'What is the primary responsibility of a tour guide before starting a tour?', options: ['Ensuring tourist safety and reviewing the itinerary', 'Buying souvenirs for guests', 'Ignoring weather forecasts', 'Changing ticket prices'], correct_answer_index: 0 },
+            { text: 'Why is it important to research your incoming guest group in advance?', options: ['To tailor commentary and accommodate dietary/accessibility needs', 'To cancel the tour early', 'To skip historical landmarks', 'To force everyone to buy extra meals'], correct_answer_index: 0 },
+            { text: 'How should a tour guide coordinate with transport drivers and local suppliers?', options: ['Confirm pickup times, route options, and contact channels in advance', 'Arrive unannounced without reservation', 'Let guests drive the bus', 'Ignore supplier schedules'], correct_answer_index: 0 },
+            { text: 'What is the first step during site familiarization before guests arrive?', options: ['Identify emergency exit paths, rest facilities, and potential hazards', 'Leave the site immediately', 'Start selling merchandise', 'Take a nap'], correct_answer_index: 0 },
+            { text: 'How should unexpected delays or route changes be handled during a live tour?', options: ['Execute contingency plans and communicate clearly with guests', 'Panic and abandon the group', 'Blame guests for the delay', 'Refuse to answer questions'], correct_answer_index: 0 }
+        ];
+        currentQuestions.value = loadQuestionsForQuiz(fallback, limit);
+    }
+
     currentQuestionIndex.value = 0;
     userAnswers.value = {};
     quizFinished.value = false;
@@ -777,7 +750,21 @@ const startFinalEvaluation = () => {
         alert(`You have already passed the End-of-Module Evaluation with a score of ${completedAttempts.value[key].correctCount}/${completedAttempts.value[key].totalQuestions}. Passed exams cannot be retaken.`);
         return;
     }
+    
     activeAssessmentType.value = 'final';
+    if (props.module.questions && props.module.questions.length > 0) {
+        currentQuestions.value = loadQuestionsForQuiz(props.module.questions, 10); // Or module.quiz_question_count if it exists
+    } else {
+        const fallback = [
+            { text: 'What is the cornerstone duty of care for a DOT-accredited tour guide?', options: ['Prioritizing tourist health, emergency readiness, and safety protocols', 'Maximizing personal tips', 'Rushing through site commentary', 'Ignoring guest feedback'], correct_answer_index: 0 },
+            { text: 'In crisis management, what is the best initial action during a minor medical issue?', options: ['Contact local first-aid responders and follow established emergency protocols', 'Ignore the guest and keep walking', 'Tell the group the tour is over', 'Offer unapproved medication'], correct_answer_index: 0 },
+            { text: 'How should historical facts and cultural narratives be presented to visitors?', options: ['Accurately, respectfully, and engagingly without fabrication', 'By inventing fictional stories as real history', 'By skipping all historical details', 'By arguing with guests about beliefs'], correct_answer_index: 0 },
+            { text: 'What is essential when concluding a tour at the final destination?', options: ['Conducting debriefing, collecting feedback, and ensuring all guests depart safely', 'Leaving guests at the site without assistance', 'Refusing to answer final questions', 'Demanding extra cash tips'], correct_answer_index: 0 },
+            { text: 'Why is group dynamics management vital during multi-stop municipality tours?', options: ['It maintains tour pacing, inclusivity, and guest satisfaction', 'It allows aggressive guests to dominate the tour', 'It eliminates rest stops', 'It ensures no guest enjoys the experience'], correct_answer_index: 0 }
+        ];
+        currentQuestions.value = loadQuestionsForQuiz(fallback, 10);
+    }
+
     currentQuestionIndex.value = 0;
     userAnswers.value = {};
     quizFinished.value = false;
@@ -839,17 +826,24 @@ const calculateAndSubmitScore = () => {
     }
 
     quizFinished.value = true;
+    saveProgressToServer();
 };
 
 const returnToModule = () => {
+    let shouldSave = false;
     if (latestAttemptResult.value?.passed) {
         if (activeAssessmentType.value === 'lesson' && activeLessonIndex.value + 1 === unlockedLessonLevel.value) {
             unlockedLessonLevel.value++;
+            shouldSave = true;
         } else if (activeAssessmentType.value === 'final') {
             alert("Module fully completed! You can now proceed to the next module.");
+            shouldSave = true;
         }
     }
     activeView.value = 'module';
+    if (shouldSave) {
+        saveProgressToServer();
+    }
 };
 </script>
 

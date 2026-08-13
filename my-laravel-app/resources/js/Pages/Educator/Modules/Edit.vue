@@ -199,6 +199,7 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold text-dark">{{ lesson.title }}</div>
+                                    <small class="text-secondary fs-8">Quick Check: {{ lesson.quiz_question_count || 5 }} Questions</small>
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
@@ -229,14 +230,26 @@
         </div>
 
         <!-- Lesson Modal -->
-        <div v-if="showLessonModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1055;">
+        <div v-if="showLessonModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.55); z-index: 1055;">
             <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content rounded-4 border-0 shadow">
-                    <div class="modal-header border-bottom p-4">
-                        <h5 class="fw-bold text-dark mb-0">{{ editingLesson ? 'Edit Lesson Content' : 'Add New Lesson' }}</h5>
-                        <button type="button" class="btn-close" @click="closeLessonModal"></button>
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-header border-bottom p-4 text-white" style="background-color: #0d4b38; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                        <h5 class="fw-bold mb-0 text-white d-flex align-items-center gap-2 fs-6">
+                            <i class="fas" :class="editingLesson ? 'fa-edit text-warning' : 'fa-plus-circle text-warning'"></i>
+                            <span>{{ editingLesson ? 'Edit Lesson Content & Quiz' : 'Add New Lesson' }}</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" @click="closeLessonModal"></button>
                     </div>
                     <div class="modal-body p-4 max-h-75vh overflow-y-auto">
+                        <!-- Prominent Validation Error Alert when save changes fails -->
+                        <div v-if="lessonError" class="alert alert-danger shadow-sm rounded-4 mb-4 border-0 d-flex align-items-start gap-3 p-3">
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold text-danger mb-1">Save Changes Failed!</h6>
+                                <p class="mb-0 text-dark small leading-relaxed">{{ lessonError }}</p>
+                            </div>
+                        </div>
+
                         <!-- Lesson Title -->
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark">Lesson Title <span class="text-danger">*</span></label>
@@ -247,6 +260,56 @@
                                 placeholder="e.g. General Preparation Before the Tour"
                                 required
                             >
+                        </div>
+
+                        <!-- Quick Check Quiz Questions Configuration -->
+                        <div class="mb-4 p-3.5 rounded-3 bg-light border">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                    <i class="fas fa-tasks text-success"></i>
+                                    <span>Quick Check Quiz Configuration</span>
+                                </label>
+                                <span class="badge bg-white text-dark border px-3 py-1 rounded-pill fs-8">
+                                    Bank Questions for this Lesson: <strong>{{ currentLessonBankCount }}</strong>
+                                </span>
+                            </div>
+
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-dark mb-1">
+                                        Number of Quiz Questions <span class="text-danger">*</span>
+                                    </label>
+                                    <input 
+                                        v-model="lessonForm.quiz_question_count" 
+                                        type="number" 
+                                        min="1"
+                                        max="100"
+                                        class="form-control rounded-3" 
+                                        :class="lessonError ? 'is-invalid border-danger' : ''"
+                                        required
+                                    >
+                                    <small class="text-muted d-block mt-1">
+                                        Number of questions asked in this lesson's quick check. Cannot exceed bank count.
+                                    </small>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="p-2.5 rounded-3 border bg-white">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <span class="small fw-bold text-dark">Question Bank Availability:</span>
+                                            <span 
+                                                class="badge rounded-pill px-2.5 py-1"
+                                                :class="lessonForm.quiz_question_count <= currentLessonBankCount ? 'bg-success text-white' : 'bg-danger text-white'"
+                                            >
+                                                {{ lessonForm.quiz_question_count <= currentLessonBankCount ? 'Sufficient Questions' : 'Insufficient Questions' }}
+                                            </span>
+                                        </div>
+                                        <small class="text-muted d-block">
+                                            {{ currentLessonBankCount }} in bank vs {{ lessonForm.quiz_question_count || 0 }} requested.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Lesson Description / Overview -->
@@ -344,7 +407,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
 
@@ -352,6 +415,10 @@ const props = defineProps({
     module: {
         type: Object,
         required: true,
+    },
+    questionBankCount: {
+        type: Number,
+        default: 5,
     },
 });
 
@@ -367,6 +434,7 @@ const form = useForm({
     cover_image: props.module.cover_image || '',
     cover_image_file: null,
     status: props.module.status || 'published',
+    quiz_question_count: props.module.quiz_question_count || 5,
 });
 
 const handleFileUpload = (event) => {
@@ -397,9 +465,19 @@ const formatDate = (dateStr) => {
 // --- Lesson Management Logic ---
 const showLessonModal = ref(false);
 const editingLesson = ref(null);
+const lessonError = ref('');
+const currentLessonBankCount = computed(() => {
+    if (!editingLesson.value) return 0;
+    if (editingLesson.value.questions && Array.isArray(editingLesson.value.questions)) {
+        return editingLesson.value.questions.length;
+    }
+    return editingLesson.value.questions_count || 0;
+});
+
 const lessonForm = ref({
     title: '',
     content: '',
+    quiz_question_count: 5,
     key_points: [
         { title: '', description: '', icon: 'fas fa-check' }
     ]
@@ -407,6 +485,7 @@ const lessonForm = ref({
 
 const openLessonModal = (lesson = null) => {
     editingLesson.value = lesson;
+    lessonError.value = '';
     if (lesson) {
         let parsedPoints = [];
         if (Array.isArray(lesson.key_points)) {
@@ -418,12 +497,14 @@ const openLessonModal = (lesson = null) => {
         lessonForm.value = {
             title: lesson.title || '',
             content: lesson.content || '',
+            quiz_question_count: lesson.quiz_question_count || 5,
             key_points: parsedPoints.length > 0 ? parsedPoints : [{ title: '', description: '', icon: 'fas fa-check' }]
         };
     } else {
         lessonForm.value = {
             title: '',
             content: '',
+            quiz_question_count: 5,
             key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
         };
     }
@@ -441,28 +522,48 @@ const removeKeyPoint = (index) => {
 const closeLessonModal = () => {
     showLessonModal.value = false;
     editingLesson.value = null;
+    lessonError.value = '';
     lessonForm.value = {
         title: '',
         content: '',
+        quiz_question_count: 5,
         key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
     };
 };
 
 const saveLesson = () => {
     if (!lessonForm.value.title) return;
+    lessonError.value = '';
     
     const payload = {
         title: lessonForm.value.title,
         content: lessonForm.value.content,
+        quiz_question_count: lessonForm.value.quiz_question_count,
         key_points: lessonForm.value.key_points.filter(p => p.title || p.description)
     };
 
     if (editingLesson.value) {
         // Update
-        router.put(route('educator.modules.lessons.update', { module: props.module.id, lesson: editingLesson.value.id }), payload, { preserveScroll: true, onSuccess: closeLessonModal });
+        router.put(route('educator.modules.lessons.update', { module: props.module.id, lesson: editingLesson.value.id }), payload, { 
+            preserveScroll: true, 
+            onSuccess: closeLessonModal,
+            onError: (errors) => {
+                if (errors.quiz_question_count) {
+                    lessonError.value = errors.quiz_question_count;
+                }
+            }
+        });
     } else {
         // Create
-        router.post(route('educator.modules.lessons.store', props.module.id), payload, { preserveScroll: true, onSuccess: closeLessonModal });
+        router.post(route('educator.modules.lessons.store', props.module.id), payload, { 
+            preserveScroll: true, 
+            onSuccess: closeLessonModal,
+            onError: (errors) => {
+                if (errors.quiz_question_count) {
+                    lessonError.value = errors.quiz_question_count;
+                }
+            }
+        });
     }
 };
 

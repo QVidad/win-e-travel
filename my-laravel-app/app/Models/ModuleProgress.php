@@ -18,12 +18,14 @@ class ModuleProgress extends Model
         'score_percentage',
         'passed',
         'unlocked',
+        'lesson_data',
     ];
 
     protected $casts = [
         'score_percentage' => 'float',
         'passed' => 'boolean',
         'unlocked' => 'boolean',
+        'lesson_data' => 'array',
     ];
 
     public function user(): BelongsTo

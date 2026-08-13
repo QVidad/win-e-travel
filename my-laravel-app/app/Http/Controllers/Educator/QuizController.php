@@ -17,7 +17,7 @@ class QuizController extends Controller
      */
     public function index(Request $request): Response
     {
-        $modules = CourseModule::with(['questions', 'updatedBy', 'lessons'])->orderBy('order')->get();
+        $modules = CourseModule::with(['questions', 'updatedBy', 'lessons.questions'])->orderBy('order')->get();
 
         return Inertia::render('Educator/Quizzes/Index', [
             'modules' => $modules,
@@ -86,6 +86,7 @@ class QuizController extends Controller
         QuizQuestion::create([
             'module_id' => $moduleId,
             'course_module_id' => $moduleId,
+            'module_lesson_id' => $validated['module_lesson_id'] ?? null,
             'question_text' => $questionText,
             'question' => $questionText,
             'option_a' => $optA,

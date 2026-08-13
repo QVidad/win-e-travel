@@ -72,4 +72,42 @@ class ModuleController extends Controller
             'userProgress' => $progress,
         ]);
     }
+
+    /**
+     * Save student progress for a specific module (lessons and evaluations).
+     */
+    public function saveProgress(Request $request, $id): \Illuminate\Http\RedirectResponse
+    {
+        $module = CourseModule::findOrFail($id);
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'lesson_data' => 'nullable|array',
+            'score_percentage' => 'nullable|numeric',
+            'passed' => 'nullable|boolean',
+            'unlocked' => 'nullable|boolean',
+        ]);
+
+        $progress = ModuleProgress::firstOrCreate(
+            ['user_id' => $user->id, 'course_module_id' => $module->id],
+            ['lesson_data' => []]
+        );
+
+        if (array_key_exists('lesson_data', $validated)) {
+            $progress->lesson_data = $validated['lesson_data'];
+        }
+        if (array_key_exists('score_percentage', $validated)) {
+            $progress->score_percentage = $validated['score_percentage'];
+        }
+        if (array_key_exists('passed', $validated)) {
+            $progress->passed = $validated['passed'];
+        }
+        if (array_key_exists('unlocked', $validated)) {
+            $progress->unlocked = $validated['unlocked'];
+        }
+
+        $progress->save();
+
+        return redirect()->back();
+    }
 }

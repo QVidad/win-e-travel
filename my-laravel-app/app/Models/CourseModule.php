@@ -22,6 +22,7 @@ class CourseModule extends Model
         'icon',
         'order',
         'status',
+        'quiz_question_count',
         'updated_by',
         'last_modified_at',
     ];

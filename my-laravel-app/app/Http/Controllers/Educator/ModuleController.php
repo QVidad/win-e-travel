@@ -41,12 +41,24 @@ class ModuleController extends Controller
      */
     public function edit($id): Response
     {
-        $module = CourseModule::with(['updatedBy', 'questions', 'lessons' => function($query) {
-            $query->orderBy('order');
-        }])->findOrFail($id);
+        $module = CourseModule::with([
+            'updatedBy', 
+            'questions' => function($query) {
+                $query->whereNull('module_lesson_id');
+            }, 
+            'lessons' => function($query) {
+                $query->with('questions')->orderBy('order');
+            }
+        ])->findOrFail($id);
+
+        $bankCount = QuizQuestion::where('module_id', $id)->whereNull('module_lesson_id')->count();
+        if ($bankCount === 0) {
+            $bankCount = QuizQuestion::where('module_id', $id)->count();
+        }
 
         return Inertia::render('Educator/Modules/Edit', [
             'module' => $module,
+            'questionBankCount' => $bankCount,
         ]);
     }
 
@@ -65,7 +77,22 @@ class ModuleController extends Controller
             'cover_image' => 'nullable|string|max:500',
             'cover_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'status' => 'required|in:draft,published',
+            'quiz_question_count' => 'required|integer|min:1|max:100',
         ]);
+
+        $bankCount = QuizQuestion::where('module_id', $id)->whereNull('module_lesson_id')->count();
+        if ($bankCount === 0) {
+            $bankCount = QuizQuestion::where('module_id', $id)->count();
+        }
+
+        $requestedCount = (int)$validated['quiz_question_count'];
+        if ($requestedCount > $bankCount) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'quiz_question_count' => "Save failed: You specified {$requestedCount} questions for the quiz, but there are only {$bankCount} question(s) available in the question bank for this module. Please lower the question count to {$bankCount} or fewer, or add more questions to the quiz bank first."
+                ]);
+        }
 
         $coverImagePath = $module->cover_image;
         if ($request->hasFile('cover_image_file')) {
@@ -83,6 +110,7 @@ class ModuleController extends Controller
             'key_spots' => $validated['key_spots'] ?? null,
             'cover_image' => $coverImagePath,
             'status' => $validated['status'],
+            'quiz_question_count' => $requestedCount,
             'updated_by' => $request->user()->id,
             'last_modified_at' => now(),
         ]);

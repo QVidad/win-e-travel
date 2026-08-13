@@ -30,6 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/student/modules', [StudentModuleController::class, 'index'])->name('student.modules.index');
     Route::get('/student/modules/{id}', [StudentModuleController::class, 'show'])->name('student.modules.show');
+    Route::post('/student/modules/{id}/progress', [StudentModuleController::class, 'saveProgress'])->name('student.modules.progress');
     Route::get('/towns', [TownController::class, 'index'])->name('towns.index');
     Route::get('/towns/{slug}', [TownController::class, 'show'])->name('towns.show');
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
