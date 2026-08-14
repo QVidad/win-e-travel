@@ -18,6 +18,17 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->redirectTo(
             guests: '/',
+            users: function (\Illuminate\Http\Request $request) {
+                if ($request->user()) {
+                    if ($request->user()->role === 'admin') {
+                        return route('admin.dashboard');
+                    }
+                    if ($request->user()->role === 'teacher' || $request->user()->role === 'educator') {
+                        return route('educator.dashboard');
+                    }
+                }
+                return route('dashboard');
+            }
         );
 
         $middleware->alias([

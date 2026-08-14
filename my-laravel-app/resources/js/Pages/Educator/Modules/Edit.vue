@@ -79,6 +79,14 @@
             </div>
 
             <form @submit.prevent="submit" class="p-4 p-md-5">
+                <!-- Global Form Errors -->
+                <div v-if="Object.keys(form.errors).length > 0" class="alert alert-danger mb-4">
+                    <strong><i class="fas fa-exclamation-triangle me-2"></i> Save Failed</strong>
+                    <ul class="mb-0 mt-2">
+                        <li v-for="(error, field) in form.errors" :key="field">{{ error }}</li>
+                    </ul>
+                </div>
+
                 <!-- 1. Module Title & Subtitle -->
                 <div class="row g-4 mb-4">
                     <div class="col-md-7">
@@ -122,8 +130,49 @@
                     <div v-if="form.errors.description" class="text-danger small mt-1">{{ form.errors.description }}</div>
                 </div>
 
-                <!-- 3. Key Spots / Itinerary Points (For Town Chapters) -->
-                <div class="mb-4">
+                <!-- Town Chapter Specifics -->
+                <div v-if="module.type === 'town_chapter'">
+                    <!-- Quick Facts -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark">Quick Facts</label>
+                        <div v-for="(fact, index) in form.quick_facts" :key="'fact-'+index" class="d-flex gap-2 mb-2">
+                            <input 
+                                v-model="form.quick_facts[index]" 
+                                type="text" 
+                                class="form-control rounded-3" 
+                                placeholder="e.g. Founded in 1580"
+                            >
+                            <button type="button" @click="removeQuickFact(index)" class="btn btn-outline-danger px-3 rounded-3">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button type="button" @click="addQuickFact" class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-1">
+                            <i class="fas fa-plus me-1"></i> Add Quick Fact
+                        </button>
+                    </div>
+
+                    <!-- Video References -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark">Video References (YouTube URLs)</label>
+                        <div v-for="(video, index) in form.video_references" :key="'video-'+index" class="d-flex gap-2 mb-2">
+                            <input 
+                                v-model="form.video_references[index]" 
+                                type="url" 
+                                class="form-control rounded-3" 
+                                placeholder="e.g. https://youtube.com/watch?v=..."
+                            >
+                            <button type="button" @click="removeVideoReference(index)" class="btn btn-outline-danger px-3 rounded-3">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button type="button" @click="addVideoReference" class="btn btn-sm btn-outline-primary rounded-pill px-3 mt-1">
+                            <i class="fas fa-plus me-1"></i> Add Video Reference
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Key Spots / Itinerary Points (For Foundation) -->
+                <div v-else class="mb-4">
                     <label class="form-label fw-bold text-dark">
                         Key Spots & Itinerary Highlights
                     </label>
@@ -164,32 +213,56 @@
                         <div class="col-md-5">
                             <div class="border rounded-3 p-2 bg-light text-center position-relative overflow-hidden" style="height: 110px;">
                                 <img 
-                                    v-if="imagePreview || form.cover_image" 
-                                    :src="imagePreview || form.cover_image" 
-                                    alt="Cover Preview" 
-                                    class="w-100 h-100 object-fit-cover rounded-2"
-                                    @error="imageError = true"
+                                    v-if="imagePreview || form.cover_image || defaultTownImage" 
+                                    :src="imagePreview || form.cover_image || defaultTownImage" 
+                                    class="w-100 h-100 object-fit-cover rounded"
+                                    alt="Cover preview"
                                 >
                                 <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
-                                    <i class="fas fa-image fa-2x mb-1 opacity-50"></i>
-                                    <span class="fs-8">Image Preview</span>
+                                    <i class="fas fa-image fs-3 mb-1"></i>
+                                    <small>No image set</small>
                                 </div>
                             </div>
+                            <small v-if="!imagePreview && !form.cover_image && defaultTownImage" class="text-muted mt-1 d-block text-center" style="font-size: 0.75rem;">
+                                Showing default town image. Upload a new one to override.
+                            </small>
                         </div>
                     </div>
                 </div>
 
-                <!-- 5. Lessons Management -->
+                    <!-- Quiz Settings -->
+                    <div v-if="module.type !== 'town_chapter'" class="row g-4 mb-4 pt-4 border-top">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-dark">Module Quick Check Quiz (Questions)</label>
+                            <div class="input-group">
+                                <input 
+                                    v-model.number="form.quiz_question_count" 
+                                    type="number" 
+                                    min="0" 
+                                    :max="questionBankCount"
+                                    class="form-control rounded-start-3" 
+                                >
+                                <span class="input-group-text bg-light text-muted rounded-end-3">
+                                    of {{ questionBankCount }} available in bank
+                                </span>
+                            </div>
+                            <small class="text-muted d-block mt-1">Set to 0 if this module shouldn't have a final quiz.</small>
+                        </div>
+                    </div>
+
+                <!-- 5. Lessons / Attractions Management -->
                 <div class="mb-4 pt-4 border-top">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <label class="form-label fw-bold text-dark mb-0">Module Lessons</label>
+                        <label class="form-label fw-bold text-dark mb-0">
+                            {{ module.type === 'town_chapter' ? 'Key Attractions' : 'Module Lessons' }}
+                        </label>
                         <button type="button" @click="openLessonModal()" class="btn btn-sm btn-success rounded-pill fw-bold shadow-sm px-3">
-                            <i class="fas fa-plus me-1"></i> Add Lesson
+                            <i class="fas fa-plus me-1"></i> Add {{ module.type === 'town_chapter' ? 'Attraction' : 'Lesson' }}
                         </button>
                     </div>
                     
                     <div v-if="!module.lessons || module.lessons.length === 0" class="text-muted small p-3 bg-light rounded-3 text-center border">
-                        No lessons added yet. Add lessons to attach specific quick-check quizzes to them.
+                        No {{ module.type === 'town_chapter' ? 'attractions' : 'lessons' }} added yet. 
                     </div>
                     <div v-else class="list-group border-0">
                         <div v-for="(lesson, index) in module.lessons" :key="lesson.id" class="list-group-item d-flex justify-content-between align-items-center bg-white p-3 border shadow-sm mb-2 rounded-3">
@@ -199,7 +272,8 @@
                                 </div>
                                 <div>
                                     <div class="fw-bold text-dark">{{ lesson.title }}</div>
-                                    <small class="text-secondary fs-8">Quick Check: {{ lesson.quiz_question_count > 0 ? lesson.quiz_question_count + ' Questions' : 'No Quiz' }}</small>
+                                    <small v-if="module.type !== 'town_chapter'" class="text-secondary fs-8">Quick Check: {{ lesson.quiz_question_count > 0 ? lesson.quiz_question_count + ' Questions' : 'No Quiz' }}</small>
+                                    <small v-else class="text-secondary fs-8">Town Attraction</small>
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
@@ -215,15 +289,12 @@
                 </div>
 
                 <!-- Submit Button Bar -->
-                <div class="pt-4 border-top d-flex justify-content-end gap-3">
-                    <Link :href="route('educator.modules.index')" class="btn btn-light rounded-pill px-4">Cancel</Link>
-                    <button 
-                        type="submit" 
-                        class="btn text-white rounded-pill px-5 fw-bold shadow-sm" 
-                        style="background-color: #0d4b38;"
-                        :disabled="form.processing"
-                    >
-                        <i class="fas fa-save me-1"></i> Save Changes
+                <div class="d-flex justify-content-end gap-2 mt-5 border-top pt-4">
+                    <Link :href="route('educator.modules.index')" class="btn btn-light border fw-bold px-4">Cancel / Back</Link>
+                    <button type="submit" class="btn fw-bold px-4" :class="form.recentlySuccessful ? 'btn-success' : 'btn-primary'" :disabled="form.processing">
+                        <span v-if="form.processing"><i class="fas fa-spinner fa-spin me-2"></i> Saving...</span>
+                        <span v-else-if="form.recentlySuccessful"><i class="fas fa-check me-2"></i> Saved Successfully!</span>
+                        <span v-else><i class="fas fa-save me-2"></i> Save Changes</span>
                     </button>
                 </div>
             </form>
@@ -236,7 +307,7 @@
                     <div class="modal-header border-bottom p-4 text-white" style="background-color: #0d4b38; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
                         <h5 class="fw-bold mb-0 text-white d-flex align-items-center gap-2 fs-6">
                             <i class="fas" :class="editingLesson ? 'fa-edit text-warning' : 'fa-plus-circle text-warning'"></i>
-                            <span>{{ editingLesson ? 'Edit Lesson Content & Quiz' : 'Add New Lesson' }}</span>
+                            <span>{{ editingLesson ? (module.type === 'town_chapter' ? 'Edit Attraction' : 'Edit Lesson Content & Quiz') : (module.type === 'town_chapter' ? 'Add New Attraction' : 'Add New Lesson') }}</span>
                         </h5>
                         <button type="button" class="btn-close btn-close-white" @click="closeLessonModal"></button>
                     </div>
@@ -252,7 +323,7 @@
 
                         <!-- Lesson Title -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-dark">Lesson Title <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold text-dark">{{ module.type === 'town_chapter' ? 'Attraction Name' : 'Lesson Title' }} <span class="text-danger">*</span></label>
                             <input 
                                 v-model="lessonForm.title" 
                                 type="text" 
@@ -263,7 +334,7 @@
                         </div>
 
                         <!-- Quick Check Quiz Questions Configuration -->
-                        <div class="mb-4 p-3.5 rounded-3 bg-light border">
+                        <div v-if="module.type !== 'town_chapter'" class="mb-4 p-3.5 rounded-3 bg-light border">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label class="form-label fw-bold text-dark mb-0 d-flex align-items-center gap-2">
                                     <i class="fas fa-tasks text-success"></i>
@@ -314,7 +385,7 @@
 
                         <!-- Lesson Description / Overview -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-dark">Topic Overview & Introduction Paragraph</label>
+                            <label class="form-label fw-bold text-dark">{{ module.type === 'town_chapter' ? 'Attraction Information' : 'Topic Overview & Introduction Paragraph' }}</label>
                             <textarea 
                                 v-model="lessonForm.content" 
                                 class="form-control rounded-3" 
@@ -324,8 +395,41 @@
                             <small class="text-muted">This overview will be displayed to students when they open this lesson topic.</small>
                         </div>
 
+                        <!-- Attraction Cover Image (Town Chapters Only) -->
+                        <div v-if="module.type === 'town_chapter'" class="mb-4">
+                            <label class="form-label fw-bold text-dark">Attraction Image</label>
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-8">
+                                    <input 
+                                        v-model="lessonForm.cover_image" 
+                                        type="text" 
+                                        class="form-control rounded-3 mb-2" 
+                                        placeholder="Image URL (e.g. /assets/images/attraction.jpg)"
+                                    >
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-light text-muted">Or upload file</span>
+                                        <input 
+                                            type="file" 
+                                            class="form-control" 
+                                            accept="image/*"
+                                            @change="handleLessonFileUpload"
+                                        >
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 bg-light text-center overflow-hidden position-relative" style="height: 90px;">
+                                        <img v-if="lessonImagePreview || lessonForm.cover_image" :src="lessonImagePreview || lessonForm.cover_image" class="w-100 h-100 object-fit-cover">
+                                        <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted small">
+                                            <i class="fas fa-image fs-4 mb-1"></i>
+                                            <span>No image set</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Key Topics & Subtopics List -->
-                        <div class="mb-3">
+                        <div v-if="module.type !== 'town_chapter'" class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <label class="form-label fw-bold text-dark mb-0">Key Subtopic Points & Guidelines</label>
                                 <button type="button" @click="addKeyPoint" class="btn btn-sm btn-outline-success rounded-pill fw-bold">
@@ -397,7 +501,7 @@
                             style="background-color: #0d4b38;" 
                             :disabled="!lessonForm.title"
                         >
-                            <i class="fas fa-save me-1"></i> Save Lesson Content
+                            <i class="fas fa-save me-1"></i> {{ module.type === 'town_chapter' ? 'Save Attraction' : 'Save Lesson Content' }}
                         </button>
                     </div>
                 </div>
@@ -420,6 +524,7 @@ const props = defineProps({
         type: Number,
         default: 5,
     },
+    defaultTownImage: String,
 });
 
 const imagePreview = ref(null);
@@ -435,6 +540,8 @@ const form = useForm({
     cover_image_file: null,
     status: props.module.status || 'published',
     quiz_question_count: props.module.quiz_question_count ?? 0,
+    quick_facts: props.module.quick_facts && props.module.quick_facts.length ? props.module.quick_facts : [''],
+    video_references: props.module.video_references && props.module.video_references.length ? props.module.video_references : [''],
 });
 
 const handleFileUpload = (event) => {
@@ -445,7 +552,16 @@ const handleFileUpload = (event) => {
     }
 };
 
+const addQuickFact = () => form.quick_facts.push('');
+const removeQuickFact = (index) => form.quick_facts.splice(index, 1);
+
+const addVideoReference = () => form.video_references.push('');
+const removeVideoReference = (index) => form.video_references.splice(index, 1);
+
 const submit = () => {
+    form.quick_facts = form.quick_facts.filter(fact => fact.trim() !== '');
+    form.video_references = form.video_references.filter(url => url.trim() !== '');
+
     form.post(route('educator.modules.update', props.module.id), {
         preserveScroll: true,
     });
@@ -474,18 +590,31 @@ const currentLessonBankCount = computed(() => {
     return editingLesson.value.questions_count || 0;
 });
 
+const lessonImagePreview = ref(null);
+
 const lessonForm = ref({
     title: '',
     content: '',
     quiz_question_count: 0,
+    cover_image: '',
+    cover_image_file: null,
     key_points: [
         { title: '', description: '', icon: 'fas fa-check' }
     ]
 });
 
+const handleLessonFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        lessonForm.value.cover_image_file = file;
+        lessonImagePreview.value = URL.createObjectURL(file);
+    }
+};
+
 const openLessonModal = (lesson = null) => {
     editingLesson.value = lesson;
     lessonError.value = '';
+    lessonImagePreview.value = null;
     if (lesson) {
         let parsedPoints = [];
         if (Array.isArray(lesson.key_points)) {
@@ -498,6 +627,8 @@ const openLessonModal = (lesson = null) => {
             title: lesson.title || '',
             content: lesson.content || '',
             quiz_question_count: lesson.quiz_question_count ?? 0,
+            cover_image: lesson.cover_image || '',
+            cover_image_file: null,
             key_points: parsedPoints.length > 0 ? parsedPoints : [{ title: '', description: '', icon: 'fas fa-check' }]
         };
     } else {
@@ -505,6 +636,8 @@ const openLessonModal = (lesson = null) => {
             title: '',
             content: '',
             quiz_question_count: 0,
+            cover_image: '',
+            cover_image_file: null,
             key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
         };
     }
@@ -523,10 +656,13 @@ const closeLessonModal = () => {
     showLessonModal.value = false;
     editingLesson.value = null;
     lessonError.value = '';
+    lessonImagePreview.value = null;
     lessonForm.value = {
         title: '',
         content: '',
         quiz_question_count: 0,
+        cover_image: '',
+        cover_image_file: null,
         key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
     };
 };
@@ -539,12 +675,15 @@ const saveLesson = () => {
         title: lessonForm.value.title,
         content: lessonForm.value.content,
         quiz_question_count: lessonForm.value.quiz_question_count,
+        cover_image: lessonForm.value.cover_image,
+        cover_image_file: lessonForm.value.cover_image_file,
         key_points: lessonForm.value.key_points.filter(p => p.title || p.description)
     };
 
     if (editingLesson.value) {
-        // Update
-        router.put(route('educator.modules.lessons.update', { module: props.module.id, lesson: editingLesson.value.id }), payload, { 
+        // Update (use POST with _method = PUT for file uploads)
+        payload._method = 'PUT';
+        router.post(route('educator.modules.lessons.update', { module: props.module.id, lesson: editingLesson.value.id }), payload, { 
             preserveScroll: true, 
             onSuccess: closeLessonModal,
             onError: (errors) => {

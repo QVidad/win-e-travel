@@ -21,12 +21,14 @@ class LessonController extends Controller
             'key_points.*.icon' => 'nullable|string|max:100',
             'order' => 'nullable|integer',
             'quiz_question_count' => 'nullable|integer|min:0|max:100',
+            'cover_image' => 'nullable|string|max:500',
+            'cover_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $requestedCount = (int)($validated['quiz_question_count'] ?? 5);
         $actualBankCount = 0;
 
-        if ($requestedCount > $actualBankCount) {
+        if ($module->type !== 'town_chapter' && $requestedCount > $actualBankCount) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
@@ -34,12 +36,22 @@ class LessonController extends Controller
                 ]);
         }
 
+        $coverImagePath = null;
+        if ($request->hasFile('cover_image_file')) {
+            $file = $request->file('cover_image_file');
+            $path = $file->store('lessons', 'public');
+            $coverImagePath = '/storage/' . $path;
+        } elseif (!empty($validated['cover_image'])) {
+            $coverImagePath = $validated['cover_image'];
+        }
+
         $lesson = $module->lessons()->create([
             'title' => $validated['title'],
             'content' => $validated['content'] ?? null,
             'key_points' => $validated['key_points'] ?? [],
             'quiz_question_count' => $requestedCount,
-            'order' => $validated['order'] ?? ($module->lessons()->max('order') + 1)
+            'order' => $validated['order'] ?? ($module->lessons()->max('order') + 1),
+            'cover_image' => $coverImagePath,
         ]);
 
         return redirect()->back()->with('success', 'Lesson added successfully.');
@@ -59,12 +71,14 @@ class LessonController extends Controller
             'key_points.*.description' => 'nullable|string',
             'key_points.*.icon' => 'nullable|string|max:100',
             'quiz_question_count' => 'required|integer|min:0|max:100',
+            'cover_image' => 'nullable|string|max:500',
+            'cover_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $requestedCount = (int)$validated['quiz_question_count'];
         $actualBankCount = QuizQuestion::where('module_lesson_id', $lesson->id)->count();
 
-        if ($requestedCount > $actualBankCount) {
+        if ($module->type !== 'town_chapter' && $requestedCount > $actualBankCount) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
@@ -72,11 +86,21 @@ class LessonController extends Controller
                 ]);
         }
 
+        $coverImagePath = $lesson->cover_image;
+        if ($request->hasFile('cover_image_file')) {
+            $file = $request->file('cover_image_file');
+            $path = $file->store('lessons', 'public');
+            $coverImagePath = '/storage/' . $path;
+        } elseif (!empty($validated['cover_image'])) {
+            $coverImagePath = $validated['cover_image'];
+        }
+
         $lesson->update([
             'title' => $validated['title'],
             'content' => $validated['content'] ?? null,
             'key_points' => $validated['key_points'] ?? [],
             'quiz_question_count' => $requestedCount,
+            'cover_image' => $coverImagePath,
         ]);
 
         return redirect()->back()->with('success', 'Lesson updated successfully.');

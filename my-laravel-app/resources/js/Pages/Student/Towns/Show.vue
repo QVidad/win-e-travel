@@ -26,38 +26,52 @@
                 <div class="col-lg-8">
                     <!-- About Section -->
                     <div class="info-section">
-                        <h3 class="fw-bold mb-3 text-dark">
+                        <h3 class="fw-bold mb-3 text-dark fs-2">
                             <i class="fas fa-info-circle text-primary me-2"></i>
                             About {{ town.name }}
                         </h3>
-                        <p class="text-secondary">{{ town.description }}</p>
-                        <p class="text-secondary">The name "{{ town.name }}" highlights the rich historical, architectural, and cultural heritage of Ilocos Norte. As part of your tour guide training, mastering site narratives and historical accuracy is essential for delivering engaging guest commentary.</p>
+                        <div class="text-secondary mb-3 fs-5" style="white-space: pre-wrap; line-height: 1.7;" v-html="module?.description || town.description"></div>
                     </div>
 
-                    <!-- Key Attractions List matching town-laoag.html -->
+                    <!-- Key Attractions List -->
                     <div class="info-section">
-                        <h3 class="fw-bold mb-4 text-dark">
+                        <h3 class="fw-bold mb-4 text-dark fs-2">
                             <i class="fas fa-map-pin text-danger me-2"></i>
                             Key Attractions
                         </h3>
 
-                        <div v-for="dest in town.destinations" :key="dest.id" class="attraction-card">
-                            <h5 class="fw-bold mb-2 text-dark">{{ dest.name }}</h5>
-                            <p class="text-muted small mb-2">{{ dest.description }}</p>
-                            <p v-if="dest.history" class="text-secondary small mb-0"><strong>Historical Note:</strong> {{ dest.history }}</p>
-                        </div>
-
-                        <div v-if="!town.destinations || town.destinations.length === 0" class="attraction-card">
-                            <h5 class="fw-bold mb-2 text-dark">Historical Landmarks</h5>
-                            <p class="text-muted small mb-0">Includes historical cathedrals, bell towers, heritage parks, and cultural museums.</p>
+                        <template v-if="module && module.lessons && module.lessons.length > 0">
+                            <div v-for="lesson in module.lessons" :key="'lesson-'+lesson.id" class="attraction-card mb-4 border rounded overflow-hidden shadow-sm">
+                                <img v-if="lesson.cover_image" :src="lesson.cover_image" class="w-100 object-fit-cover" style="height: 250px;" :alt="lesson.title">
+                                <div class="p-3">
+                                    <h5 class="fw-bold mb-2 text-dark fs-4">{{ lesson.title }}</h5>
+                                    <div class="text-muted mb-0 html-content fs-6" style="line-height: 1.6;" v-html="lesson.content"></div>
+                                </div>
+                            </div>
+                        </template>
+                        <div v-else class="attraction-card p-3 border rounded shadow-sm">
+                            <h5 class="fw-bold mb-2 text-dark fs-4">Historical Landmarks</h5>
+                            <p class="text-muted mb-0 fs-6">Includes historical cathedrals, bell towers, heritage parks, and cultural museums.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-4">
                     <!-- Quick Facts Card -->
-                    <div class="info-section">
-                        <h5 class="fw-bold mb-3 text-dark">
+                    <div class="info-section" v-if="module && module.quick_facts && module.quick_facts.length > 0">
+                        <h5 class="fw-bold mb-3 text-dark fs-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Quick Facts
+                        </h5>
+                        <ul class="list-unstyled mb-0">
+                            <li v-for="(fact, index) in module.quick_facts" :key="'fact-'+index" class="mb-3 py-1 border-bottom d-flex align-items-center">
+                                <i class="fas me-2 text-center" style="width: 20px;" :class="getFactIcon(fact)"></i>
+                                <span class="text-dark flex-grow-1 fs-5" style="line-height: 1.5;" v-html="formatFact(fact)"></span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div v-else class="info-section">
+                        <h5 class="fw-bold mb-3 text-dark fs-3">
                             <i class="fas fa-lightbulb text-warning me-2"></i>
                             Quick Facts
                         </h5>
@@ -70,28 +84,28 @@
                                 <span class="text-muted"><i class="fas fa-landmark me-2 text-muted"></i>Attractions:</span>
                                 <strong class="text-dark">{{ town.destinations ? town.destinations.length : 0 }} Sites</strong>
                             </li>
-                            <li class="mb-3 py-1 border-bottom d-flex justify-content-between">
-                                <span class="text-muted"><i class="fas fa-signal me-2 text-muted"></i>Level:</span>
-                                <span class="badge bg-success bg-opacity-10 text-success">{{ town.difficulty_level }}</span>
-                            </li>
                         </ul>
                     </div>
 
                     <!-- Training Video Embed -->
-                    <div class="info-section">
-                        <h5 class="fw-bold mb-3 text-dark">
+                    <div class="info-section" v-if="module && module.video_references && module.video_references.length > 0">
+                        <h5 class="fw-bold mb-3 text-dark fs-3">
                             <i class="fas fa-play-circle text-primary me-2"></i>
-                            Training Video
+                            Training Video References
                         </h5>
-                        <div class="video-container mb-3">
-                            <iframe
+                        <div v-for="(video, index) in module.video_references" :key="'video-'+index" class="video-container mb-3">
+                            <!-- Attempt to convert standard youtube url to embed format if needed, else assume it works in iframe or just provide link -->
+                            <iframe v-if="video.includes('youtube.com/embed') || video.includes('youtu.be')"
                                 width="100%"
                                 height="200"
-                                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                                :src="video.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')"
                                 frameborder="0"
                                 allowfullscreen
                                 style="border-radius: 15px;"
                             ></iframe>
+                            <a v-else :href="video" target="_blank" class="btn btn-outline-primary w-100 rounded-pill shadow-sm">
+                                <i class="fas fa-external-link-alt me-1"></i> Watch Video Reference {{ index + 1 }}
+                            </a>
                         </div>
                         <p class="small text-muted mb-0">Review the training video anytime for voice & pacing tips.</p>
                     </div>
@@ -117,7 +131,30 @@ import { Link } from '@inertiajs/vue3';
 
 defineProps({
     town: Object,
+    module: Object,
 });
+
+const getFactIcon = (fact) => {
+    const lowerFact = fact.toLowerCase();
+    if (lowerFact.includes('status') || lowerFact.includes('date') || lowerFact.includes('founded')) return 'fa-calendar-alt text-secondary';
+    if (lowerFact.includes('area') || lowerFact.includes('size')) return 'fa-map text-secondary';
+    if (lowerFact.includes('barangay') || lowerFact.includes('population') || lowerFact.includes('people') || lowerFact.includes('demographic')) return 'fa-users text-secondary';
+    if (lowerFact.includes('nickname') || lowerFact.includes('region') || lowerFact.includes('province')) return 'fa-globe text-secondary';
+    if (lowerFact.includes('meaning') || lowerFact.includes('name')) return 'fa-id-card text-secondary';
+    if (lowerFact.includes('patron') || lowerFact.includes('saint') || lowerFact.includes('religion') || lowerFact.includes('church') || lowerFact.includes('cathedral')) return 'fa-church text-secondary';
+    if (lowerFact.includes('level') || lowerFact.includes('difficulty')) return 'fa-signal text-secondary';
+    if (lowerFact.includes('attraction') || lowerFact.includes('spot') || lowerFact.includes('site')) return 'fa-landmark text-secondary';
+    return 'fa-check text-success';
+};
+
+const formatFact = (fact) => {
+    if (fact.includes(':')) {
+        const parts = fact.split(':');
+        const label = parts.shift();
+        return `<strong class="text-dark">${label}:</strong> ${parts.join(':')}`;
+    }
+    return fact;
+};
 </script>
 
 <style scoped>

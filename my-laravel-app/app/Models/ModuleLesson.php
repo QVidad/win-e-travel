@@ -18,6 +18,7 @@ class ModuleLesson extends Model
         'key_points',
         'order',
         'quiz_question_count',
+        'cover_image',
     ];
 
     protected $casts = [

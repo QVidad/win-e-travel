@@ -65,8 +65,13 @@ class TownController extends Controller
             $query->where('is_visible', true)->orderBy('order');
         }, 'simulation'])->where('slug', $slug)->firstOrFail();
 
+        $module = \App\Models\CourseModule::with(['lessons' => function ($query) {
+            $query->orderBy('order');
+        }])->where('code', 'town-' . $slug)->first();
+
         return Inertia::render('Student/Towns/Show', [
             'town' => $town,
+            'module' => $module,
         ]);
     }
 }

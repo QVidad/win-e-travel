@@ -25,10 +25,14 @@ class CourseModule extends Model
         'quiz_question_count',
         'updated_by',
         'last_modified_at',
+        'quick_facts',
+        'video_references',
     ];
 
     protected $casts = [
         'last_modified_at' => 'datetime',
+        'quick_facts' => 'array',
+        'video_references' => 'array',
     ];
 
     public function updatedBy(): BelongsTo

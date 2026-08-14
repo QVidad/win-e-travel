@@ -56,9 +56,19 @@ class ModuleController extends Controller
             $bankCount = QuizQuestion::where('module_id', $id)->count();
         }
 
+        $defaultTownImage = null;
+        if ($module->type === 'town_chapter' && str_starts_with($module->code, 'town-')) {
+            $slug = substr($module->code, 5); // remove 'town-'
+            $town = \App\Models\Town::where('slug', $slug)->first();
+            if ($town) {
+                $defaultTownImage = $town->hero_image;
+            }
+        }
+
         return Inertia::render('Educator/Modules/Edit', [
             'module' => $module,
             'questionBankCount' => $bankCount,
+            'defaultTownImage' => $defaultTownImage,
         ]);
     }
 
@@ -78,6 +88,8 @@ class ModuleController extends Controller
             'cover_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'status' => 'required|in:draft,published',
             'quiz_question_count' => 'required|integer|min:0|max:100',
+            'quick_facts' => 'nullable|array',
+            'video_references' => 'nullable|array',
         ]);
 
         $bankCount = QuizQuestion::where('module_id', $id)->whereNull('module_lesson_id')->count();
@@ -86,7 +98,7 @@ class ModuleController extends Controller
         }
 
         $requestedCount = (int)$validated['quiz_question_count'];
-        if ($requestedCount > $bankCount) {
+        if ($module->type !== 'town_chapter' && $requestedCount > $bankCount) {
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
@@ -113,11 +125,13 @@ class ModuleController extends Controller
             'quiz_question_count' => $requestedCount,
             'updated_by' => $request->user()->id,
             'last_modified_at' => now(),
+            'quick_facts' => $validated['quick_facts'] ?? null,
+            'video_references' => $validated['video_references'] ?? null,
         ]);
 
         Cache::forget('published_student_modules');
 
-        return redirect()->route('educator.modules.index')
+        return redirect()->back()
             ->with('success', 'Module updated successfully.');
     }
 
