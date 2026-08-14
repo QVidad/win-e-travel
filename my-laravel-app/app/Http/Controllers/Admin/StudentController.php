@@ -77,7 +77,7 @@ class StudentController extends Controller
     /**
      * Delete or unenroll a student account.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(string $id): RedirectResponse
     {
         $student = User::where('role', 'student')->findOrFail($id);
         
@@ -91,7 +91,7 @@ class StudentController extends Controller
     /**
      * Reset a student's quiz/module progress.
      */
-    public function resetProgress($id): RedirectResponse
+    public function resetProgress(string $id): RedirectResponse
     {
         $student = User::where('role', 'student')->findOrFail($id);
 

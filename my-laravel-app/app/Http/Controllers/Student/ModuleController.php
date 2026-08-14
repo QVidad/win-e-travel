@@ -38,7 +38,7 @@ class ModuleController extends Controller
      * Display a specific published module for students.
      * Throws 404 if module does not exist or is currently in draft state.
      */
-    public function show($id): Response
+    public function show(string $id): Response
     {
         $module = CourseModule::where('status', 'published')
             ->with(['questions', 'lessons.questions' => function ($q) {
@@ -76,7 +76,7 @@ class ModuleController extends Controller
     /**
      * Save student progress for a specific module (lessons and evaluations).
      */
-    public function saveProgress(Request $request, $id): \Illuminate\Http\RedirectResponse
+    public function saveProgress(Request $request, string $id): \Illuminate\Http\RedirectResponse
     {
         $module = CourseModule::findOrFail($id);
         $user = Auth::user();

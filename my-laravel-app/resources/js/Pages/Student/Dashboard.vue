@@ -24,7 +24,7 @@
                 </div>
 
                 <!-- Show when new user (0% progress) -->
-                <div v-if="overallPercent === 0" class="card border-0 shadow-sm bg-white p-4 mb-4 rounded-4 border-start border-4 border-success">
+                <div v-if="overallPercent === 0" class="card shadow-sm bg-white p-4 mb-4 rounded-4" style="border: none; border-left: 4px solid var(--bs-success);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px;">

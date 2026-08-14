@@ -39,7 +39,7 @@ class ModuleController extends Controller
     /**
      * Show form to edit module text/media/content.
      */
-    public function edit($id): Response
+    public function edit(string $id): Response
     {
         $module = CourseModule::with([
             'updatedBy', 
@@ -65,7 +65,7 @@ class ModuleController extends Controller
     /**
      * Update module text, description, town chapter details, status, and media.
      */
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request, string $id): RedirectResponse
     {
         $module = CourseModule::findOrFail($id);
 

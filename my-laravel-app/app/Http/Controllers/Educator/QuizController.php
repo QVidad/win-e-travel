@@ -114,7 +114,7 @@ class QuizController extends Controller
     /**
      * Update an existing question item in the pool.
      */
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request, string $id): RedirectResponse
     {
         $questionItem = QuizQuestion::findOrFail($id);
 
@@ -199,7 +199,7 @@ class QuizController extends Controller
     /**
      * Delete a question item from a module's quiz pool.
      */
-    public function destroy(Request $request, $id): RedirectResponse
+    public function destroy(Request $request, string $id): RedirectResponse
     {
         $question = QuizQuestion::findOrFail($id);
         $module = $question->module ?? $question->courseModule;
