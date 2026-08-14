@@ -14,11 +14,15 @@
             </nav>
 
             <!-- Hero Image Banner matching town-laoag.html -->
-            <div class="town-hero" :style="{ backgroundImage: `url('${town.hero_image || '/assets/images/Laoag.jpg'}')` }">
+            <div class="town-hero" :style="{ 
+                backgroundImage: `url('${module?.cover_image || town.hero_image || '/assets/images/Laoag.jpg'}')`,
+                backgroundPosition: module?.cover_image_position || 'center'
+            }">
                 <div class="town-hero-overlay">
-                    <span class="badge bg-success mb-2 px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i>Completed</span>
+                    <span v-if="isCompleted" class="badge bg-success mb-2 px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i>Completed</span>
+                    <span v-else class="badge bg-warning text-dark mb-2 px-3 py-2 rounded-pill"><i class="fas fa-clock me-1"></i>In Progress</span>
                     <h1 class="display-5 fw-bold mb-2">{{ town.name }}</h1>
-                    <p class="lead mb-0">{{ town.title || town.description }}</p>
+                    <p class="lead mb-0">{{ module?.subtitle || town.title || town.description }}</p>
                 </div>
             </div>
 
@@ -42,7 +46,7 @@
 
                         <template v-if="module && module.lessons && module.lessons.length > 0">
                             <div v-for="lesson in module.lessons" :key="'lesson-'+lesson.id" class="attraction-card mb-4 border rounded overflow-hidden shadow-sm">
-                                <img v-if="lesson.cover_image" :src="lesson.cover_image" class="w-100 object-fit-cover" style="height: 250px;" :alt="lesson.title">
+                                <img v-if="lesson.cover_image" :src="lesson.cover_image" class="w-100 object-fit-cover" :style="{ height: '250px', objectPosition: lesson.cover_image_position || 'center 50%' }" :alt="lesson.title">
                                 <div class="p-3">
                                     <h5 class="fw-bold mb-2 text-dark fs-4">{{ lesson.title }}</h5>
                                     <div class="text-muted mb-0 html-content fs-6" style="line-height: 1.6;" v-html="lesson.content"></div>
@@ -132,6 +136,7 @@ import { Link } from '@inertiajs/vue3';
 defineProps({
     town: Object,
     module: Object,
+    isCompleted: Boolean,
 });
 
 const getFactIcon = (fact) => {

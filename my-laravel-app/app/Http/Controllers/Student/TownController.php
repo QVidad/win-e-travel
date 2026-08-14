@@ -12,8 +12,19 @@ class TownController extends Controller
     public function index(): Response
     {
         $user = \Illuminate\Support\Facades\Auth::user();
-        $towns = Town::with('destinations')->where('status', 'published')->orderBy('order')->get();
         
+        $publishedModuleCodes = \App\Models\CourseModule::where('type', 'town_chapter')
+            ->where('status', 'published')
+            ->pluck('code')
+            ->toArray();
+
+        $towns = Town::with('destinations')
+            ->where('status', 'published')
+            ->orderBy('order')
+            ->get()
+            ->filter(function ($town) use ($publishedModuleCodes) {
+                return in_array('town-' . $town->slug, $publishedModuleCodes);
+            })->values();
         // Fetch user progress for town modules
         $progresses = \App\Models\ModuleProgress::where('user_id', $user->id)
             ->whereHas('courseModule', function ($q) {
@@ -67,11 +78,17 @@ class TownController extends Controller
 
         $module = \App\Models\CourseModule::with(['lessons' => function ($query) {
             $query->orderBy('order');
-        }])->where('code', 'town-' . $slug)->first();
+        }])->where('code', 'town-' . $slug)->where('status', 'published')->firstOrFail();
+
+        $progress = \App\Models\ModuleProgress::where('user_id', \Illuminate\Support\Facades\Auth::id())
+            ->where('course_module_id', $module->id)
+            ->first();
+        $isCompleted = $progress && $progress->passed;
 
         return Inertia::render('Student/Towns/Show', [
             'town' => $town,
             'module' => $module,
+            'isCompleted' => $isCompleted,
         ]);
     }
 }

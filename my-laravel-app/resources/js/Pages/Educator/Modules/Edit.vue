@@ -198,7 +198,7 @@
                                 class="form-control rounded-3 mb-2" 
                                 placeholder="Image URL (e.g. /assets/images/laoag-belltower.jpg)"
                             >
-                            <div class="input-group input-group-sm">
+                            <div class="input-group input-group-sm mb-2">
                                 <span class="input-group-text bg-light text-muted">Or upload file</span>
                                 <input 
                                     type="file" 
@@ -211,20 +211,35 @@
 
                         <!-- Image Live Preview -->
                         <div class="col-md-5">
-                            <div class="border rounded-3 p-2 bg-light text-center position-relative overflow-hidden" style="height: 110px;">
+                            <div 
+                                class="border rounded-3 p-0 bg-light text-center position-relative overflow-hidden shadow-sm" 
+                                style="height: 120px; cursor: pointer; transition: transform 0.2s;"
+                                @click="openPositionEditor('module', imagePreview || form.cover_image || defaultTownImage, form.cover_image_position)"
+                                onmouseover="this.style.transform='scale(1.02)'"
+                                onmouseout="this.style.transform='scale(1)'"
+                            >
                                 <img 
                                     v-if="imagePreview || form.cover_image || defaultTownImage" 
                                     :src="imagePreview || form.cover_image || defaultTownImage" 
-                                    class="w-100 h-100 object-fit-cover rounded"
+                                    class="w-100 h-100 object-fit-cover"
+                                    :style="{ objectPosition: form.cover_image_position || 'center 50%' }"
                                     alt="Cover preview"
                                 >
                                 <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
                                     <i class="fas fa-image fs-3 mb-1"></i>
                                     <small>No image set</small>
                                 </div>
+                                
+                                <!-- Edit Overlay -->
+                                <div v-if="imagePreview || form.cover_image || defaultTownImage" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 opacity-0 hover-opacity-100 transition-opacity">
+                                    <span class="text-white fw-bold small"><i class="fas fa-crop-alt me-1"></i> Click to adjust</span>
+                                </div>
                             </div>
                             <small v-if="!imagePreview && !form.cover_image && defaultTownImage" class="text-muted mt-1 d-block text-center" style="font-size: 0.75rem;">
                                 Showing default town image. Upload a new one to override.
+                            </small>
+                            <small v-if="imagePreview || form.cover_image || defaultTownImage" class="text-primary mt-1 d-block text-center fw-bold" style="font-size: 0.75rem; cursor: pointer;" @click="openPositionEditor('module', imagePreview || form.cover_image || defaultTownImage, form.cover_image_position)">
+                                <i class="fas fa-crop-alt"></i> Adjust Image Position
                             </small>
                         </div>
                     </div>
@@ -417,11 +432,27 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="border rounded-3 bg-light text-center overflow-hidden position-relative" style="height: 90px;">
-                                        <img v-if="lessonImagePreview || lessonForm.cover_image" :src="lessonImagePreview || lessonForm.cover_image" class="w-100 h-100 object-fit-cover">
+                                    <div 
+                                        class="border rounded-3 bg-light text-center overflow-hidden position-relative shadow-sm" 
+                                        style="height: 100px; cursor: pointer; transition: transform 0.2s;"
+                                        @click="openPositionEditor('lesson', lessonImagePreview || lessonForm.cover_image, lessonForm.cover_image_position)"
+                                        onmouseover="this.style.transform='scale(1.02)'"
+                                        onmouseout="this.style.transform='scale(1)'"
+                                    >
+                                        <img 
+                                            v-if="lessonImagePreview || lessonForm.cover_image" 
+                                            :src="lessonImagePreview || lessonForm.cover_image" 
+                                            class="w-100 h-100 object-fit-cover"
+                                            :style="{ objectPosition: lessonForm.cover_image_position || 'center 50%' }"
+                                        >
                                         <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted small">
                                             <i class="fas fa-image fs-4 mb-1"></i>
                                             <span>No image set</span>
+                                        </div>
+
+                                        <!-- Edit Overlay -->
+                                        <div v-if="lessonImagePreview || lessonForm.cover_image" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-50 opacity-0 hover-opacity-100 transition-opacity">
+                                            <span class="text-white fw-bold small"><i class="fas fa-crop-alt"></i> Adjust</span>
                                         </div>
                                     </div>
                                 </div>
@@ -507,6 +538,14 @@
                 </div>
             </div>
         </div>
+        <!-- Image Position Editor Modal -->
+        <ImagePositionEditor 
+            :show="showPositionEditor"
+            :image-url="editorImageUrl"
+            :initial-position="editorInitialPosition"
+            @close="showPositionEditor = false"
+            @save="handlePositionSave"
+        />
     </EducatorLayout>
 </template>
 
@@ -514,6 +553,8 @@
 import { ref, computed } from 'vue';
 import { useForm, Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
+
+import ImagePositionEditor from '@/Components/ImagePositionEditor.vue';
 
 const props = defineProps({
     module: {
@@ -527,21 +568,45 @@ const props = defineProps({
     defaultTownImage: String,
 });
 
+// Image Position Editor State
+const showPositionEditor = ref(false);
+const editorImageUrl = ref('');
+const editorInitialPosition = ref('');
+const editorTarget = ref(null);
+
+const openPositionEditor = (target, imageUrl, initialPos) => {
+    if (!imageUrl) return;
+    editorTarget.value = target;
+    editorImageUrl.value = imageUrl;
+    editorInitialPosition.value = initialPos;
+    showPositionEditor.value = true;
+};
+
+const handlePositionSave = (newPosition) => {
+    if (editorTarget.value === 'module') {
+        form.cover_image_position = newPosition;
+    } else if (editorTarget.value === 'lesson') {
+        lessonForm.value.cover_image_position = newPosition;
+    }
+    showPositionEditor.value = false;
+};
+
 const imagePreview = ref(null);
 const imageError = ref(false);
 
 const form = useForm({
     _method: 'PUT',
-    title: props.module.title,
+    title: props.module.title || '',
     subtitle: props.module.subtitle || '',
     description: props.module.description || '',
     key_spots: props.module.key_spots || '',
     cover_image: props.module.cover_image || '',
+    cover_image_position: props.module.cover_image_position || 'center',
     cover_image_file: null,
-    status: props.module.status || 'published',
-    quiz_question_count: props.module.quiz_question_count ?? 0,
-    quick_facts: props.module.quick_facts && props.module.quick_facts.length ? props.module.quick_facts : [''],
-    video_references: props.module.video_references && props.module.video_references.length ? props.module.video_references : [''],
+    status: props.module.status || 'draft',
+    quiz_question_count: props.module.quiz_question_count || 0,
+    quick_facts: props.module.quick_facts ? [...props.module.quick_facts] : [],
+    video_references: props.module.video_references ? [...props.module.video_references] : [],
 });
 
 const handleFileUpload = (event) => {
@@ -628,6 +693,7 @@ const openLessonModal = (lesson = null) => {
             content: lesson.content || '',
             quiz_question_count: lesson.quiz_question_count ?? 0,
             cover_image: lesson.cover_image || '',
+            cover_image_position: lesson.cover_image_position || 'center 50%',
             cover_image_file: null,
             key_points: parsedPoints.length > 0 ? parsedPoints : [{ title: '', description: '', icon: 'fas fa-check' }]
         };
@@ -637,6 +703,7 @@ const openLessonModal = (lesson = null) => {
             content: '',
             quiz_question_count: 0,
             cover_image: '',
+            cover_image_position: 'center 50%',
             cover_image_file: null,
             key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
         };
@@ -662,6 +729,7 @@ const closeLessonModal = () => {
         content: '',
         quiz_question_count: 0,
         cover_image: '',
+        cover_image_position: 'center 50%',
         cover_image_file: null,
         key_points: [{ title: '', description: '', icon: 'fas fa-check' }]
     };
@@ -675,10 +743,16 @@ const saveLesson = () => {
         title: lessonForm.value.title,
         content: lessonForm.value.content,
         quiz_question_count: lessonForm.value.quiz_question_count,
-        cover_image: lessonForm.value.cover_image,
-        cover_image_file: lessonForm.value.cover_image_file,
         key_points: lessonForm.value.key_points.filter(p => p.title || p.description)
     };
+
+    if (lessonForm.value.cover_image_file) {
+        payload.cover_image_file = lessonForm.value.cover_image_file;
+    } else {
+        payload.cover_image = lessonForm.value.cover_image;
+    }
+    
+    payload.cover_image_position = lessonForm.value.cover_image_position;
 
     if (editingLesson.value) {
         // Update (use POST with _method = PUT for file uploads)

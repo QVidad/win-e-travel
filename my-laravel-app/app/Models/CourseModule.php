@@ -19,6 +19,7 @@ class CourseModule extends Model
         'description',
         'key_spots',
         'cover_image',
+        'cover_image_position',
         'icon',
         'order',
         'status',
