@@ -18,9 +18,57 @@ class StudentDashboardController extends Controller
         $towns = Town::where('status', 'published')->orderBy('order')->get();
         $achievements = Achievement::orderBy('order')->take(4)->get();
 
-        $completedChapters = $user->completed_chapters_count ?? 0;
-        $totalChapters = 25;
-        $overallProgress = $totalChapters > 0 ? (int) round(($completedChapters / $totalChapters) * 100) : 0;
+        $completedChapters = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->where('passed', true)
+            ->count();
+            
+        $totalChapters = \App\Models\CourseModule::where('status', 'published')->count();
+        if ($totalChapters === 0) {
+            $totalChapters = 1; // avoid division by zero
+        }
+
+        $overallProgress = (int) round(($completedChapters / $totalChapters) * 100);
+
+        $foundationCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->where('passed', true)
+            ->whereHas('courseModule', function ($query) {
+                $query->where('type', 'foundation');
+            })->count();
+
+        $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->where('passed', true)
+            ->whereHas('courseModule', function ($query) {
+                $query->where('type', 'town_chapter');
+            })->count();
+
+        $hasStarted = \App\Models\ModuleProgress::where('user_id', $user->id)->exists();
+        
+        // Give a 1% motivational bump if they have started but haven't fully completed a chapter yet
+        if ($overallProgress === 0 && $hasStarted) {
+            $overallProgress = 1;
+        }
+
+        // Determine where the user left off
+        $latestProgress = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->with('courseModule')
+            ->orderBy('updated_at', 'desc')
+            ->first();
+            
+        $continueModule = null;
+        if ($latestProgress) {
+            if ($latestProgress->passed) {
+                $continueModule = \App\Models\CourseModule::where('status', 'published')
+                    ->where('order', '>', $latestProgress->courseModule->order)
+                    ->orderBy('order')
+                    ->first();
+            } else {
+                $continueModule = $latestProgress->courseModule;
+            }
+        }
+        
+        if (!$continueModule) {
+            $continueModule = \App\Models\CourseModule::where('status', 'published')->orderBy('order')->first();
+        }
 
         return Inertia::render('Student/Dashboard', [
             'towns' => $towns,
@@ -32,12 +80,18 @@ class StudentDashboardController extends Controller
                 'streakDays' => $user->streak_days ?? 0,
             ],
             'progress' => [
+                'hasStarted' => $hasStarted,
                 'completedChapters' => $completedChapters,
                 'totalChapters' => $totalChapters,
                 'overallPercentage' => $overallProgress,
-                'foundationCompleted' => $user->foundation_completed_count ?? 0,
-                'townsCompleted' => $user->towns_completed_count ?? 0,
+                'foundationCompleted' => $foundationCompleted,
+                'townsCompleted' => $townsCompleted,
                 'simulationsUnlocked' => $user->simulations_unlocked_count ?? 0,
+                'continueModule' => $continueModule ? [
+                    'id' => $continueModule->id,
+                    'title' => $continueModule->title,
+                    'type' => $continueModule->type,
+                ] : null,
             ],
             'activities' => [],
         ]);

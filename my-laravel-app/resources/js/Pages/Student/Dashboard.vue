@@ -15,16 +15,19 @@
                         </div>
                         <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
                             <div class="d-flex justify-content-lg-end">
-                                <div class="overall-progress-circle" :style="progressCircleStyle">
-                                    <span class="progress-percentage">{{ overallPercent }}%</span>
+                                <div class="text-center">
+                                    <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
+                                        <span class="progress-percentage">{{ overallPercent }}%</span>
+                                    </div>
+                                    <span class="small fw-bold text-white opacity-75">Current Progress</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Show when new user (0% progress) -->
-                <div v-if="overallPercent === 0" class="card shadow-sm bg-white p-4 mb-4 rounded-4" style="border: none; border-left: 4px solid var(--bs-success);">
+                <!-- Show when new user (0 progress entries) -->
+                <div v-if="!progress.hasStarted" class="card shadow-sm bg-white p-4 mb-4 rounded-4" style="border: none; border-left: 4px solid var(--bs-success);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
                             <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px;">
@@ -40,33 +43,40 @@
                         </Link>
                     </div>
                 </div>
+                
+                <!-- Show when user has started but 0 modules are completely passed -->
+                <div v-else-if="overallPercent === 0 && progress.hasStarted" class="card shadow-sm bg-white p-4 mb-4 rounded-4" style="border: none; border-left: 4px solid var(--bs-warning);">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning text-dark rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px;">
+                                <i class="fas fa-running fa-xl"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark">You're making progress!</h5>
+                                <p class="text-muted small mb-0">You've passed some lessons, but you need to pass the End-of-Module Evaluation to complete your first chapter.</p>
+                            </div>
+                        </div>
+                        <Link :href="route('foundation.index')" class="btn btn-warning px-4 rounded-pill fw-bold">
+                            Continue Module 1 <i class="fas fa-arrow-right ms-2"></i>
+                        </Link>
+                    </div>
+                </div>
 
                 <!-- Progress Overview Card -->
-                <div class="progress-overview-card">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h4 class="fw-bold mb-3 text-dark">
-                                <i class="fas fa-chart-line text-success me-2"></i>
-                                Current Journey
-                            </h4>
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="stat-badge bg-success bg-opacity-10 text-success">
-                                    <i class="fas fa-check-circle me-1"></i>
-                                    <span>{{ totalCompletedChapters }}</span> of <span>25</span> Chapters Completed
-                                </span>
+                <div v-if="progress.continueModule" class="progress-overview-card">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px;">
+                                <i class="fas fa-book-open fa-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold mb-1 text-dark">Pick up where you left off</h4>
+                                <p class="text-muted mb-0">Continue with <strong>{{ progress.continueModule.title }}</strong></p>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="chapter-progress justify-content-md-end">
-                                <span class="me-3 fw-bold text-dark">Progress:</span>
-                                <div style="width: 200px;">
-                                    <div class="progress-bar-custom">
-                                        <div class="progress-fill" :style="{ width: overallPercent + '%' }"></div>
-                                    </div>
-                                </div>
-                                <span class="ms-3 fw-bold text-dark">{{ overallPercent }}%</span>
-                            </div>
-                        </div>
+                        <Link :href="route('student.modules.show', progress.continueModule.id)" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
+                            Continue Learning <i class="fas fa-play ms-2"></i>
+                        </Link>
                     </div>
                 </div>
 
@@ -189,61 +199,7 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity & Next Steps -->
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100 rounded-4 bg-white p-4">
-                            <h5 class="fw-bold mb-4 d-flex align-items-center gap-2 text-dark">
-                                <i class="fas fa-clock text-primary"></i> Recent Activity
-                            </h5>
-                            <!-- Dynamic Activity List -->
-                            <div v-if="activities && activities.length > 0" class="activity-list">
-                                <div v-for="(item, index) in activities" :key="index" class="d-flex align-items-center gap-3 mb-3">
-                                    <div class="bg-light-subtle rounded-3 p-2 text-primary">
-                                        <i :class="item.icon || 'fas fa-check-circle'"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ item.title }}</div>
-                                        <small class="text-muted">{{ item.time }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Empty State for Brand New Accounts -->
-                            <div v-else class="text-center py-4 my-2">
-                                <div class="text-muted opacity-50 mb-2">
-                                    <i class="fas fa-history fa-3x"></i>
-                                </div>
-                                <p class="fw-medium text-dark mb-1">No Recent Activity</p>
-                                <small class="text-muted d-block">Activities will appear here as you complete lessons and quizzes.</small>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm h-100 rounded-4 bg-white p-4">
-                            <h5 class="fw-bold mb-3 text-dark">
-                                <i class="fas fa-forward text-warning me-2"></i>
-                                Next Steps
-                            </h5>
-                            <div id="nextSteps">
-                                <div class="list-group list-group-flush">
-                                    <div class="list-group-item px-0 d-flex align-items-center bg-transparent">
-                                        <i class="fas fa-circle text-success me-3 small"></i>
-                                        <span>Complete Module 1: Tour Preparation</span>
-                                    </div>
-                                    <div class="list-group-item px-0 d-flex align-items-center bg-transparent">
-                                        <i class="fas fa-circle text-secondary me-3 small"></i>
-                                        <span>Pass Module 1 Quiz (90% required)</span>
-                                    </div>
-                                    <div class="list-group-item px-0 d-flex align-items-center bg-transparent">
-                                        <i class="fas fa-circle text-secondary me-3 small"></i>
-                                        <span>Continue to Module 2: Tour Briefings</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </StudentLayout>
