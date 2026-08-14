@@ -2,27 +2,27 @@
     <StudentLayout>
         <div class="discover-container py-4">
             <div class="container">
-                <!-- Page Header matching towns.html -->
-                <div class="page-header">
+                <!-- Welcome Banner matching dashboard.html -->
+                <div class="welcome-banner">
                     <div class="row align-items-center">
                         <div class="col-lg-8">
-                            <h2 class="fw-bold mb-2">
+                            <h2 class="display-6 fw-bold mb-3">
                                 <i class="fas fa-compass me-2"></i>
                                 Dare to Discover
                             </h2>
-                            <p class="mb-0 opacity-90">Explore the municipalities of Ilocos Norte and master their stories</p>
+                            <p class="mb-0 opacity-90 fs-5">Explore the municipalities of Ilocos Norte and master their stories</p>
                         </div>
-                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                            <div class="d-inline-block bg-white bg-opacity-25 rounded-4 px-4 py-2 fw-bold">
-                                <span id="townsCompleted">{{ completedCount }}</span>/{{ towns.length }} Towns Completed
+                        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                            <div class="d-flex justify-content-lg-end">
+                                <div class="text-center">
+                                    <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
+                                        <span class="progress-percentage fs-4">{{ completedCount }}/{{ towns.length }}</span>
+                                    </div>
+                                    <span class="small fw-bold text-white opacity-75">Towns Completed</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Overall Progress Bar -->
-                <div class="progress-bar-custom mb-4">
-                    <div class="progress-fill bg-success" :style="{ width: (completedCount / towns.length) * 100 + '%', height: '8px', borderRadius: '10px' }"></div>
                 </div>
 
                 <!-- Search & Filter Controls -->
@@ -56,26 +56,24 @@
                     </div>
                 </div>
 
-                <!-- Interactive Map Placeholder -->
-                <div class="card border-0 shadow-sm mb-4 rounded-4 bg-white">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-map-marked-alt me-2 text-danger"></i>Ilocos Norte Interactive Map</h5>
-                            <span class="badge bg-light text-dark">Click on highlighted towns below</span>
-                        </div>
-                        <div class="text-center py-4 bg-light rounded-3">
-                            <i class="fas fa-map fa-4x text-muted mb-3"></i>
-                            <p class="text-muted mb-0 fw-semibold">Interactive Map — 21 Municipalities Loaded</p>
-                        </div>
-                    </div>
+                <!-- Town Cards Grid Header with Map Toggle -->
+                <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                    <h5 class="fw-bold mb-0 text-dark">Available Destinations</h5>
+                    <button @click="showMap = !showMap" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" style="background-color: #0a472e; border: none;">
+                        <i class="fas fa-map-marked-alt me-2"></i>
+                        {{ showMap ? 'Hide Map' : 'View Interactive Map' }}
+                    </button>
                 </div>
 
-                <!-- Town Cards Grid matching towns.html -->
-                <h5 class="fw-bold mb-3 text-dark">Available Destinations</h5>
+                <!-- Interactive Map Section -->
+                <div v-if="showMap" class="mb-5">
+                    <TownMap :towns="towns" @town-clicked="handleTownClick" />
+                </div>
                 <div class="town-grid">
                     <template v-for="town in filteredTowns" :key="town.id">
                         <Link
-                            v-if="town.status === 'published' || town.status === 'completed' || town.status === 'available'"
+                            :id="'town-card-' + town.slug"
+                            v-if="town.progress_status !== 'locked'"
                             :href="route('towns.show', town.slug)"
                             class="town-card"
                             :class="getTownCardClass(town)"
@@ -83,18 +81,18 @@
                             <div class="town-image" :style="{ backgroundImage: `url('${town.hero_image || '/assets/images/INBackground.jpg'}')` }">
                                 <span class="town-badge" :class="getBadgeClass(town)">
                                     {{ getBadgeLabel(town) }}
-                                    <i v-if="town.slug === 'laoag-city'" class="fas fa-check-circle ms-1"></i>
+                                    <i v-if="town.progress_status === 'completed'" class="fas fa-check-circle ms-1"></i>
                                 </span>
                             </div>
                             <div class="town-content">
                                 <h5 class="fw-bold mb-1 text-dark">{{ town.name }}</h5>
                                 <p class="text-muted small mb-2">{{ town.title || town.description }}</p>
                                 <div class="progress-bar-custom">
-                                    <div class="progress-fill bg-success" :style="{ width: (town.slug === 'laoag-city' ? 100 : 0) + '%', height: '6px', borderRadius: '10px' }"></div>
+                                    <div class="progress-fill bg-success" :style="{ width: (town.progress_status === 'completed' ? 100 : 0) + '%', height: '6px', borderRadius: '10px' }"></div>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="small text-muted">{{ town.slug === 'laoag-city' ? '100% Complete' : '0% Complete' }}</span>
-                                    <i :class="town.slug === 'laoag-city' ? 'fas fa-check-circle text-success' : 'fas fa-arrow-right text-muted'"></i>
+                                    <span class="small text-muted">{{ town.progress_status === 'completed' ? '100% Complete' : '0% Complete' }}</span>
+                                    <i :class="town.progress_status === 'completed' ? 'fas fa-check-circle text-success' : 'fas fa-arrow-right text-muted'"></i>
                                 </div>
                                 <div v-if="town.destinations && town.destinations.length > 0" class="mt-2">
                                     <span v-for="dest in town.destinations.slice(0, 2)" :key="dest.id" class="attraction-tag">
@@ -105,7 +103,7 @@
                             </div>
                         </Link>
 
-                        <div v-else class="town-card locked opacity-75">
+                        <div v-else :id="'town-card-' + town.slug" class="town-card locked opacity-75">
                             <div class="town-image" :style="{ backgroundImage: `url('${town.hero_image || '/assets/images/INBackground.jpg'}')` }">
                                 <span class="town-badge bg-secondary text-white">
                                     Locked <i class="fas fa-lock ms-1"></i>
@@ -126,19 +124,30 @@
 
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, defineAsyncComponent } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import 'leaflet/dist/leaflet.css';
+
+const TownMap = defineAsyncComponent(() => import('@/Components/TownMap.vue'));
+
+const showMap = ref(false);
+
+const handleTownClick = (slug) => {
+    const el = document.getElementById('town-card-' + slug);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('highlight-pulse');
+        setTimeout(() => el.classList.remove('highlight-pulse'), 2000);
+    }
+};
 
 const props = defineProps({
     towns: Array,
+    completedCount: Number,
 });
 
 const searchQuery = ref('');
 const selectedStatus = ref('All');
-
-const completedCount = computed(() => {
-    return props.towns.filter(t => t.slug === 'laoag-city').length;
-});
 
 const filteredTowns = computed(() => {
     return props.towns.filter(town => {
@@ -147,44 +156,77 @@ const filteredTowns = computed(() => {
                               (town.title && town.title.toLowerCase().includes(searchQuery.value.toLowerCase()));
 
         let matchesStatus = true;
-        if (selectedStatus.value === 'Completed') matchesStatus = town.slug === 'laoag-city';
-        else if (selectedStatus.value === 'Available') matchesStatus = town.slug !== 'laoag-city' && town.status === 'published';
-        else if (selectedStatus.value === 'Locked') matchesStatus = town.status === 'draft';
+        if (selectedStatus.value === 'Completed') matchesStatus = town.progress_status === 'completed';
+        else if (selectedStatus.value === 'Available') matchesStatus = town.progress_status === 'available';
+        else if (selectedStatus.value === 'Locked') matchesStatus = town.progress_status === 'locked';
 
         return matchesSearch && matchesStatus;
     });
 });
 
 const getTownCardClass = (town) => {
-    if (town.slug === 'laoag-city') return 'completed';
-    return 'available';
+    return town.progress_status;
 };
 
 const getBadgeClass = (town) => {
-    if (town.slug === 'laoag-city') return 'bg-success text-white';
-    if (town.slug === 'paoay') return 'bg-primary text-white';
+    if (town.progress_status === 'completed') return 'bg-success text-white';
+    if (town.progress_status === 'available') return 'bg-primary text-white';
     return 'bg-secondary text-white';
 };
 
 const getBadgeLabel = (town) => {
-    if (town.slug === 'laoag-city') return 'Completed';
-    if (town.slug === 'paoay') return 'Available';
+    if (town.progress_status === 'completed') return 'Completed';
+    if (town.progress_status === 'available') return 'Available';
     return 'Locked';
 };
+
+const progressCircleStyle = computed(() => {
+    const degrees = props.towns.length > 0 ? (props.completedCount / props.towns.length) * 360 : 0;
+    return {
+        background: `conic-gradient(#0a472e 0deg ${degrees}deg, rgba(255,255,255,0.3) ${degrees}deg 360deg)`
+    };
+});
 </script>
 
 <style scoped>
 .discover-container {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
     min-height: 100vh;
 }
 
-.page-header {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    border-radius: 20px;
-    padding: 30px;
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 30px;
+    padding: 40px;
     color: white;
-    margin: 30px 0;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.overall-progress-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(#0a472e 0deg 0deg, rgba(255,255,255,0.3) 0deg 360deg);
+    position: relative;
+}
+
+.overall-progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-color: #1a5f7a; /* matching banner */
+    border-radius: 50%;
+}
+
+.progress-percentage {
+    position: relative;
+    font-weight: 800;
+    color: white;
 }
 
 .town-grid {
@@ -261,5 +303,16 @@ const getBadgeLabel = (town) => {
     display: inline-block;
     font-size: 0.75rem;
     color: #495057;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7); }
+    50% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(0, 123, 255, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 123, 255, 0); }
+}
+
+.highlight-pulse {
+    animation: pulse 2s;
+    border: 2px solid #007bff !important;
 }
 </style>
