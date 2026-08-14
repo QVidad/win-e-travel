@@ -27,4 +27,9 @@ class Town extends Model
     {
         return $this->hasMany(Destination::class)->orderBy('order');
     }
+
+    public function simulation()
+    {
+        return $this->hasOne(Simulation::class);
+    }
 }

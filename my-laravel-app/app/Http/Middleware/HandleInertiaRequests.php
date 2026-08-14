@@ -34,6 +34,21 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'isFinalBossUnlocked' => function () use ($request) {
+                if (!$request->user() || $request->user()->role !== 'student') {
+                    return false;
+                }
+                
+                $townsCount = \App\Models\Town::where('status', 'published')->count();
+                $completedTownsCount = \App\Models\ModuleProgress::where('user_id', $request->user()->id)
+                    ->whereHas('courseModule', function ($q) {
+                        $q->where('type', 'town_chapter');
+                    })
+                    ->where('passed', true)
+                    ->count();
+
+                return $townsCount > 0 && $completedTownsCount >= $townsCount;
+            },
         ];
     }
 }

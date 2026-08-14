@@ -34,7 +34,7 @@
                         <div class="mb-1"><i class="fas fa-compass fa-lg"></i></div>
                         <div>Dare to Discover</div>
                     </Link>
-                    <Link 
+                    <Link
                         :href="route('simulation.index')" 
                         class="text-decoration-none text-center small" 
                         :class="$page.url.startsWith('/simulation') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"

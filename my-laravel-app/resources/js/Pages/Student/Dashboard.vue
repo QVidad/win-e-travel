@@ -124,7 +124,6 @@
                             <div class="progress-bar-custom mb-3">
                                 <div class="progress-fill" :style="{ width: (discoverCompleted / 21) * 100 + '%' }"></div>
                             </div>
-
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="small text-muted">
                                     <span>{{ discoverCompleted }}</span>/21 Completed
@@ -133,25 +132,15 @@
                             </div>
 
                             <div class="chapter-progress mb-3">
-                                <div class="chapter-dot completed"></div>
-                                <div class="chapter-dot"></div>
-                                <div class="chapter-dot"></div>
+                                <div class="chapter-dot" :class="{ 'completed': discoverCompleted >= 1 }"></div>
+                                <div class="chapter-dot" :class="{ 'completed': discoverCompleted >= 2 }"></div>
+                                <div class="chapter-dot" :class="{ 'completed': discoverCompleted >= 3 }"></div>
                                 <div class="chapter-dot">...</div>
                             </div>
 
-                            <div v-if="foundationCompleted < 4" class="lock-overlay">
-                                <div class="lock-icon">
-                                    <i class="fas fa-lock"></i>
-                                </div>
-                                <p class="small text-muted mb-0">Complete Go Beyond Books first</p>
-                            </div>
-
-                            <Link v-if="foundationCompleted >= 4" :href="route('towns.index')" class="btn btn-journey w-100" style="background-color: #f5576c; color: white;">
+                            <Link :href="route('towns.index')" class="btn btn-journey w-100" style="background-color: #ff9ed2; color: white;">
                                 <i class="fas fa-arrow-right me-2"></i>Explore Towns
                             </Link>
-                            <button v-else class="btn btn-outline-secondary w-100 btn-journey" disabled>
-                                <i class="fas fa-lock me-2"></i>Locked
-                            </button>
                         </div>
                     </div>
 
@@ -182,19 +171,9 @@
                                 <div class="chapter-dot">...</div>
                             </div>
 
-                            <div v-if="discoverCompleted < 21" class="lock-overlay">
-                                <div class="lock-icon">
-                                    <i class="fas fa-lock"></i>
-                                </div>
-                                <p class="small text-muted mb-0">Complete Dare to Discover first</p>
-                            </div>
-
-                            <Link v-if="discoverCompleted >= 21" :href="route('simulation.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
-                                <i class="fas fa-arrow-right me-2"></i>Start Simulation
+                            <Link :href="route('simulation.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
+                                <i class="fas fa-arrow-right me-2"></i>Adventure Awaits
                             </Link>
-                            <button v-else class="btn btn-outline-secondary w-100 btn-journey" disabled>
-                                <i class="fas fa-lock me-2"></i>Locked
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -241,7 +220,7 @@ const overallPercent = computed(() => props.progress?.overallPercentage ?? Math.
 const progressCircleStyle = computed(() => {
     const degrees = (overallPercent.value / 100) * 360;
     return {
-        background: `conic-gradient(#0a472e 0deg ${degrees}deg, #e9ecef ${degrees}deg 360deg)`
+        background: `conic-gradient(#ffc107 0deg ${degrees}deg, rgba(255,255,255,0.2) ${degrees}deg 360deg)`
     };
 });
 
@@ -401,13 +380,15 @@ onMounted(() => {
 }
 
 .overall-progress-circle {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: conic-gradient(#ffc107 0deg 0deg, rgba(255,255,255,0.2) 0deg 360deg);
     position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .overall-progress-circle::before {
@@ -427,3 +408,4 @@ onMounted(() => {
     color: #0a472e;
 }
 </style>
+ 

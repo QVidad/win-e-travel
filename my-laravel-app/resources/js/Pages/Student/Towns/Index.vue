@@ -183,7 +183,7 @@ const getBadgeLabel = (town) => {
 const progressCircleStyle = computed(() => {
     const degrees = props.towns.length > 0 ? (props.completedCount / props.towns.length) * 360 : 0;
     return {
-        background: `conic-gradient(#0a472e 0deg ${degrees}deg, rgba(255,255,255,0.3) ${degrees}deg 360deg)`
+        background: `conic-gradient(#ffc107 0deg ${degrees}deg, rgba(255,255,255,0.2) ${degrees}deg 360deg)`
     };
 });
 </script>
@@ -210,8 +210,9 @@ const progressCircleStyle = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: conic-gradient(#0a472e 0deg 0deg, rgba(255,255,255,0.3) 0deg 360deg);
+    background: conic-gradient(#ffc107 0deg 0deg, rgba(255,255,255,0.2) 0deg 360deg);
     position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .overall-progress-circle::before {

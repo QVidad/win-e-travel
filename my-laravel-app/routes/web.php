@@ -35,8 +35,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/towns/{slug}', [TownController::class, 'show'])->name('towns.show');
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
     Route::get('/foundation', [FoundationController::class, 'index'])->name('foundation.index');
-    Route::get('/simulation', [SimulationController::class, 'index'])->name('simulation.index');
+    Route::get('/simulations', [SimulationController::class, 'index'])->name('simulation.index');
+    Route::get('/simulation/final', [SimulationController::class, 'finalBoss'])->name('simulation.final');
+    Route::get('/simulation/{id}', [SimulationController::class, 'show'])->name('simulation.show');
     Route::post('/simulation/validate', [SimulationController::class, 'validateSpeech'])->name('simulation.validate');
+    Route::post('/simulation/{id}/complete', [SimulationController::class, 'complete'])->name('simulation.complete');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

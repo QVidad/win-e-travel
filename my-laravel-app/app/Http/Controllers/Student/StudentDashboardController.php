@@ -70,6 +70,8 @@ class StudentDashboardController extends Controller
             $continueModule = \App\Models\CourseModule::where('status', 'published')->orderBy('order')->first();
         }
 
+        $finalSimulation = \App\Models\Simulation::where('type', 'final')->first();
+
         return Inertia::render('Student/Dashboard', [
             'towns' => $towns,
             'achievements' => $achievements,
@@ -86,7 +88,8 @@ class StudentDashboardController extends Controller
                 'overallPercentage' => $overallProgress,
                 'foundationCompleted' => $foundationCompleted,
                 'townsCompleted' => $townsCompleted,
-                'simulationsUnlocked' => $user->simulations_unlocked_count ?? 0,
+                'simulationsUnlocked' => $user->simulations_completed ?? 0,
+                'finalSimulationId' => $finalSimulation ? $finalSimulation->id : null,
                 'continueModule' => $continueModule ? [
                     'id' => $continueModule->id,
                     'title' => $continueModule->title,

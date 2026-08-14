@@ -97,10 +97,14 @@
                     </div>
 
                     <!-- Completed / Launch Simulation Button -->
-                    <Link :href="route('simulation.index')" class="btn btn-success simulation-btn w-100 shadow-sm text-center text-white text-decoration-none">
+                    <Link v-if="town.simulation" :href="route('simulation.show', town.simulation.id)" class="btn btn-success simulation-btn w-100 shadow-sm text-center text-white text-decoration-none">
                         <i class="fas fa-play me-2"></i>
                         Launch {{ town.name }} Simulation
                     </Link>
+                    <button v-else disabled class="btn btn-secondary simulation-btn w-100 shadow-sm text-center text-white">
+                        <i class="fas fa-lock me-2"></i>
+                        Simulation Not Available
+                    </button>
                 </div>
             </div>
         </div>

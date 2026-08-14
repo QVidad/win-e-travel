@@ -43,12 +43,9 @@ class TownController extends Controller
             if ($isCompleted) {
                 $status = 'completed';
                 $completedCount++;
-                $isNextAvailable = true; // Unlock the next one
-            } elseif ($isNextAvailable) {
-                $status = 'available';
-                $isNextAvailable = false; // Lock all subsequent ones until this is passed
             } else {
-                $status = 'locked';
+                // TEMPORARY BYPASS: All towns available for testing
+                $status = 'available';
             }
             
             $town->progress_status = $status;
@@ -66,7 +63,7 @@ class TownController extends Controller
     {
         $town = Town::with(['destinations' => function ($query) {
             $query->where('is_visible', true)->orderBy('order');
-        }])->where('slug', $slug)->firstOrFail();
+        }, 'simulation'])->where('slug', $slug)->firstOrFail();
 
         return Inertia::render('Student/Towns/Show', [
             'town' => $town,

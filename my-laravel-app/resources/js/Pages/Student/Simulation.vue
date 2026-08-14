@@ -2,19 +2,24 @@
     <StudentLayout>
         <div class="simulation-container py-4">
             <div class="container">
-                <!-- Page Header matching simulation.html -->
-                <div class="page-header">
+                <!-- Page Header matching overall design -->
+                <div class="welcome-banner mb-4">
                     <div class="row align-items-center">
                         <div class="col-lg-8">
-                            <h2 class="fw-bold mb-2">
+                            <h2 class="display-6 fw-bold mb-3">
                                 <i class="fas fa-mountain me-2"></i>
-                                Stage 3: Adventure Awaits Simulation Engine
+                                Adventure Awaits
                             </h2>
-                            <p class="mb-0 opacity-90">Live Webcam Virtual Background & Real-Time Speech Recognition Tour Guiding Simulation</p>
+                            <p class="mb-0 opacity-90 fs-5">Live Virtual Tour Guiding Simulation Engine</p>
                         </div>
-                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                            <div class="d-inline-block bg-white bg-opacity-25 rounded-4 px-4 py-2 fw-bold">
-                                <i class="fas fa-smile text-warning me-1"></i> Satisfaction: {{ satisfactionScore }}%
+                        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                            <div class="d-flex justify-content-lg-end">
+                                <div class="text-center">
+                                    <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
+                                        <span class="progress-percentage fs-4">{{ satisfactionScore }}%</span>
+                                    </div>
+                                    <span class="small fw-bold text-white opacity-75">Tourist Satisfaction</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -75,9 +80,9 @@
 
                             <div class="card-body p-4">
                                 <!-- Scenario Prompt -->
-                                <div class="tourist-question-card mb-4">
-                                    <h5 class="fw-bold text-white mb-2"><i class="fas fa-user-circle me-2"></i>Tourist Scenario Prompt</h5>
-                                    <p class="mb-0 opacity-90 fs-6">{{ currentStepData.prompt }}</p>
+                                <div class="tourist-question-card mb-4 shadow-sm border-0">
+                                    <h5 class="fw-bold text-dark mb-2"><i class="fas fa-user-circle me-2 text-primary"></i>Tourist Scenario Prompt</h5>
+                                    <p class="mb-0 text-muted fs-6">{{ currentStepData.prompt }}</p>
                                 </div>
 
                                 <!-- Speech Recognition Pipeline Section -->
@@ -231,6 +236,10 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import axios from 'axios';
 
+const props = defineProps({
+    simulation: Object
+});
+
 const currentStepIndex = ref(0);
 const satisfactionScore = ref(90);
 const totalXpEarned = ref(150);
@@ -239,6 +248,13 @@ const selectedOptionIndex = ref(null);
 const feedbackText = ref('');
 const feedbackIsGood = ref(true);
 const showCompleteModal = ref(false);
+
+const progressCircleStyle = computed(() => {
+    const degrees = (satisfactionScore.value / 100) * 360;
+    return {
+        background: `conic-gradient(#ffc107 0deg ${degrees}deg, rgba(255,255,255,0.2) ${degrees}deg 360deg)`
+    };
+});
 
 // Webcam & Virtual Canvas States
 const isWebcamActive = ref(false);
@@ -254,57 +270,12 @@ const matchedKeywordsList = ref([]);
 const speechSupported = ref(false);
 let recognition = null;
 
-const steps = [
-    { title: 'Preparation' },
-    { title: 'Briefing' },
-    { title: 'Guiding' },
-    { title: 'Conclusion' },
-];
+const scenarioData = props.simulation ? props.simulation.scenarios : [];
 
-const scenarioData = [
-    {
-        location: 'St. William Cathedral & Sinking Bell Tower',
-        title: 'Arrival in Laoag City Center',
-        prompt: 'Your tour group steps out in front of the Sinking Bell Tower in Laoag City. A tourist asks: "Why is this bell tower located so far away from the main church structure?" How do you respond?',
-        image: '/assets/images/Laoag.jpg',
-        keywords: ['Earthquake Baroque', 'Augustinian', 'Sandy', '85 Meters'],
-        options: [
-            {
-                text: 'Explain that Augustinian friars built it 85 meters away due to earthquake precautions and sandy ground foundation conditions.',
-                score: 10,
-                feedback: 'Excellent response! Accurate historical context regarding earthquake baroque design.',
-                isGood: true,
-            },
-            {
-                text: 'Tell them it was accidentally built in the wrong location by Spanish architects.',
-                score: -10,
-                feedback: 'Incorrect. The placement was deliberate due to soil and structural stability considerations.',
-                isGood: false,
-            },
-        ],
-    },
-    {
-        location: 'Paoay UNESCO World Heritage Church',
-        title: 'Guiding at Paoay Church',
-        prompt: 'As you approach Paoay Church, guests are amazed by the thick buttresses. What key feature should you highlight in your spoken commentary?',
-        image: '/assets/images/Paoay.jpg',
-        keywords: ['24 Buttresses', 'UNESCO', 'Coral Stone', 'Sugar Cane'],
-        options: [
-            {
-                text: 'Highlight the 24 massive coral stone buttresses built to withstand severe seismic activity, inscribing it into UNESCO World Heritage list.',
-                score: 10,
-                feedback: 'Outstanding commentary! Guests are impressed by your heritage knowledge.',
-                isGood: true,
-            },
-            {
-                text: 'Focus only on taking photos and skip explaining the architectural history.',
-                score: -5,
-                feedback: 'Tourists appreciate photo opportunities, but expected historical commentary.',
-                isGood: false,
-            },
-        ],
-    },
-];
+const stepNames = ['Preparation', 'Briefing', 'Guiding', 'Conclusion', 'Debriefing'];
+const steps = computed(() => {
+    return scenarioData.map((_, idx) => ({ title: stepNames[idx] || `Stage ${idx + 1}` }));
+});
 
 const currentStepData = computed(() => scenarioData[Math.min(currentStepIndex.value, scenarioData.length - 1)]);
 
@@ -497,22 +468,51 @@ const proceedNextStep = () => {
         }
     } else {
         showCompleteModal.value = true;
+        axios.post(route('simulation.complete', props.simulation.id)).catch(err => console.error(err));
     }
 };
 </script>
 
 <style scoped>
 .simulation-container {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
     min-height: 100vh;
 }
 
-.page-header {
+.welcome-banner {
     background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
-    border-radius: 20px;
-    padding: 30px;
+    border-radius: 30px;
+    padding: 40px;
     color: white;
-    margin: 30px 0;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.overall-progress-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(#ffc107 0deg 0deg, rgba(255,255,255,0.2) 0deg 360deg);
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.overall-progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-color: #1a5f7a; /* matching banner */
+    border-radius: 50%;
+}
+
+.progress-percentage {
+    position: relative;
+    font-weight: 800;
+    color: white;
 }
 
 .simulation-steps {
@@ -572,9 +572,9 @@ const proceedNextStep = () => {
 }
 
 .tourist-question-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 15px;
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    border-radius: 12px;
     padding: 20px 25px;
 }
 
