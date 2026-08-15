@@ -53,6 +53,7 @@ Route::middleware(['auth'])->prefix('educator')->name('educator.')->group(functi
     Route::get('/modules/{id}/edit', [EducatorModuleController::class, 'edit'])->name('modules.edit');
     Route::put('/modules/{id}', [EducatorModuleController::class, 'update'])->name('modules.update');
     Route::post('/modules/reorder', [EducatorModuleController::class, 'reorder'])->name('modules.reorder');
+    Route::post('/modules/{module}/simulation', [EducatorModuleController::class, 'updateSimulation'])->name('modules.simulation.update');
 
     Route::post('/modules/{module}/lessons', [LessonController::class, 'store'])->name('modules.lessons.store');
     Route::put('/modules/{module}/lessons/{lesson}', [LessonController::class, 'update'])->name('modules.lessons.update');

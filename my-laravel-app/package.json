@@ -21,6 +21,7 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
+        "@mediapipe/tasks-vision": "^1.0.1",
         "leaflet": "^1.9.4"
     }
 }

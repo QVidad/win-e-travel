@@ -80,10 +80,12 @@ class TownController extends Controller
             $query->orderBy('order');
         }])->where('code', 'town-' . $slug)->where('status', 'published')->firstOrFail();
 
-        $progress = \App\Models\ModuleProgress::where('user_id', \Illuminate\Support\Facades\Auth::id())
-            ->where('course_module_id', $module->id)
-            ->first();
-        $isCompleted = $progress && $progress->passed;
+        $progress = \App\Models\ModuleProgress::firstOrCreate(
+            ['user_id' => \Illuminate\Support\Facades\Auth::id(), 'course_module_id' => $module->id],
+            ['passed' => false, 'status' => 'in_progress', 'progress' => 0]
+        );
+
+        $isCompleted = $progress->passed;
 
         return Inertia::render('Student/Towns/Show', [
             'town' => $town,

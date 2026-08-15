@@ -73,16 +73,21 @@
 
                                 <!-- Location Header Overlay -->
                                 <div class="position-absolute bottom-0 start-0 end-0 p-3 bg-dark bg-opacity-75 text-white d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold"><i class="fas fa-map-marker-alt me-2 text-warning"></i>{{ currentStepData.location }}</span>
-                                    <span class="badge bg-warning text-dark">Step {{ currentStepIndex + 1 }} of {{ steps.length }}</span>
+                                    <span class="fw-bold"><i class="fas fa-map-marker-alt me-2 text-warning"></i>{{ currentStepData.title }}</span>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="badge bg-danger text-white fs-6 border border-light" :class="{ 'animate-pulse': timeRemaining <= 10 }">
+                                            <i class="fas fa-clock me-1"></i> {{ formatTime(timeRemaining) }}
+                                        </span>
+                                        <span class="badge bg-warning text-dark">Step {{ currentStepIndex + 1 }} of {{ steps.length }}</span>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="card-body p-4">
                                 <!-- Scenario Prompt -->
                                 <div class="tourist-question-card mb-4 shadow-sm border-0">
-                                    <h5 class="fw-bold text-dark mb-2"><i class="fas fa-user-circle me-2 text-primary"></i>Tourist Scenario Prompt</h5>
-                                    <p class="mb-0 text-muted fs-6">{{ currentStepData.prompt }}</p>
+                                    <h5 class="fw-bold text-dark mb-2"><i class="fas fa-bullhorn me-2 text-primary"></i>Your Turn to Guide</h5>
+                                    <p class="mb-0 text-muted fs-6">You are now at <strong>{{ currentStepData.title }}</strong>. Begin your commentary and make sure to mention the required keywords before the timer runs out!</p>
                                 </div>
 
                                 <!-- Speech Recognition Pipeline Section -->
@@ -102,36 +107,34 @@
 
                                     <!-- Action Buttons -->
                                     <div class="d-flex gap-2 mb-3">
-                                        <button @click="toggleSpeechRecognition" class="btn rounded-pill px-4 fw-bold shadow-sm" :class="isListening ? 'btn-danger' : 'btn-success'">
+                                        <button @click="toggleSpeechRecognition" class="btn rounded-pill px-4 fw-bold shadow-sm" :class="isListening ? 'btn-danger' : 'btn-success'" :disabled="stepAnswered">
                                             <i class="fas" :class="isListening ? 'fa-stop-circle me-1' : 'fa-microphone me-1'"></i>
                                             {{ isListening ? 'Stop Speech Commentary' : 'Start Spoken Commentary' }}
                                         </button>
-                                        <button v-if="spokenTranscript" @click="resetTranscript" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                                            Clear Speech
+                                        <button v-if="spokenTranscript && !stepAnswered" @click="resetTranscript" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                            Clear
+                                        </button>
+                                        <button v-if="spokenTranscript && !stepAnswered" @click="validateSpeechWithServer" class="btn btn-primary rounded-pill px-4 fw-bold ms-auto">
+                                            Submit Answer <i class="fas fa-check ms-1"></i>
                                         </button>
                                     </div>
 
                                     <!-- Live Speech Transcript Display Box -->
-                                    <div class="transcript-box p-3 bg-white rounded-3 border" style="min-height: 80px; max-height: 140px; overflow-y: auto;">
+                                    <div class="transcript-box p-3 bg-white rounded-3 border mb-3" style="min-height: 80px; max-height: 140px; overflow-y: auto;">
                                         <span v-if="spokenTranscript" class="text-dark fw-medium">{{ spokenTranscript }}</span>
                                         <span v-else class="text-muted italic small"><i class="fas fa-comment-dots me-1"></i>Click 'Start Spoken Commentary' and speak your response...</span>
                                     </div>
-                                </div>
 
-                                <!-- Multiple Choice Fallback Options -->
-                                <h6 class="fw-bold text-dark mb-3"><i class="fas fa-comments me-2 text-success"></i>Or Select Prepared Commentary Text:</h6>
-                                <div class="d-grid gap-3 mb-4">
-                                    <button
-                                        v-for="(option, idx) in currentStepData.options"
-                                        :key="idx"
-                                        type="button"
-                                        class="btn btn-outline-secondary text-start p-3 rounded-3 option-btn"
-                                        :class="{ selected: selectedOptionIndex === idx }"
-                                        @click="chooseOption(option, idx)"
-                                        :disabled="stepAnswered"
-                                    >
-                                        <strong class="text-success me-2">{{ String.fromCharCode(65 + idx) }}.</strong> {{ option.text }}
-                                    </button>
+                                    <!-- Typing Fallback -->
+                                    <h6 class="fw-bold text-dark mb-2 fs-6"><i class="fas fa-keyboard me-2 text-success"></i>Or Type Your Commentary:</h6>
+                                    <textarea 
+                                        v-model="spokenTranscript" 
+                                        class="form-control rounded-3" 
+                                        rows="2" 
+                                        placeholder="Type your commentary here if you cannot use the microphone..." 
+                                        :disabled="stepAnswered || isListening" 
+                                        @input="parseKeywordsFromTranscript(spokenTranscript)"
+                                    ></textarea>
                                 </div>
 
                                 <!-- Validation Keyword Cloud -->
@@ -139,12 +142,12 @@
                                     <h6 class="fw-bold text-dark mb-2"><i class="fas fa-tags me-2 text-primary"></i>Required Validation Keywords:</h6>
                                     <div class="keyword-cloud">
                                         <span
-                                            v-for="kw in currentStepData.keywords"
-                                            :key="kw"
+                                            v-for="(kw, idx) in currentStepData.keywords"
+                                            :key="'kw-'+idx"
                                             class="keyword-tag"
                                             :class="isKeywordMatched(kw) ? 'covered bg-success text-white border-success' : ''"
                                         >
-                                            <i class="fas fa-check me-1" v-if="isKeywordMatched(kw)"></i>{{ kw }}
+                                            <i class="fas fa-check me-1" v-if="isKeywordMatched(kw)"></i>{{ kw.word }} ({{ kw.points }} pts)
                                         </span>
                                     </div>
                                 </div>
@@ -184,10 +187,13 @@
                                 <small class="text-secondary">Speak key terms like <strong>Earthquake Baroque</strong>, <strong>UNESCO</strong>, and historical dates out loud to maximize score accuracy.</small>
                             </div>
 
-                            <!-- Live Keyword Score Counter -->
+                            <!-- Live Points Counter -->
                             <div class="p-3 bg-success bg-opacity-10 rounded-3 text-start border border-success">
-                                <small class="text-success d-block mb-1 fw-bold">KEYWORDS MATCHED:</small>
-                                <h4 class="fw-bold text-success mb-0">{{ matchedKeywordsList.length }} / {{ currentStepData.keywords.length }}</h4>
+                                <small class="text-success d-block mb-1 fw-bold">POINTS EARNED:</small>
+                                <h4 class="fw-bold text-success mb-0">
+                                    {{ currentStepData.keywords.filter(kw => isKeywordMatched(kw)).reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }} / 
+                                    {{ currentStepData.keywords.reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }}
+                                </h4>
                             </div>
                         </div>
                     </div>
@@ -200,29 +206,44 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content rounded-4 shadow-lg border-0">
                     <div class="modal-body text-center p-4">
-                        <i class="fas fa-trophy text-warning display-3 mb-3"></i>
-                        <h3 class="fw-bold text-success mb-2">Simulation Complete!</h3>
-                        <p class="text-muted mb-4">You successfully completed the Ilocos Norte Tour Guiding Simulation.</p>
+                        <i :class="isPassed ? 'fas fa-trophy text-warning' : 'fas fa-times-circle text-danger'" class="display-3 mb-3"></i>
+                        <h3 class="fw-bold mb-2" :class="isPassed ? 'text-success' : 'text-danger'">
+                            {{ isPassed ? 'Simulation Complete!' : 'Simulation Failed' }}
+                        </h3>
+                        <p class="text-muted mb-4">
+                            {{ isPassed ? 'You successfully completed the Tour Guiding Simulation.' : 'You did not meet the required satisfaction score to pass this simulation.' }}
+                        </p>
 
                         <div class="bg-light p-3 rounded-4 mb-4 border">
                             <div class="row">
                                 <div class="col-6">
                                     <small class="text-muted d-block">Satisfaction Score</small>
-                                    <h3 class="fw-bold text-success mb-0">{{ satisfactionScore }}%</h3>
+                                    <h3 class="fw-bold mb-0" :class="isPassed ? 'text-success' : 'text-danger'">{{ Math.round(satisfactionScore) }}%</h3>
+                                    <small class="text-muted">Required: {{ props.simulation.passing_score || 80 }}%</small>
                                 </div>
                                 <div class="col-6">
                                     <small class="text-muted d-block">XP Points Earned</small>
-                                    <h3 class="fw-bold text-warning mb-0">+{{ totalXpEarned }} XP</h3>
+                                    <h3 class="fw-bold text-warning mb-0">+{{ isPassed ? totalXpEarned : 0 }} XP</h3>
                                 </div>
                             </div>
                         </div>
 
-                        <Link :href="route('achievements.index')" class="btn btn-warning rounded-pill px-4 fw-bold me-2 mb-2">
-                            <i class="fas fa-certificate me-1"></i> View Certificate
-                        </Link>
-                        <Link :href="route('dashboard')" class="btn btn-success rounded-pill px-4 fw-bold mb-2">
-                            Return to Dashboard
-                        </Link>
+                        <div v-if="isPassed">
+                            <Link :href="route('achievements.index')" class="btn btn-warning rounded-pill px-4 fw-bold me-2 mb-2">
+                                <i class="fas fa-certificate me-1"></i> View Certificate
+                            </Link>
+                            <Link :href="route('dashboard')" class="btn btn-success rounded-pill px-4 fw-bold mb-2">
+                                Return to Dashboard
+                            </Link>
+                        </div>
+                        <div v-else>
+                            <button @click="retrySimulation" class="btn btn-primary rounded-pill px-4 fw-bold me-2 mb-2">
+                                <i class="fas fa-redo me-1"></i> Retry Simulation
+                            </button>
+                            <Link :href="route('towns.show', props.simulation.town?.slug || '')" class="btn btn-light border rounded-pill px-4 fw-bold mb-2">
+                                Back to Town
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -232,22 +253,28 @@
 
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import axios from 'axios';
+import { ImageSegmenter, FilesetResolver } from '@mediapipe/tasks-vision';
 
 const props = defineProps({
     simulation: Object
 });
 
 const currentStepIndex = ref(0);
-const satisfactionScore = ref(90);
-const totalXpEarned = ref(150);
+const satisfactionScore = ref(0);
+const totalXpEarned = ref(0);
 const stepAnswered = ref(false);
 const selectedOptionIndex = ref(null);
 const feedbackText = ref('');
 const feedbackIsGood = ref(true);
 const showCompleteModal = ref(false);
+const isPassed = ref(false);
+
+const retrySimulation = () => {
+    window.location.reload();
+};
 
 const progressCircleStyle = computed(() => {
     const degrees = (satisfactionScore.value / 100) * 360;
@@ -272,15 +299,67 @@ let recognition = null;
 
 const scenarioData = props.simulation ? props.simulation.scenarios : [];
 
-const stepNames = ['Preparation', 'Briefing', 'Guiding', 'Conclusion', 'Debriefing'];
 const steps = computed(() => {
-    return scenarioData.map((_, idx) => ({ title: stepNames[idx] || `Stage ${idx + 1}` }));
+    return scenarioData.map((s) => ({ title: s.title }));
 });
 
 const currentStepData = computed(() => scenarioData[Math.min(currentStepIndex.value, scenarioData.length - 1)]);
 
+// Timer States
+const timeRemaining = ref(0);
+let timerInterval = null;
+
+const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+};
+
+const startTimer = () => {
+    if (timerInterval) clearInterval(timerInterval);
+    timeRemaining.value = currentStepData.value.time_limit || 60;
+    timerInterval = setInterval(() => {
+        if (timeRemaining.value > 0) {
+            timeRemaining.value--;
+        } else {
+            clearInterval(timerInterval);
+            if (isListening.value) {
+                toggleSpeechRecognition();
+            } else {
+                validateSpeechWithServer();
+            }
+        }
+    }, 1000);
+};
+
+// Virtual Background Segmenter State
+let imageSegmenter = null;
+const isSegmenterReady = ref(false);
+
+const initSegmenter = async () => {
+    try {
+        const vision = await FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+        );
+        imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
+            baseOptions: {
+                modelAssetPath: "/assets/models/selfie_segmenter.tflite",
+                delegate: "GPU"
+            },
+            runningMode: "VIDEO",
+            outputCategoryMask: true,
+            outputConfidenceMasks: false
+        });
+        isSegmenterReady.value = true;
+    } catch (e) {
+        console.error("Failed to initialize MediaPipe Segmenter:", e);
+    }
+};
+
 // Web Speech API Initialization
 onMounted(() => {
+    initSegmenter();
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
         speechSupported.value = true;
@@ -291,7 +370,7 @@ onMounted(() => {
 
         recognition.onresult = (event) => {
             let current = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
+            for (let i = 0; i < event.results.length; i++) {
                 current += event.results[i][0].transcript;
             }
             spokenTranscript.value = current;
@@ -306,9 +385,12 @@ onMounted(() => {
             isListening.value = false;
         };
     }
+    
+    startTimer();
 });
 
 onUnmounted(() => {
+    if (timerInterval) clearInterval(timerInterval);
     stopWebcam();
     if (recognition && isListening.value) {
         recognition.stop();
@@ -325,6 +407,7 @@ const toggleWebcam = async () => {
             if (webcamVideo.value) {
                 webcamVideo.value.srcObject = mediaStream;
                 isWebcamActive.value = true;
+                await nextTick(); // Wait for canvas to be visible and get real dimensions
                 renderCanvasOverlay();
             }
         } catch (e) {
@@ -354,6 +437,14 @@ const renderCanvasOverlay = () => {
     const bgImg = new Image();
     bgImg.src = currentStepData.value.image;
 
+    let lastVideoTime = -1;
+
+    // Mask processing canvases
+    const maskCanvas = document.createElement('canvas');
+    const maskCtx = maskCanvas.getContext('2d');
+    const personCanvas = document.createElement('canvas');
+    const personCtx = personCanvas.getContext('2d');
+
     const draw = () => {
         if (!isWebcamActive.value) return;
         ctx.clearRect(0, 0, width, height);
@@ -363,19 +454,62 @@ const renderCanvasOverlay = () => {
             ctx.drawImage(bgImg, 0, 0, width, height);
         }
 
-        // Draw webcam feed in lower right corner inset
         if (webcamVideo.value.readyState === webcamVideo.value.HAVE_ENOUGH_DATA) {
-            const insetWidth = width * 0.35;
-            const insetHeight = height * 0.45;
+            const videoWidth = webcamVideo.value.videoWidth;
+            const videoHeight = webcamVideo.value.videoHeight;
+            const insetWidth = width * 0.45; // Increased slightly for better presence
+            const insetHeight = (insetWidth / videoWidth) * videoHeight;
             const x = width - insetWidth - 15;
             const y = height - insetHeight - 55;
 
-            ctx.save();
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(x, y, insetWidth, insetHeight);
-            ctx.drawImage(webcamVideo.value, x, y, insetWidth, insetHeight);
-            ctx.restore();
+            if (isSegmenterReady.value && imageSegmenter) {
+                if (webcamVideo.value.currentTime !== lastVideoTime) {
+                    lastVideoTime = webcamVideo.value.currentTime;
+                    const startTimeMs = performance.now();
+                    const segmentation = imageSegmenter.segmentForVideo(webcamVideo.value, startTimeMs);
+                    
+                    if (segmentation && segmentation.categoryMask) {
+                        const mask = segmentation.categoryMask;
+                        maskCanvas.width = mask.width;
+                        maskCanvas.height = mask.height;
+                        
+                        personCanvas.width = mask.width;
+                        personCanvas.height = mask.height;
+
+                        const maskArray = mask.getAsUint8Array();
+                        const imageData = maskCtx.createImageData(mask.width, mask.height);
+                        
+                        for (let i = 0; i < maskArray.length; i++) {
+                            const isPerson = maskArray[i] === 0; // 0 is person in this model, 255 is background
+                            const offset = i * 4;
+                            imageData.data[offset] = 0;
+                            imageData.data[offset + 1] = 0;
+                            imageData.data[offset + 2] = 0;
+                            imageData.data[offset + 3] = isPerson ? 255 : 0;
+                        }
+                        maskCtx.putImageData(imageData, 0, 0);
+
+                        personCtx.clearRect(0, 0, personCanvas.width, personCanvas.height);
+                        personCtx.drawImage(maskCanvas, 0, 0);
+                        personCtx.globalCompositeOperation = 'source-in';
+                        personCtx.drawImage(webcamVideo.value, 0, 0, personCanvas.width, personCanvas.height);
+                        personCtx.globalCompositeOperation = 'source-over';
+                    }
+                }
+
+                // Draw the segmented person onto main canvas
+                if (personCanvas.width > 0) {
+                    ctx.drawImage(personCanvas, x, y, insetWidth, insetHeight);
+                }
+            } else {
+                // Fallback while segmenter is loading
+                ctx.save();
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, insetWidth, insetHeight);
+                ctx.drawImage(webcamVideo.value, x, y, insetWidth, insetHeight);
+                ctx.restore();
+            }
         }
 
         animFrameId = requestAnimationFrame(draw);
@@ -411,19 +545,22 @@ const parseKeywordsFromTranscript = (text) => {
     const lower = text.toLowerCase();
     const matches = [];
     currentStepData.value.keywords.forEach(kw => {
-        if (lower.includes(kw.toLowerCase())) {
-            matches.push(kw);
+        if (lower.includes(kw.word.toLowerCase())) {
+            matches.push(kw.word);
         }
     });
     matchedKeywordsList.value = matches;
 };
 
 const isKeywordMatched = (kw) => {
-    return matchedKeywordsList.value.includes(kw) || stepAnswered.value;
+    return matchedKeywordsList.value.includes(kw.word) || stepAnswered.value;
 };
+
+const stepScores = ref([]);
 
 const validateSpeechWithServer = async () => {
     if (!spokenTranscript.value) return;
+    if (timerInterval) clearInterval(timerInterval); // stop timer on submission
     try {
         const response = await axios.post(route('simulation.validate'), {
             transcript: spokenTranscript.value,
@@ -433,16 +570,44 @@ const validateSpeechWithServer = async () => {
         if (response.data.success) {
             matchedKeywordsList.value = response.data.matched_keywords;
             stepAnswered.value = true;
-            satisfactionScore.value = Math.min(100, satisfactionScore.value + (response.data.match_count * 5));
+            
+            const stepScore = response.data.score_percent;
+            const totalKw = currentStepData.value.keywords.length;
+            
+            stepScores.value[currentStepIndex.value] = stepScore;
+            
+            const totalScores = stepScores.value.reduce((a,b) => a+b, 0);
+            satisfactionScore.value = totalScores / (currentStepIndex.value + 1);
+
             totalXpEarned.value += response.data.xp_earned;
-            feedbackText.value = `Speech processed! Matched ${response.data.match_count} of ${currentStepData.value.keywords.length} keywords. Earned +${response.data.xp_earned} XP!`;
-            feedbackIsGood.value = response.data.match_count > 0;
+            feedbackText.value = `Speech processed! Score: ${Math.round(stepScore)}% (${response.data.match_count} keywords matched)`;
+            feedbackIsGood.value = response.data.match_count > 0 || totalKw === 0;
         }
     } catch (e) {
         // Fallback to local keyword validation
         stepAnswered.value = true;
-        feedbackText.value = `Commentary speech recorded. Matched ${matchedKeywordsList.value.length} keywords.`;
-        feedbackIsGood.value = true;
+        
+        let earnedPoints = 0;
+        let totalPoints = 0;
+        
+        currentStepData.value.keywords.forEach(kw => {
+            const pts = Number(kw.points) || 0;
+            totalPoints += pts;
+            if (matchedKeywordsList.value.includes(kw.word)) {
+                earnedPoints += pts;
+            }
+        });
+        
+        let stepScore = 100;
+        if (totalPoints > 0) {
+            stepScore = (earnedPoints / totalPoints) * 100;
+        }
+        stepScores.value[currentStepIndex.value] = stepScore;
+        const totalScores = stepScores.value.reduce((a,b) => a+b, 0);
+        satisfactionScore.value = totalScores / (currentStepIndex.value + 1);
+        
+        feedbackText.value = `Commentary recorded. Score: ${Math.round(stepScore)}% (${earnedPoints} / ${totalPoints} points)`;
+        feedbackIsGood.value = earnedPoints > 0 || totalPoints === 0;
     }
 };
 
@@ -466,9 +631,11 @@ const proceedNextStep = () => {
         if (isWebcamActive.value) {
             renderCanvasOverlay();
         }
+        startTimer();
     } else {
+        const isPassed = satisfactionScore.value >= (props.simulation.passing_score || 80);
         showCompleteModal.value = true;
-        axios.post(route('simulation.complete', props.simulation.id)).catch(err => console.error(err));
+        axios.post(route('simulation.complete', props.simulation.id), { passed: isPassed }).catch(err => console.error(err));
     }
 };
 </script>

@@ -303,6 +303,102 @@
                     </div>
                 </div>
 
+                <!-- 6. Simulation Engine Settings (Town Chapters Only) -->
+                <div v-if="module.type === 'town_chapter'" class="mb-4 pt-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <label class="form-label fw-bold text-dark mb-0">
+                            <i class="fas fa-gamepad text-primary me-2"></i> Simulation Engine Settings
+                        </label>
+                        <button type="button" @click="saveSimulation" class="btn btn-sm btn-primary rounded-pill fw-bold shadow-sm px-3" :disabled="simulationForm.processing">
+                            <span v-if="simulationForm.processing"><i class="fas fa-spinner fa-spin me-1"></i> Saving...</span>
+                            <span v-else-if="simulationForm.recentlySuccessful"><i class="fas fa-check me-1"></i> Saved!</span>
+                            <span v-else><i class="fas fa-save me-1"></i> Save Sim Settings</span>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-light p-4 rounded-4 border">
+                        <!-- Simulation Form Errors -->
+                        <div v-if="Object.keys(simulationForm.errors).length > 0" class="alert alert-danger rounded-3 mb-4 shadow-sm border-danger border-opacity-50">
+                            <h6 class="fw-bold mb-2 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Please fix the following errors to save your simulation settings:</h6>
+                            <ul class="mb-0 small text-danger">
+                                <li v-for="(error, key) in simulationForm.errors" :key="key">{{ error }}</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">Required Passing Score (%)</label>
+                            <input 
+                                v-model.number="simulationForm.passing_score" 
+                                type="number" 
+                                min="1" max="100" 
+                                class="form-control rounded-3" 
+                                style="max-width: 200px;"
+                            >
+                            <small class="text-muted d-block mt-1">Students must achieve this satisfaction score to pass the simulation.</small>
+                        </div>
+
+                        <h6 class="fw-bold mb-3 border-bottom pb-2">Attraction Scenarios</h6>
+                        <div v-if="simulationForm.scenarios.length === 0" class="text-muted small">
+                            Add attractions first to configure their simulation scenarios.
+                        </div>
+                        
+                        <div v-for="(scenario, index) in simulationForm.scenarios" :key="'scen-'+index" class="card border mb-3 shadow-sm rounded-4">
+                            <div class="card-header bg-white border-bottom fw-bold text-primary d-flex justify-content-between align-items-center">
+                                <span>{{ scenario.title }}</span>
+                                <span class="badge bg-light text-dark border">
+                                    Total Points: <strong :class="totalPoints(scenario.keywords) !== 100 ? 'text-danger' : 'text-success'">{{ totalPoints(scenario.keywords) }}</strong>
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark small">Time Limit (Seconds)</label>
+                                    <input 
+                                        v-model.number="scenario.time_limit" 
+                                        type="number" 
+                                        min="10" 
+                                        class="form-control form-control-sm rounded-3"
+                                        style="max-width: 150px;"
+                                    >
+                                </div>
+                                
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold text-dark small mb-0">Expected Keywords & Points</label>
+                                        <button type="button" @click="addKeyword(scenario)" class="btn btn-sm btn-outline-success rounded-pill px-3 py-0">
+                                            <i class="fas fa-plus"></i> Add Keyword
+                                        </button>
+                                    </div>
+                                    
+                                    <div v-if="!scenario.keywords || scenario.keywords.length === 0" class="text-muted small fst-italic mb-2">
+                                        No keywords defined. Students will automatically get 0 points.
+                                    </div>
+                                    
+                                    <div v-for="(kw, kIdx) in scenario.keywords" :key="'kw-'+index+'-'+kIdx" class="d-flex gap-2 mb-2 align-items-center">
+                                        <input 
+                                            v-model="kw.word" 
+                                            type="text" 
+                                            class="form-control form-control-sm rounded-3 flex-grow-1"
+                                            placeholder="Keyword or phrase (e.g., Batac Empanada)"
+                                        >
+                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                            <input 
+                                                v-model.number="kw.points" 
+                                                type="number" 
+                                                class="form-control text-center"
+                                                min="1"
+                                            >
+                                            <span class="input-group-text bg-light">pts</span>
+                                        </div>
+                                        <button type="button" @click="removeKeyword(scenario, kIdx)" class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 28px; height: 28px;">
+                                            <i class="fas fa-times" style="font-size: 0.75rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Submit Button Bar -->
                 <div class="d-flex justify-content-end gap-2 mt-5 border-top pt-4">
                     <Link :href="route('educator.modules.index')" class="btn btn-light border fw-bold px-4">Cancel / Back</Link>
@@ -550,7 +646,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useForm, Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
 
@@ -566,6 +662,10 @@ const props = defineProps({
         default: 5,
     },
     defaultTownImage: String,
+    simulation: {
+        type: Object,
+        default: null
+    }
 });
 
 // Image Position Editor State
@@ -589,6 +689,86 @@ const handlePositionSave = (newPosition) => {
         lessonForm.value.cover_image_position = newPosition;
     }
     showPositionEditor.value = false;
+};
+
+// Simulation Form (Town Chapters Only)
+const simulationForm = useForm({
+    passing_score: props.simulation?.passing_score ?? 80,
+    scenarios: [],
+});
+
+const syncSimulationScenarios = () => {
+    if (props.module.type !== 'town_chapter') return;
+    
+    let existingScenarios = [];
+    if (props.simulation && props.simulation.scenarios) {
+        try {
+            existingScenarios = typeof props.simulation.scenarios === 'string' ? JSON.parse(props.simulation.scenarios) : props.simulation.scenarios;
+        } catch (e) {
+            existingScenarios = [];
+        }
+    }
+    
+    const scenarios = props.module.lessons.map(lesson => {
+        const existing = existingScenarios.find(s => s.lesson_id === lesson.id);
+        
+        // Convert old string format to new array format if necessary
+        let kwArray = existing?.keywords ?? [];
+        if (typeof kwArray === 'string') {
+            kwArray = kwArray.split(',').map(k => k.trim()).filter(k => k).map(k => ({ word: k, points: 10 }));
+        }
+        
+        return {
+            lesson_id: lesson.id,
+            title: lesson.title,
+            keywords: kwArray,
+            time_limit: existing?.time_limit ?? 60
+        };
+    });
+
+    const townExisting = existingScenarios.find(s => s.lesson_id === null || s.lesson_id === 'town');
+    let townKwArray = townExisting?.keywords ?? [];
+    if (typeof townKwArray === 'string') {
+        townKwArray = townKwArray.split(',').map(k => k.trim()).filter(k => k).map(k => ({ word: k, points: 10 }));
+    }
+    
+    scenarios.unshift({
+        lesson_id: null,
+        title: props.module.title + ' (Town Overview)',
+        keywords: townKwArray,
+        time_limit: townExisting?.time_limit ?? 60
+    });
+    
+    simulationForm.scenarios = scenarios;
+};
+
+syncSimulationScenarios();
+
+watch(() => props.module.lessons, () => {
+    syncSimulationScenarios();
+}, { deep: true });
+
+const addKeyword = (scenario) => {
+    if (!scenario.keywords) scenario.keywords = [];
+    scenario.keywords.push({ word: '', points: 10 });
+};
+
+const removeKeyword = (scenario, index) => {
+    scenario.keywords.splice(index, 1);
+};
+
+const totalPoints = (keywords) => {
+    if (!keywords || !Array.isArray(keywords)) return 0;
+    return keywords.reduce((sum, kw) => sum + (Number(kw.points) || 0), 0);
+};
+
+const saveSimulation = () => {
+    simulationForm.post(route('educator.modules.simulation.update', props.module.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // success
+        }
+    });
 };
 
 const imagePreview = ref(null);

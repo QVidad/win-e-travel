@@ -57,11 +57,13 @@ class ModuleController extends Controller
         }
 
         $defaultTownImage = null;
+        $simulation = null;
         if ($module->type === 'town_chapter' && str_starts_with($module->code, 'town-')) {
             $slug = substr($module->code, 5); // remove 'town-'
-            $town = \App\Models\Town::where('slug', $slug)->first();
+            $town = \App\Models\Town::with('simulation')->where('slug', $slug)->first();
             if ($town) {
                 $defaultTownImage = $town->hero_image;
+                $simulation = $town->simulation;
             }
         }
 
@@ -69,6 +71,7 @@ class ModuleController extends Controller
             'module' => $module,
             'questionBankCount' => $bankCount,
             'defaultTownImage' => $defaultTownImage,
+            'simulation' => $simulation,
         ]);
     }
 
@@ -165,5 +168,43 @@ class ModuleController extends Controller
             \Illuminate\Support\Facades\Log::error('Reorder exception: ' . $e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * Update town simulation settings.
+     */
+    public function updateSimulation(Request $request, string $id): RedirectResponse
+    {
+        $module = CourseModule::findOrFail($id);
+        
+        if ($module->type !== 'town_chapter' || !str_starts_with($module->code, 'town-')) {
+            abort(400, 'Invalid module type for simulation');
+        }
+
+        $validated = $request->validate([
+            'passing_score' => 'required|integer|min:1|max:100',
+            'scenarios' => 'nullable|array',
+            'scenarios.*.lesson_id' => 'nullable|integer',
+            'scenarios.*.title' => 'required|string',
+            'scenarios.*.keywords' => 'nullable|array',
+            'scenarios.*.keywords.*.word' => 'required|string',
+            'scenarios.*.keywords.*.points' => 'required|numeric',
+            'scenarios.*.time_limit' => 'required|integer|min:10',
+        ]);
+
+        $slug = substr($module->code, 5); // remove 'town-'
+        $town = \App\Models\Town::where('slug', $slug)->firstOrFail();
+
+        $simulation = \App\Models\Simulation::firstOrCreate(
+            ['town_id' => $town->id, 'type' => 'town'],
+            ['title' => $town->name . ' Simulation', 'status' => 'published', 'scenarios' => '[]']
+        );
+
+        $simulation->update([
+            'passing_score' => $validated['passing_score'],
+            'scenarios' => json_encode($validated['scenarios'] ?? []),
+        ]);
+
+        return redirect()->back()->with('success', 'Simulation settings updated successfully.');
     }
 }
