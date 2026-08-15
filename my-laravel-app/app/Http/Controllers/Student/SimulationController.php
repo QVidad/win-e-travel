@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Town;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -11,7 +12,8 @@ class SimulationController extends Controller
 {
     public function index(): Response
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
         $towns = \App\Models\Town::where('status', 'published')->orderBy('order')->get();
         $totalTowns = $towns->count();
 
@@ -32,7 +34,7 @@ class SimulationController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show(string $id)
     {
         $simulation = \App\Models\Simulation::with('town')->findOrFail($id);
 
@@ -44,7 +46,7 @@ class SimulationController extends Controller
             }
             
             if ($module) {
-                $progress = \App\Models\ModuleProgress::where('user_id', auth()->id())
+                $progress = \App\Models\ModuleProgress::where('user_id', \Illuminate\Support\Facades\Auth::id())
                     ->where('course_module_id', $module->id)
                     ->first();
                 
@@ -137,7 +139,8 @@ class SimulationController extends Controller
         $xpEarned = $earnedPoints;
 
         // Update authenticated user stats if available
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
         if ($user) {
             $user->increment('xp', $xpEarned);
         }
@@ -151,9 +154,10 @@ class SimulationController extends Controller
         ]);
     }
 
-    public function complete(Request $request, $id)
+    public function complete(Request $request, string $id)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
         if ($user) {
             $simulation = \App\Models\Simulation::with('town')->findOrFail($id);
             $passed = $request->input('passed', false);
