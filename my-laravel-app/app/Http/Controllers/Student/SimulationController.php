@@ -119,16 +119,19 @@ class SimulationController extends Controller
         ]);
 
         $transcript = strtolower($validated['transcript']);
+        $cleanTranscript = preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', '', $transcript);
+        
         $matchedKeywords = [];
         $totalPoints = 0;
         $earnedPoints = 0;
 
         foreach ($validated['required_keywords'] as $kw) {
             $word = $kw['word'];
+            $cleanKw = preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', '', strtolower(trim($word)));
             $points = (int)$kw['points'];
             $totalPoints += $points;
             
-            if (str_contains($transcript, strtolower($word))) {
+            if (str_contains($cleanTranscript, $cleanKw)) {
                 $matchedKeywords[] = $word;
                 $earnedPoints += $points;
             }

@@ -293,6 +293,7 @@ let animFrameId = null;
 // Web Speech API States
 const isListening = ref(false);
 const spokenTranscript = ref('');
+const finalTranscriptBuffer = ref('');
 const matchedKeywordsList = ref([]);
 const speechSupported = ref(false);
 let recognition = null;
@@ -368,21 +369,31 @@ onMounted(() => {
         recognition.interimResults = true;
         recognition.lang = 'en-US';
 
+        recognition.onstart = () => {
+            isListening.value = true;
+        };
+
         recognition.onresult = (event) => {
             let current = '';
             for (let i = 0; i < event.results.length; i++) {
                 current += event.results[i][0].transcript;
             }
-            spokenTranscript.value = current;
-            parseKeywordsFromTranscript(current);
+            console.log("Speech Result Received:", current);
+            spokenTranscript.value = (finalTranscriptBuffer.value + ' ' + current).trim();
+            parseKeywordsFromTranscript(spokenTranscript.value);
         };
 
-        recognition.onerror = () => {
+        recognition.onerror = (event) => {
+            console.error('Speech Recognition Error:', event.error);
+            if (event.error === 'not-allowed') {
+                alert('Microphone access denied. Please allow microphone permissions in your browser.');
+            }
             isListening.value = false;
         };
 
         recognition.onend = () => {
             isListening.value = false;
+            finalTranscriptBuffer.value = spokenTranscript.value;
         };
     }
     
@@ -528,25 +539,36 @@ const toggleSpeechRecognition = () => {
     if (isListening.value) {
         recognition.stop();
         isListening.value = false;
-        validateSpeechWithServer();
     } else {
-        spokenTranscript.value = '';
-        recognition.start();
-        isListening.value = true;
+        try {
+            recognition.start();
+            isListening.value = true;
+        } catch (e) {
+            console.error("Speech Recognition Start Error:", e);
+            if (e.name === 'InvalidStateError') {
+                // Already started, just set state to true
+                isListening.value = true;
+            }
+        }
     }
 };
 
 const resetTranscript = () => {
     spokenTranscript.value = '';
+    finalTranscriptBuffer.value = '';
     matchedKeywordsList.value = [];
 };
 
 const parseKeywordsFromTranscript = (text) => {
-    const lower = text.toLowerCase();
+    if (!text) return;
+    const cleanText = text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
     const matches = [];
     currentStepData.value.keywords.forEach(kw => {
-        if (lower.includes(kw.word.toLowerCase())) {
-            matches.push(kw.word);
+        if (kw && kw.word) {
+            const cleanKw = kw.word.toLowerCase().trim().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
+            if (cleanText.includes(cleanKw)) {
+                matches.push(kw.word);
+            }
         }
     });
     matchedKeywordsList.value = matches;

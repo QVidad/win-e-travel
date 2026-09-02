@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 // Public Home Landing
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+
 // Student Portal Routes (Authenticated Students)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/welcome', [WelcomeController::class, 'index'])->name('welcome');
