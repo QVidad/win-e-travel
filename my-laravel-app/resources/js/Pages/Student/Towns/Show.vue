@@ -115,11 +115,15 @@
                     </div>
 
                     <!-- Completed / Launch Simulation Button -->
-                    <Link v-if="town.simulation" :href="route('simulation.show', town.simulation.id)" class="btn btn-success simulation-btn w-100 shadow-sm text-center text-white text-decoration-none">
+                    <button v-if="isCompleted" disabled class="btn btn-success simulation-btn w-100 shadow-sm text-center text-white fs-5 py-3">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Passed the {{ town.name }} Simulation
+                    </button>
+                    <Link v-else-if="town.simulation" :href="route('simulation.show', town.simulation.id)" class="btn btn-primary simulation-btn w-100 shadow-sm text-center text-white text-decoration-none fs-5 py-3">
                         <i class="fas fa-play me-2"></i>
                         Launch {{ town.name }} Simulation
                     </Link>
-                    <button v-else disabled class="btn btn-secondary simulation-btn w-100 shadow-sm text-center text-white">
+                    <button v-else disabled class="btn btn-secondary simulation-btn w-100 shadow-sm text-center text-white fs-5 py-3">
                         <i class="fas fa-lock me-2"></i>
                         Simulation Not Available
                     </button>

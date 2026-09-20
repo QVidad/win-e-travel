@@ -40,7 +40,7 @@
                 <div v-if="!simulationStarted" class="row justify-content-center">
                     <div class="col-lg-8">
                         <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white mt-4">
-                            <img src="/assets/images/facilitator-female.jpg" alt="Guide Maria" class="rounded-circle mx-auto mb-4 shadow border border-4 border-warning" style="width: 130px; height: 130px; object-fit: cover;">
+                            <img src="/assets/images/facilitator-female.jpg" alt="Guide Maria" class="rounded-circle mx-auto mb-4 shadow border-4 border-warning" style="width: 130px; height: 130px; object-fit: cover;">
                             <h3 class="fw-bold text-dark mb-1">Guide Maria</h3>
                             <h5 class="text-success fw-bold d-block mb-4">Your AI Tour Facilitator</h5>
                             
@@ -309,6 +309,7 @@ const spokenTranscript = ref('');
 const finalTranscriptBuffer = ref('');
 const matchedKeywordsList = ref([]);
 const speechSupported = ref(false);
+const isResetting = ref(false);
 let recognition = null;
 
 const scenarioData = props.simulation ? props.simulation.scenarios : [];
@@ -332,15 +333,19 @@ const formatTime = (seconds) => {
 const startTimer = () => {
     if (timerInterval) clearInterval(timerInterval);
     timeRemaining.value = currentStepData.value.time_limit || 60;
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(async () => {
         if (timeRemaining.value > 0) {
             timeRemaining.value--;
         } else {
             clearInterval(timerInterval);
             if (isListening.value) {
                 toggleSpeechRecognition();
-            } else {
-                validateSpeechWithServer();
+            }
+            if (!stepAnswered.value) {
+                await validateSpeechWithServer();
+                setTimeout(() => {
+                    proceedNextStep();
+                }, 2000);
             }
         }
     }, 1000);
@@ -380,13 +385,14 @@ onMounted(() => {
         recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'en-US';
+        recognition.lang = 'en-PH';
 
         recognition.onstart = () => {
             isListening.value = true;
         };
 
         recognition.onresult = (event) => {
+            if (isResetting.value) return;
             let current = '';
             for (let i = 0; i < event.results.length; i++) {
                 current += event.results[i][0].transcript;
@@ -406,7 +412,9 @@ onMounted(() => {
 
         recognition.onend = () => {
             isListening.value = false;
-            finalTranscriptBuffer.value = spokenTranscript.value;
+            if (!isResetting.value) {
+                finalTranscriptBuffer.value = spokenTranscript.value;
+            }
         };
     }
 });
@@ -565,6 +573,7 @@ const toggleSpeechRecognition = () => {
 };
 
 const resetTranscript = () => {
+    isResetting.value = true;
     spokenTranscript.value = '';
     finalTranscriptBuffer.value = '';
     matchedKeywordsList.value = [];
@@ -575,6 +584,7 @@ const resetTranscript = () => {
         recognition.stop();
         // Give it a moment to fully stop and fire onend before restarting
         setTimeout(() => {
+            isResetting.value = false;
             if (speechSupported.value && !isListening.value && !stepAnswered.value) {
                 try {
                     recognition.start();
@@ -584,18 +594,44 @@ const resetTranscript = () => {
                 }
             }
         }, 400);
+    } else {
+        isResetting.value = false;
     }
+};
+
+const normalizeUnits = (text) => {
+    if (!text) return '';
+    return text.toLowerCase()
+        .replace(/\bkilometers?\b/g, 'km')
+        .replace(/\bmeters?\b/g, 'm');
 };
 
 const parseKeywordsFromTranscript = (text) => {
     if (!text) return;
-    const cleanText = text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
+    const normalizedText = normalizeUnits(text);
+    const cleanText = normalizedText.replace(/[\s.,/#!$%^&*;:{}=\-_`~()]/g,"");
     const matches = [];
     currentStepData.value.keywords.forEach(kw => {
         if (kw && kw.word) {
-            const cleanKw = kw.word.toLowerCase().trim().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
+            const normalizedKw = normalizeUnits(kw.word);
+            const cleanKw = normalizedKw.replace(/[\s.,/#!$%^&*;:{}=\-_`~()]/g,"");
+            
+            // Check exact word
             if (cleanText.includes(cleanKw)) {
                 matches.push(kw.word);
+                return;
+            }
+            
+            // Check aliases
+            if (kw.aliases && Array.isArray(kw.aliases)) {
+                for (const alias of kw.aliases) {
+                    const normalizedAlias = normalizeUnits(alias);
+                    const cleanAlias = normalizedAlias.replace(/[\s.,/#!$%^&*;:{}=\-_`~()]/g,"");
+                    if (cleanText.includes(cleanAlias)) {
+                        matches.push(kw.word);
+                        return;
+                    }
+                }
             }
         }
     });
@@ -603,17 +639,19 @@ const parseKeywordsFromTranscript = (text) => {
 };
 
 const isKeywordMatched = (kw) => {
-    return matchedKeywordsList.value.includes(kw.word) || stepAnswered.value;
+    return matchedKeywordsList.value.includes(kw.word);
 };
 
 const stepScores = ref([]);
 
 const validateSpeechWithServer = async () => {
-    if (!spokenTranscript.value) return;
     if (timerInterval) clearInterval(timerInterval); // stop timer on submission
+    
+    const transcriptToSend = spokenTranscript.value ? spokenTranscript.value : ' ';
+    
     try {
         const response = await axios.post(route('simulation.validate'), {
-            transcript: spokenTranscript.value,
+            transcript: transcriptToSend,
             required_keywords: currentStepData.value.keywords,
         });
 
@@ -682,9 +720,9 @@ const proceedNextStep = () => {
         }
         startTimer();
     } else {
-        const isPassed = satisfactionScore.value >= (props.simulation.passing_score || 80);
+        isPassed.value = satisfactionScore.value >= (props.simulation.passing_score || 80);
         showCompleteModal.value = true;
-        axios.post(route('simulation.complete', props.simulation.id), { passed: isPassed }).catch(err => console.error(err));
+        axios.post(route('simulation.complete', props.simulation.id), { passed: isPassed.value, score: Math.round(satisfactionScore.value) }).catch(err => console.error(err));
     }
 };
 </script>

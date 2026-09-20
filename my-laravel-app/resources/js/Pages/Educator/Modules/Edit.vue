@@ -373,25 +373,45 @@
                                         No keywords defined. Students will automatically get 0 points.
                                     </div>
                                     
-                                    <div v-for="(kw, kIdx) in scenario.keywords" :key="'kw-'+index+'-'+kIdx" class="d-flex gap-2 mb-2 align-items-center">
-                                        <input 
-                                            v-model="kw.word" 
-                                            type="text" 
-                                            class="form-control form-control-sm rounded-3 flex-grow-1"
-                                            placeholder="Keyword or phrase (e.g., Batac Empanada)"
-                                        >
-                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                    <div v-for="(kw, kIdx) in scenario.keywords" :key="'kw-'+index+'-'+kIdx" class="mb-3 border rounded-3 p-3 bg-white shadow-sm">
+                                        <div class="d-flex gap-2 mb-2 align-items-center">
                                             <input 
-                                                v-model.number="kw.points" 
-                                                type="number" 
-                                                class="form-control text-center"
-                                                min="1"
+                                                v-model="kw.word" 
+                                                type="text" 
+                                                class="form-control form-control-sm rounded-3 flex-grow-1"
+                                                placeholder="Keyword or phrase (e.g., Batac Empanada)"
                                             >
-                                            <span class="input-group-text bg-light">pts</span>
+                                            <div class="input-group input-group-sm" style="width: 120px;">
+                                                <input 
+                                                    v-model.number="kw.points" 
+                                                    type="number" 
+                                                    class="form-control text-center"
+                                                    min="1"
+                                                >
+                                                <span class="input-group-text bg-light">pts</span>
+                                            </div>
+                                            <button type="button" @click="removeKeyword(scenario, kIdx)" class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 28px; height: 28px;">
+                                                <i class="fas fa-times" style="font-size: 0.75rem;"></i>
+                                            </button>
                                         </div>
-                                        <button type="button" @click="removeKeyword(scenario, kIdx)" class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 28px; height: 28px;">
-                                            <i class="fas fa-times" style="font-size: 0.75rem;"></i>
-                                        </button>
+                                        
+                                        <!-- Aliases Section -->
+                                        <div class="mt-2 pt-2 border-top">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <small class="text-muted fw-bold" style="font-size: 0.75rem;">Phonetic Aliases</small>
+                                                <button type="button" @click="startRecordingAlias(kw, index, kIdx)" class="btn btn-sm py-0 px-2 rounded-pill" :class="activeRecordingId === `${index}-${kIdx}` ? 'btn-danger' : 'btn-outline-primary'" style="font-size: 0.7rem;">
+                                                    <i class="fas" :class="activeRecordingId === `${index}-${kIdx}` ? 'fa-spinner fa-spin' : 'fa-microphone'"></i>
+                                                    {{ activeRecordingId === `${index}-${kIdx}` ? 'Listening...' : 'Test Pronunciation' }}
+                                                </button>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                                <span v-for="(alias, aIdx) in (kw.aliases || [])" :key="aIdx" class="badge bg-secondary rounded-pill px-2" style="font-size: 0.7rem;">
+                                                    {{ alias }}
+                                                    <i @click="removeAlias(kw, aIdx)" class="fas fa-times ms-1" style="cursor: pointer;"></i>
+                                                </span>
+                                                <span v-if="!kw.aliases || kw.aliases.length === 0" class="text-muted fst-italic" style="font-size: 0.7rem;">No aliases added. Click "Test Pronunciation" to train the AI.</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -715,7 +735,9 @@ const syncSimulationScenarios = () => {
         // Convert old string format to new array format if necessary
         let kwArray = existing?.keywords ?? [];
         if (typeof kwArray === 'string') {
-            kwArray = kwArray.split(',').map(k => k.trim()).filter(k => k).map(k => ({ word: k, points: 10 }));
+            kwArray = kwArray.split(',').map(k => k.trim()).filter(k => k).map(k => ({ word: k, points: 10, aliases: [] }));
+        } else {
+            kwArray = kwArray.map(k => ({ ...k, aliases: k.aliases || [] }));
         }
         
         return {
@@ -729,7 +751,9 @@ const syncSimulationScenarios = () => {
     const townExisting = existingScenarios.find(s => s.lesson_id === null || s.lesson_id === 'town');
     let townKwArray = townExisting?.keywords ?? [];
     if (typeof townKwArray === 'string') {
-        townKwArray = townKwArray.split(',').map(k => k.trim()).filter(k => k).map(k => ({ word: k, points: 10 }));
+        townKwArray = townKwArray.split(',').map(k => k.trim()).filter(k => k).map(k => ({ word: k, points: 10, aliases: [] }));
+    } else {
+        townKwArray = townKwArray.map(k => ({ ...k, aliases: k.aliases || [] }));
     }
     
     scenarios.unshift({
@@ -750,7 +774,7 @@ watch(() => props.module.lessons, () => {
 
 const addKeyword = (scenario) => {
     if (!scenario.keywords) scenario.keywords = [];
-    scenario.keywords.push({ word: '', points: 10 });
+    scenario.keywords.push({ word: '', points: 10, aliases: [] });
 };
 
 const removeKeyword = (scenario, index) => {
@@ -760,6 +784,56 @@ const removeKeyword = (scenario, index) => {
 const totalPoints = (keywords) => {
     if (!keywords || !Array.isArray(keywords)) return 0;
     return keywords.reduce((sum, kw) => sum + (Number(kw.points) || 0), 0);
+};
+
+// --- Alias Recording Logic ---
+const activeRecordingId = ref(null);
+let aliasRecognition = null;
+
+const removeAlias = (kw, index) => {
+    kw.aliases.splice(index, 1);
+};
+
+const startRecordingAlias = (kw, sIdx, kIdx) => {
+    if (activeRecordingId.value !== null) return;
+    
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Speech Recognition is not supported in this browser.");
+        return;
+    }
+    
+    aliasRecognition = new SpeechRecognition();
+    aliasRecognition.continuous = false;
+    aliasRecognition.interimResults = true;
+    aliasRecognition.lang = 'en-PH'; // Use same language as simulation
+    
+    activeRecordingId.value = `${sIdx}-${kIdx}`;
+    
+    if (!kw.aliases) kw.aliases = [];
+    
+    aliasRecognition.onresult = (e) => {
+        if (e.results[0].isFinal) {
+            const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+            const alias = transcript.toLowerCase().trim();
+            // Add if not empty, not exact match to word, and not already in aliases
+            if (alias && alias !== kw.word.toLowerCase() && !kw.aliases.includes(alias)) {
+                kw.aliases.push(alias);
+            }
+        }
+    };
+    
+    aliasRecognition.onend = () => {
+        activeRecordingId.value = null;
+        aliasRecognition = null;
+    };
+    
+    try {
+        aliasRecognition.start();
+    } catch (e) {
+        console.error("Error starting alias recognition", e);
+        activeRecordingId.value = null;
+    }
 };
 
 const saveSimulation = () => {
@@ -807,9 +881,20 @@ const submit = () => {
     form.quick_facts = form.quick_facts.filter(fact => fact.trim() !== '');
     form.video_references = form.video_references.filter(url => url.trim() !== '');
 
-    form.post(route('educator.modules.update', props.module.id), {
-        preserveScroll: true,
-    });
+    if (props.module.type === 'town_chapter') {
+        simulationForm.post(route('educator.modules.simulation.update', props.module.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                form.post(route('educator.modules.update', props.module.id), {
+                    preserveScroll: true,
+                });
+            }
+        });
+    } else {
+        form.post(route('educator.modules.update', props.module.id), {
+            preserveScroll: true,
+        });
+    }
 };
 
 const formatDate = (dateStr) => {

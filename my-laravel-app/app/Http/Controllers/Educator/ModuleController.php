@@ -177,6 +177,8 @@ class ModuleController extends Controller
     {
         $module = CourseModule::findOrFail($id);
         
+        \Illuminate\Support\Facades\Log::info('Update Simulation Payload: ', $request->all());
+
         if ($module->type !== 'town_chapter' || !str_starts_with($module->code, 'town-')) {
             abort(400, 'Invalid module type for simulation');
         }
@@ -189,6 +191,8 @@ class ModuleController extends Controller
             'scenarios.*.keywords' => 'nullable|array',
             'scenarios.*.keywords.*.word' => 'required|string',
             'scenarios.*.keywords.*.points' => 'required|numeric',
+            'scenarios.*.keywords.*.aliases' => 'nullable|array',
+            'scenarios.*.keywords.*.aliases.*' => 'string',
             'scenarios.*.time_limit' => 'required|integer|min:10',
         ]);
 
@@ -202,8 +206,10 @@ class ModuleController extends Controller
 
         $simulation->update([
             'passing_score' => $validated['passing_score'],
-            'scenarios' => json_encode($validated['scenarios'] ?? []),
+            'scenarios' => $validated['scenarios'] ?? [],
         ]);
+        
+        \Illuminate\Support\Facades\Log::info('Saved Simulation Scenarios: ', $validated['scenarios'] ?? []);
 
         return redirect()->back()->with('success', 'Simulation settings updated successfully.');
     }

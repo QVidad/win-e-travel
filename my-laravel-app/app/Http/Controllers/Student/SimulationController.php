@@ -116,22 +116,47 @@ class SimulationController extends Controller
             'required_keywords' => 'required|array',
             'required_keywords.*.word' => 'required|string',
             'required_keywords.*.points' => 'required|numeric',
+            'required_keywords.*.aliases' => 'nullable|array',
+            'required_keywords.*.aliases.*' => 'string',
         ]);
 
         $transcript = strtolower($validated['transcript']);
-        $cleanTranscript = preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', '', $transcript);
+        $transcript = preg_replace('/\bkilometers?\b/', 'km', $transcript);
+        $transcript = preg_replace('/\bmeters?\b/', 'm', $transcript);
+        $cleanTranscript = preg_replace('/[\s.,\/#!$%\^&\*;:{}=\-_`~()]/', '', $transcript);
         
         $matchedKeywords = [];
         $totalPoints = 0;
         $earnedPoints = 0;
 
         foreach ($validated['required_keywords'] as $kw) {
-            $word = $kw['word'];
-            $cleanKw = preg_replace('/[.,\/#!$%\^&\*;:{}=\-_`~()]/', '', strtolower(trim($word)));
+            $word = strtolower(trim($kw['word']));
+            $word = preg_replace('/\bkilometers?\b/', 'km', $word);
+            $word = preg_replace('/\bmeters?\b/', 'm', $word);
+            $cleanKw = preg_replace('/[\s.,\/#!$%\^&\*;:{}=\-_`~()]/', '', $word);
             $points = (int)$kw['points'];
             $totalPoints += $points;
             
+            $matched = false;
+            
+            // Check exact word
             if (str_contains($cleanTranscript, $cleanKw)) {
+                $matched = true;
+            } else if (!empty($kw['aliases']) && is_array($kw['aliases'])) {
+                // Check aliases
+                foreach ($kw['aliases'] as $alias) {
+                    $alias = strtolower(trim($alias));
+                    $alias = preg_replace('/\bkilometers?\b/', 'km', $alias);
+                    $alias = preg_replace('/\bmeters?\b/', 'm', $alias);
+                    $cleanAlias = preg_replace('/[\s.,\/#!$%\^&\*;:{}=\-_`~()]/', '', $alias);
+                    if (!empty($cleanAlias) && str_contains($cleanTranscript, $cleanAlias)) {
+                        $matched = true;
+                        break;
+                    }
+                }
+            }
+            
+            if ($matched) {
                 $matchedKeywords[] = $word;
                 $earnedPoints += $points;
             }
@@ -164,6 +189,7 @@ class SimulationController extends Controller
         if ($user) {
             $simulation = \App\Models\Simulation::with('town')->findOrFail($id);
             $passed = $request->input('passed', false);
+            $score = (int) $request->input('score', 0);
 
             $record = \Illuminate\Support\Facades\DB::table('simulation_user')
                 ->where('user_id', $user->id)
@@ -175,6 +201,7 @@ class SimulationController extends Controller
                     'user_id' => $user->id,
                     'simulation_id' => $simulation->id,
                     'passed' => $passed,
+                    'score' => $score,
                     'attempts' => 1,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -184,27 +211,37 @@ class SimulationController extends Controller
                     ->where('id', $record->id)
                     ->update([
                         'passed' => $record->passed || $passed,
+                        'score' => $record->passed ? $record->score : $score,
                         'attempts' => $record->attempts + 1,
                         'updated_at' => now(),
                     ]);
             }
 
-            // Only award XP and progress if they just passed for the first time
-            if ($passed && (!$record || !$record->passed)) {
-                $user->increment('xp', 150);
-
+            // Always ensure the town module progress is recorded if they pass
+            if ($passed) {
                 if ($simulation->type === 'town' && $simulation->town_id) {
                     $module = \App\Models\CourseModule::where('type', 'town_chapter')
                         ->where('code', 'town-' . $simulation->town->slug)
                         ->first();
+                        
+                    if (!$module) {
+                        $module = \App\Models\CourseModule::where('type', 'town_chapter')
+                            ->where('code', 'like', 'town-' . $simulation->town->slug . '%')
+                            ->first();
+                    }
                     
                     if ($module) {
                         \App\Models\ModuleProgress::updateOrCreate(
                             ['user_id' => $user->id, 'course_module_id' => $module->id],
-                            ['passed' => true, 'status' => 'completed', 'progress' => 100]
+                            ['passed' => true]
                         );
                     }
                 }
+            }
+
+            // Only award progress if they just passed for the first time
+            if ($passed && (!$record || !$record->passed)) {
+                // Future: award XP here if user table has an xp column
             }
         }
 

@@ -23,6 +23,11 @@ use Illuminate\Support\Facades\Route;
 // Public Home Landing
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Sandbox test route
+Route::get('/speech-tester', function () {
+    return \Inertia\Inertia::render('SpeechTester');
+});
+
 
 // Student Portal Routes (Authenticated Students)
 Route::middleware(['auth', 'verified'])->group(function () {
