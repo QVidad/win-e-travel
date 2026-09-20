@@ -115,6 +115,7 @@
                     <!-- Stage 2: Dare to Discover -->
                     <div class="col-lg-4">
                         <div class="journey-stage-card stage-discover" :class="{ locked: foundationCompleted < 4 }" id="discoverStage">
+                            <span v-if="foundationCompleted < 4" class="locked-badge-top">Locked <i class="fas fa-lock"></i></span>
                             <div class="stage-icon">
                                 <i class="fas fa-compass"></i>
                             </div>
@@ -138,7 +139,10 @@
                                 <div class="chapter-dot">...</div>
                             </div>
 
-                            <Link :href="route('towns.index')" class="btn btn-journey w-100" style="background-color: #ff9ed2; color: white;">
+                            <div v-if="foundationCompleted < 4" class="text-secondary small mt-2">
+                                <i class="fas fa-lock me-1"></i>Complete Foundation Modules First
+                            </div>
+                            <Link v-else :href="route('towns.index')" class="btn btn-journey w-100" style="background-color: #ff9ed2; color: white;">
                                 <i class="fas fa-arrow-right me-2"></i>Explore Towns
                             </Link>
                         </div>
@@ -147,6 +151,7 @@
                     <!-- Stage 3: Adventure Awaits -->
                     <div class="col-lg-4">
                         <div class="journey-stage-card stage-adventure" :class="{ locked: discoverCompleted < 21 }" id="adventureStage">
+                            <span v-if="discoverCompleted < 21" class="locked-badge-top">Locked <i class="fas fa-lock"></i></span>
                             <div class="stage-icon">
                                 <i class="fas fa-mountain"></i>
                             </div>
@@ -171,7 +176,10 @@
                                 <div class="chapter-dot">...</div>
                             </div>
 
-                            <Link :href="route('simulation.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
+                            <div v-if="discoverCompleted < 21" class="text-secondary small mt-2">
+                                <i class="fas fa-lock me-1"></i>Complete Dare to Discover First
+                            </div>
+                            <Link v-else :href="route('simulation.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
                                 <i class="fas fa-arrow-right me-2"></i>Adventure Awaits
                             </Link>
                         </div>
@@ -269,7 +277,7 @@ onMounted(() => {
 }
 
 .journey-stage-card.locked {
-    opacity: 0.8;
+    /* Opacity removed so the button can have full visibility above the overlay */
 }
 
 .journey-stage-card.locked::before {
@@ -279,9 +287,22 @@ onMounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.75);
     border-radius: 20px;
     z-index: 1;
+}
+
+.locked-badge-top {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(108, 117, 125, 0.85);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    z-index: 2;
 }
 
 .stage-icon {

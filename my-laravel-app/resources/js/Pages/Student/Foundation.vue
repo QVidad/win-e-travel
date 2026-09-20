@@ -52,27 +52,36 @@
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <h3 class="fw-bold text-dark mb-0">Module {{ index + 1 }}: {{ mod.title }}</h3>
                                         
-                                        <!-- Status Badge -->
+                                        <!-- Status Badges for Completed/Available -->
                                         <span 
-                                            v-if="index + 1 <= unlockedLevel" 
+                                            v-if="index + 1 < unlockedLevel" 
                                             class="badge bg-success rounded-pill px-4 py-2 fs-8 fw-bold"
+                                        >
+                                            Completed
+                                        </span>
+                                        <span 
+                                            v-else-if="index + 1 === unlockedLevel" 
+                                            class="badge bg-primary rounded-pill px-4 py-2 fs-8 fw-bold"
                                         >
                                             Available
                                         </span>
-                                        <span 
-                                            v-else 
-                                            class="badge bg-secondary rounded-pill px-4 py-2 fs-8 fw-bold"
-                                        >
-                                            Locked
-                                        </span>
                                     </div>
+                                    
+                                    <!-- Absolutely Positioned Locked Badge -->
+                                    <span 
+                                        v-if="index + 1 > unlockedLevel" 
+                                        class="badge rounded-pill fw-bold position-absolute"
+                                        style="top: 20px; right: 20px; background: rgba(108, 117, 125, 0.85); color: white; padding: 6px 14px; font-size: 0.85rem;"
+                                    >
+                                        Locked <i class="fas fa-lock ms-1"></i>
+                                    </span>
                                     
                                     <p class="text-muted fs-6 mb-4">{{ mod.description || 'Essential foundational concepts for tour guiding.' }}</p>
                                     
-                                    <!-- Lesson Tags (Mocked) -->
+                                    <!-- Lesson Tags -->
                                     <div class="d-flex flex-wrap gap-2">
                                         <span 
-                                            v-for="(tag, tIndex) in getTagsForModule(index)" 
+                                            v-for="(tag, tIndex) in mod.tags" 
                                             :key="tIndex" 
                                             class="badge bg-light text-secondary rounded-pill px-3 py-2 fw-medium border"
                                         >
@@ -99,13 +108,16 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    unlockedLevel: {
+        type: Number,
+        default: 1
+    }
 });
 
-const unlockedLevel = ref(1);
-const completedModulesCount = computed(() => Math.min(unlockedLevel.value - 1, props.foundationModules.length));
+const completedModulesCount = computed(() => Math.min(props.unlockedLevel - 1, props.foundationModules.length));
 
 const selectModule = (mod, index) => {
-    if (index + 1 <= unlockedLevel.value) {
+    if (index + 1 <= props.unlockedLevel) {
         router.visit(route('student.modules.show', mod.id));
     }
 };
@@ -126,18 +138,6 @@ const getIconColorClass = (index) => {
         'bg-info bg-opacity-10 text-info',
     ];
     return colors[index % colors.length];
-};
-
-// Mocked lesson tags based on design
-const getTagsForModule = (index) => {
-    const defaultTags = [
-        ['General Preparation Before the Tour', 'Researching Your Incoming Group', 'Coordinating with Suppliers', 'Site Familiarization'],
-        ['Welcome', 'Getting Acquainted', 'Tour Essentials', 'Group Conduct Guidelines'],
-        ['Strategies for Effective Tour Information Delivery', 'Introduction to Crisis Management During the Tour'],
-        ['How to Conclude a Tour']
-    ];
-    
-    return defaultTags[index] || ['Lesson 1', 'Lesson 2'];
 };
 </script>
 

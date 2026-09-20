@@ -55,8 +55,12 @@ class TownController extends Controller
                 $status = 'completed';
                 $completedCount++;
             } else {
-                // TEMPORARY BYPASS: All towns available for testing
-                $status = 'available';
+                if ($isNextAvailable) {
+                    $status = 'available';
+                    $isNextAvailable = false;
+                } else {
+                    $status = 'locked';
+                }
             }
             
             $town->progress_status = $status;

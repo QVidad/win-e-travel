@@ -78,10 +78,12 @@
                                     </span>
                                 </p>
                             </div>
-                            <div class="text-secondary fs-5">
+                            <div class="text-secondary fs-5 d-flex align-items-center">
                                 <i v-if="getAssessmentDetails(index)?.passed" class="fas fa-check-circle text-success fs-4"></i>
                                 <i v-else-if="index + 1 <= unlockedLessonLevel" class="fas fa-chevron-right text-dark fs-5"></i>
-                                <i v-else class="fas fa-lock fs-5"></i>
+                                <span v-else class="badge rounded-pill fw-bold" style="background: rgba(108, 117, 125, 0.85); color: white; padding: 6px 14px; font-size: 0.85rem;">
+                                    Locked <i class="fas fa-lock ms-1"></i>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -101,9 +103,11 @@
                                 </h5>
                                 <p class="mb-0 opacity-90 small">25 questions • 90% required to pass and unlock next module</p>
                             </div>
-                            <div class="fs-4">
+                            <div class="fs-4 d-flex align-items-center">
                                 <i v-if="isEvaluationUnlocked" class="fas fa-play-circle"></i>
-                                <i v-else class="fas fa-lock"></i>
+                                <span v-else class="badge rounded-pill fw-bold" style="background: rgba(108, 117, 125, 0.85); color: white; padding: 6px 14px; font-size: 0.85rem;">
+                                    Locked <i class="fas fa-lock ms-1"></i>
+                                </span>
                             </div>
                         </div>
                     </div>
