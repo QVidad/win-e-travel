@@ -17,7 +17,7 @@
                             <div class="d-flex justify-content-lg-end">
                                 <div class="text-center">
                                     <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
-                                        <span class="progress-percentage">{{ overallPercent }}%</span>
+                                        <span class="progress-percentage fs-4">{{ overallPercent }}%</span>
                                     </div>
                                     <span class="small fw-bold text-white opacity-75">Current Progress</span>
                                 </div>
@@ -394,18 +394,16 @@ onMounted(() => {
 .overall-progress-circle::before {
     content: '';
     position: absolute;
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
+    background-color: #1a5f7a; /* matching banner */
     border-radius: 50%;
-    background: white;
 }
 
 .progress-percentage {
     position: relative;
-    z-index: 1;
-    font-size: 24px;
-    font-weight: 700;
-    color: #0a472e;
+    font-weight: 800;
+    color: white;
 }
 </style>
  

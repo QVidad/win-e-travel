@@ -36,13 +36,43 @@
                     </div>
                 </div>
 
-                <!-- Active Simulation Interface -->
-                <div class="row g-4">
+                <!-- Intro Screen -->
+                <div v-if="!simulationStarted" class="row justify-content-center">
                     <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white mt-4">
+                            <img src="/assets/images/facilitator-female.jpg" alt="Guide Maria" class="rounded-circle mx-auto mb-4 shadow border border-4 border-warning" style="width: 130px; height: 130px; object-fit: cover;">
+                            <h3 class="fw-bold text-dark mb-1">Guide Maria</h3>
+                            <h5 class="text-success fw-bold d-block mb-4">Your AI Tour Facilitator</h5>
+                            
+                            <div class="p-4 bg-light rounded-4 text-start mb-4 border">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-primary me-2"></i>Simulation Instructions</h5>
+                                <p class="mb-2 fs-5"><strong>1.</strong> When you start, your camera and microphone will activate automatically.</p>
+                                <p class="mb-2 fs-5"><strong>2.</strong> You will be placed in a virtual environment via webcam background overlay.</p>
+                                <p class="mb-0 fs-5"><strong>3.</strong> Speak your commentary out loud, making sure to hit the required keywords before the timer runs out!</p>
+                            </div>
+
+                            <div class="p-4 bg-light rounded-4 text-start mb-5 border">
+                                <small class="text-muted d-block mb-1 fw-bold">SPEECH ENGINE STATUS:</small>
+                                <small class="fw-semibold fs-5" :class="speechSupported ? 'text-success' : 'text-warning'">
+                                    <i class="fas" :class="speechSupported ? 'fa-check-circle me-1' : 'fa-exclamation-triangle me-1'"></i>
+                                    {{ speechSupported ? 'Web Speech API Ready - Your browser is supported.' : 'Speech API fallback active - Please use Chrome.' }}
+                                </small>
+                            </div>
+
+                            <button @click="startSimulation" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg animate-pulse-subtle">
+                                <i class="fas fa-play-circle me-2"></i> Start Simulation Engine
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Simulation Interface -->
+                <div v-else class="row g-4">
+                    <div class="col-lg-12">
                         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
                             
                             <!-- WebRTC Live Webcam & Virtual Background Canvas Container -->
-                            <div class="position-relative bg-dark" style="height: 380px;">
+                            <div class="position-relative bg-dark" style="height: 550px;">
                                 <!-- Background Image (Virtual Canvas Container) -->
                                 <img
                                     v-if="!isWebcamActive"
@@ -63,8 +93,18 @@
                                     </div>
                                 </div>
 
+                                <!-- Subtitle Overlay -->
+                                <div class="position-absolute bottom-0 start-0 w-100 p-4 text-center z-3" style="margin-bottom: 50px; pointer-events: none;">
+                                    <span v-if="spokenTranscript" class="subtitle-text px-4 py-3 rounded-4 shadow-lg d-inline-block">
+                                        {{ spokenTranscript }}
+                                    </span>
+                                    <span v-else-if="isListening" class="subtitle-text text-white-50 px-4 py-3 rounded-4 shadow-lg d-inline-block fst-italic">
+                                        <i class="fas fa-microphone me-2 animate-pulse text-danger"></i> Listening... Speak your commentary.
+                                    </span>
+                                </div>
+
                                 <!-- Camera Toggle Controls -->
-                                <div class="position-absolute top-0 end-0 m-3 z-3">
+                                <div class="position-absolute top-0 end-0 m-3 z-3" style="pointer-events: auto;">
                                     <button @click="toggleWebcam" class="btn btn-sm rounded-pill px-3 shadow" :class="isWebcamActive ? 'btn-danger' : 'btn-light text-dark'">
                                         <i class="fas" :class="isWebcamActive ? 'fa-video-slash me-1' : 'fa-camera me-1'"></i>
                                         {{ isWebcamActive ? 'Disable Camera' : 'Enable Live Webcam' }}
@@ -72,61 +112,67 @@
                                 </div>
 
                                 <!-- Location Header Overlay -->
-                                <div class="position-absolute bottom-0 start-0 end-0 p-3 bg-dark bg-opacity-75 text-white d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold"><i class="fas fa-map-marker-alt me-2 text-warning"></i>{{ currentStepData.title }}</span>
+                                <div class="position-absolute bottom-0 start-0 end-0 p-3 bg-dark bg-opacity-75 text-white d-flex justify-content-between align-items-center z-3">
+                                    <span class="fw-bold fs-5"><i class="fas fa-map-marker-alt me-2 text-warning"></i>{{ currentStepData.title }}</span>
                                     <div class="d-flex align-items-center gap-3">
-                                        <span class="badge bg-danger text-white fs-6 border border-light" :class="{ 'animate-pulse': timeRemaining <= 10 }">
+                                        <span class="badge bg-danger text-white fs-5 border border-light" :class="{ 'animate-pulse': timeRemaining <= 10 }">
                                             <i class="fas fa-clock me-1"></i> {{ formatTime(timeRemaining) }}
                                         </span>
-                                        <span class="badge bg-warning text-dark">Step {{ currentStepIndex + 1 }} of {{ steps.length }}</span>
+                                        <span class="badge bg-warning text-dark fs-6">Step {{ currentStepIndex + 1 }} of {{ steps.length }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="card-body p-4">
-                                <!-- Scenario Prompt -->
-                                <div class="tourist-question-card mb-4 shadow-sm border-0">
-                                    <h5 class="fw-bold text-dark mb-2"><i class="fas fa-bullhorn me-2 text-primary"></i>Your Turn to Guide</h5>
-                                    <p class="mb-0 text-muted fs-6">You are now at <strong>{{ currentStepData.title }}</strong>. Begin your commentary and make sure to mention the required keywords before the timer runs out!</p>
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <!-- Scenario Prompt -->
+                                        <div class="tourist-question-card mb-4 shadow-sm border-0 h-100">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h4 class="fw-bold text-dark mb-0"><i class="fas fa-bullhorn me-2 text-primary"></i>Your Turn to Guide</h4>
+                                                
+                                                <div class="bg-success bg-opacity-10 px-4 py-2 rounded-pill border border-success">
+                                                    <span class="text-success fw-bold fs-5">Points: {{ currentStepData.keywords.filter(kw => isKeywordMatched(kw)).reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }} / {{ currentStepData.keywords.reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }}</span>
+                                                </div>
+                                            </div>
+                                            <p class="mb-0 text-muted fs-5">You are now at <strong>{{ currentStepData.title }}</strong>. Begin your commentary and make sure to mention the required keywords before the timer runs out!</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <!-- Validation Keyword Cloud -->
+                                        <div class="h-100 p-4 bg-light rounded-4 border">
+                                            <h5 class="fw-bold text-dark mb-3"><i class="fas fa-tags me-2 text-primary"></i>Validation Keywords:</h5>
+                                            <div class="keyword-cloud">
+                                                <span
+                                                    v-for="(kw, idx) in currentStepData.keywords"
+                                                    :key="'kw-'+idx"
+                                                    class="keyword-tag fs-6"
+                                                    :class="isKeywordMatched(kw) ? 'covered bg-success text-white border-success' : ''"
+                                                >
+                                                    <i class="fas fa-check me-1" v-if="isKeywordMatched(kw)"></i>{{ kw.word }} ({{ kw.points }} pts)
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Speech Recognition Pipeline Section -->
-                                <div class="speech-pipeline-card p-3 rounded-4 bg-light border mb-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <h6 class="fw-bold text-dark mb-0">
-                                            <i class="fas fa-microphone text-danger me-2"></i>
-                                            Real-Time Speech Recognition Commentary
-                                        </h6>
-                                        <span class="badge" :class="isListening ? 'bg-danger animate-pulse' : 'bg-secondary'">
-                                            <i class="fas fa-circle me-1" style="font-size: 0.6rem;"></i>
-                                            {{ isListening ? 'Listening Live...' : 'Microphone Idle' }}
-                                        </span>
-                                    </div>
-                                    
-                                    <p class="small text-muted mb-3">Speak your commentary response clearly into your microphone to earn XP points and unlock destination badges.</p>
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-3 mt-4 justify-content-center">
+                                    <button @click="toggleSpeechRecognition" class="btn rounded-pill px-5 py-2 fs-5 fw-bold shadow-sm" :class="isListening ? 'btn-danger' : 'btn-success'" :disabled="stepAnswered">
+                                        <i class="fas" :class="isListening ? 'fa-stop-circle me-1' : 'fa-microphone me-1'"></i>
+                                        {{ isListening ? 'Stop Speech Commentary' : 'Start Spoken Commentary' }}
+                                    </button>
+                                    <button v-if="spokenTranscript && !stepAnswered" @click="resetTranscript" class="btn btn-outline-secondary rounded-pill px-5 py-2 fs-5 fw-bold">
+                                        Clear Text
+                                    </button>
+                                    <button v-if="spokenTranscript && !stepAnswered" @click="validateSpeechWithServer" class="btn btn-primary rounded-pill px-5 py-2 fs-5 fw-bold ms-auto shadow-sm">
+                                        Submit Answer <i class="fas fa-check ms-1"></i>
+                                    </button>
+                                </div>
 
-                                    <!-- Action Buttons -->
-                                    <div class="d-flex gap-2 mb-3">
-                                        <button @click="toggleSpeechRecognition" class="btn rounded-pill px-4 fw-bold shadow-sm" :class="isListening ? 'btn-danger' : 'btn-success'" :disabled="stepAnswered">
-                                            <i class="fas" :class="isListening ? 'fa-stop-circle me-1' : 'fa-microphone me-1'"></i>
-                                            {{ isListening ? 'Stop Speech Commentary' : 'Start Spoken Commentary' }}
-                                        </button>
-                                        <button v-if="spokenTranscript && !stepAnswered" @click="resetTranscript" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                                            Clear
-                                        </button>
-                                        <button v-if="spokenTranscript && !stepAnswered" @click="validateSpeechWithServer" class="btn btn-primary rounded-pill px-4 fw-bold ms-auto">
-                                            Submit Answer <i class="fas fa-check ms-1"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- Live Speech Transcript Display Box -->
-                                    <div class="transcript-box p-3 bg-white rounded-3 border mb-3" style="min-height: 80px; max-height: 140px; overflow-y: auto;">
-                                        <span v-if="spokenTranscript" class="text-dark fw-medium">{{ spokenTranscript }}</span>
-                                        <span v-else class="text-muted italic small"><i class="fas fa-comment-dots me-1"></i>Click 'Start Spoken Commentary' and speak your response...</span>
-                                    </div>
-
-                                    <!-- Typing Fallback -->
-                                    <h6 class="fw-bold text-dark mb-2 fs-6"><i class="fas fa-keyboard me-2 text-success"></i>Or Type Your Commentary:</h6>
+                                <!-- Typing Fallback (Hidden normally, exposed only if no transcript and disabled api) -->
+                                <div class="mt-4" v-if="!speechSupported && !isListening && !spokenTranscript">
+                                    <h6 class="fw-bold text-dark mb-2 fs-6"><i class="fas fa-keyboard me-2 text-success"></i>Type Your Commentary (Fallback):</h6>
                                     <textarea 
                                         v-model="spokenTranscript" 
                                         class="form-control rounded-3" 
@@ -137,63 +183,20 @@
                                     ></textarea>
                                 </div>
 
-                                <!-- Validation Keyword Cloud -->
-                                <div>
-                                    <h6 class="fw-bold text-dark mb-2"><i class="fas fa-tags me-2 text-primary"></i>Required Validation Keywords:</h6>
-                                    <div class="keyword-cloud">
-                                        <span
-                                            v-for="(kw, idx) in currentStepData.keywords"
-                                            :key="'kw-'+idx"
-                                            class="keyword-tag"
-                                            :class="isKeywordMatched(kw) ? 'covered bg-success text-white border-success' : ''"
-                                        >
-                                            <i class="fas fa-check me-1" v-if="isKeywordMatched(kw)"></i>{{ kw.word }} ({{ kw.points }} pts)
-                                        </span>
+                                <!-- Feedback Section -->
+                                <div v-if="feedbackText" class="mt-4 p-4 rounded-4 border" :class="feedbackIsGood ? 'bg-success bg-opacity-10 border-success' : 'bg-warning bg-opacity-10 border-warning'">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="fw-bold mb-2" :class="feedbackIsGood ? 'text-success' : 'text-dark'">
+                                                <i :class="feedbackIsGood ? 'fas fa-check-circle text-success' : 'fas fa-exclamation-triangle text-warning'" class="me-2"></i>Evaluation Result
+                                            </h5>
+                                            <p class="mb-0 fs-5 text-dark">{{ feedbackText }}</p>
+                                        </div>
+                                        <button @click="proceedNextStep" class="btn btn-success btn-lg rounded-pill fw-bold px-5 shadow-sm">
+                                            {{ currentStepIndex + 1 < scenarioData.length ? 'Next Destination Step' : 'Complete Simulation' }} <i class="fas fa-arrow-right ms-2"></i>
+                                        </button>
                                     </div>
                                 </div>
-
-                                <!-- Feedback Section -->
-                                <div v-if="feedbackText" class="mt-4 p-3 rounded-3 border" :class="feedbackIsGood ? 'bg-success bg-opacity-10 border-success' : 'bg-warning bg-opacity-10 border-warning'">
-                                    <h6 class="fw-bold mb-1" :class="feedbackIsGood ? 'text-success' : 'text-dark'">
-                                        <i :class="feedbackIsGood ? 'fas fa-check-circle text-success' : 'fas fa-exclamation-triangle text-warning'" class="me-2"></i>Evaluation Result
-                                    </h6>
-                                    <p class="mb-3 small text-dark">{{ feedbackText }}</p>
-                                    <button @click="proceedNextStep" class="btn btn-success rounded-pill fw-bold px-4">
-                                        {{ currentStepIndex + 1 < scenarioData.length ? 'Next Destination Step' : 'Complete Simulation' }} <i class="fas fa-arrow-right ms-1"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Side Facilitator Panel -->
-                    <div class="col-lg-4">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white sticky-top" style="top: 20px;">
-                            <img src="/assets/images/facilitator-female.jpg" alt="Guide Maria" class="rounded-circle mx-auto mb-3 shadow border border-3 border-warning" style="width: 90px; height: 90px; object-fit: cover;">
-                            <h5 class="fw-bold text-dark mb-1">Guide Maria</h5>
-                            <small class="text-success fw-bold d-block mb-3">AI Tour Facilitator</small>
-
-                            <!-- Speech Recognition Status Indicator -->
-                            <div class="p-3 bg-light rounded-3 text-start mb-3 border">
-                                <small class="text-muted d-block mb-1 fw-bold">SPEECH ENGINE STATUS:</small>
-                                <small class="fw-semibold" :class="speechSupported ? 'text-success' : 'text-warning'">
-                                    <i class="fas" :class="speechSupported ? 'fa-check-circle me-1' : 'fa-exclamation-triangle me-1'"></i>
-                                    {{ speechSupported ? 'Web Speech API Ready' : 'Speech API fallback active' }}
-                                </small>
-                            </div>
-
-                            <div class="p-3 bg-light rounded-3 text-start mb-3 border">
-                                <small class="text-muted d-block mb-1 fw-bold">FACILITATOR TIP:</small>
-                                <small class="text-secondary">Speak key terms like <strong>Earthquake Baroque</strong>, <strong>UNESCO</strong>, and historical dates out loud to maximize score accuracy.</small>
-                            </div>
-
-                            <!-- Live Points Counter -->
-                            <div class="p-3 bg-success bg-opacity-10 rounded-3 text-start border border-success">
-                                <small class="text-success d-block mb-1 fw-bold">POINTS EARNED:</small>
-                                <h4 class="fw-bold text-success mb-0">
-                                    {{ currentStepData.keywords.filter(kw => isKeywordMatched(kw)).reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }} / 
-                                    {{ currentStepData.keywords.reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }}
-                                </h4>
                             </div>
                         </div>
                     </div>
@@ -271,6 +274,16 @@ const feedbackText = ref('');
 const feedbackIsGood = ref(true);
 const showCompleteModal = ref(false);
 const isPassed = ref(false);
+const simulationStarted = ref(false);
+
+const startSimulation = () => {
+    simulationStarted.value = true;
+    startTimer();
+    toggleWebcam();
+    if (speechSupported.value && !isListening.value) {
+        toggleSpeechRecognition();
+    }
+};
 
 const retrySimulation = () => {
     window.location.reload();
@@ -396,8 +409,6 @@ onMounted(() => {
             finalTranscriptBuffer.value = spokenTranscript.value;
         };
     }
-    
-    startTimer();
 });
 
 onUnmounted(() => {
@@ -557,6 +568,23 @@ const resetTranscript = () => {
     spokenTranscript.value = '';
     finalTranscriptBuffer.value = '';
     matchedKeywordsList.value = [];
+    
+    // Web Speech API retains all previous speech in the current session's event.results.
+    // To truly clear it, we must restart the engine.
+    if (recognition && isListening.value) {
+        recognition.stop();
+        // Give it a moment to fully stop and fire onend before restarting
+        setTimeout(() => {
+            if (speechSupported.value && !isListening.value && !stepAnswered.value) {
+                try {
+                    recognition.start();
+                    isListening.value = true;
+                } catch (e) {
+                    console.error("Restart error:", e);
+                }
+            }
+        }, 400);
+    }
 };
 
 const parseKeywordsFromTranscript = (text) => {
@@ -648,8 +676,7 @@ const proceedNextStep = () => {
         stepAnswered.value = false;
         selectedOptionIndex.value = null;
         feedbackText.value = '';
-        spokenTranscript.value = '';
-        matchedKeywordsList.value = [];
+        resetTranscript();
         if (isWebcamActive.value) {
             renderCanvasOverlay();
         }
@@ -796,6 +823,28 @@ const proceedNextStep = () => {
     background: #28a745;
     color: white;
     border-color: #28a745;
+}
+
+.subtitle-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.55);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    backdrop-filter: blur(8px);
+    max-width: 90%;
+    line-height: 1.4;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.animate-pulse-subtle {
+    animation: pulse-subtle 2s infinite;
+}
+
+@keyframes pulse-subtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 @keyframes pulse {

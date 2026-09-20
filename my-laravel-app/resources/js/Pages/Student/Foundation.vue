@@ -14,8 +14,13 @@
                             </p>
                         </div>
                         <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                            <div class="d-inline-block bg-white bg-opacity-10 rounded-pill px-4 py-3 fw-bold fs-5 border border-white border-opacity-25">
-                                <span class="text-warning">{{ completedModulesCount }}</span> / {{ foundationModules.length }} Completed
+                            <div class="d-flex justify-content-lg-end">
+                                <div class="text-center">
+                                    <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
+                                        <span class="progress-percentage fs-4">{{ completedModulesCount }}/{{ foundationModules.length }}</span>
+                                    </div>
+                                    <span class="small fw-bold text-white opacity-75">Modules Completed</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -105,6 +110,13 @@ const selectModule = (mod, index) => {
     }
 };
 
+const progressCircleStyle = computed(() => {
+    const degrees = props.foundationModules.length > 0 ? (completedModulesCount.value / props.foundationModules.length) * 360 : 0;
+    return {
+        background: `conic-gradient(#ffc107 0deg ${degrees}deg, rgba(255,255,255,0.2) ${degrees}deg 360deg)`
+    };
+});
+
 // Dynamic icon background colors
 const getIconColorClass = (index) => {
     const colors = [
@@ -142,5 +154,32 @@ const getTagsForModule = (index) => {
 .hover-lift:hover:not(.opacity-75) {
     transform: translateY(-3px);
     box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+}
+
+.overall-progress-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(#ffc107 0deg 0deg, rgba(255,255,255,0.2) 0deg 360deg);
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.overall-progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-color: #1a5f7a; /* matching banner */
+    border-radius: 50%;
+}
+
+.progress-percentage {
+    position: relative;
+    font-weight: 800;
+    color: white;
 }
 </style>
