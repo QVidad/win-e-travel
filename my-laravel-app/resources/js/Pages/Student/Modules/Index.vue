@@ -57,7 +57,7 @@
                                     </small>
 
                                     <Link 
-                                        :href="route('student.modules.show', mod.id)" 
+                                        :href="route('go-beyond-books.modules.show', mod.id)" 
                                         class="btn btn-sm text-white rounded-pill px-3 fw-bold" 
                                         style="background-color: #0d4b38;"
                                     >

@@ -243,7 +243,7 @@
                             <button @click="retrySimulation" class="btn btn-primary rounded-pill px-4 fw-bold me-2 mb-2">
                                 <i class="fas fa-redo me-1"></i> Retry Simulation
                             </button>
-                            <Link :href="route('towns.show', props.simulation.town?.slug || '')" class="btn btn-light border rounded-pill px-4 fw-bold mb-2">
+                            <Link :href="route('dare-to-discover.show', props.simulation.town?.slug || '')" class="btn btn-light border rounded-pill px-4 fw-bold mb-2">
                                 Back to Town
                             </Link>
                         </div>
@@ -650,7 +650,7 @@ const validateSpeechWithServer = async () => {
     const transcriptToSend = spokenTranscript.value ? spokenTranscript.value : ' ';
     
     try {
-        const response = await axios.post(route('simulation.validate'), {
+        const response = await axios.post(route('adventure-awaits.validate'), {
             transcript: transcriptToSend,
             required_keywords: currentStepData.value.keywords,
         });
@@ -722,7 +722,7 @@ const proceedNextStep = () => {
     } else {
         isPassed.value = satisfactionScore.value >= (props.simulation.passing_score || 80);
         showCompleteModal.value = true;
-        axios.post(route('simulation.complete', props.simulation.id), { passed: isPassed.value, score: Math.round(satisfactionScore.value) }).catch(err => console.error(err));
+        axios.post(route('adventure-awaits.complete', props.simulation.id), { passed: isPassed.value, score: Math.round(satisfactionScore.value) }).catch(err => console.error(err));
     }
 };
 </script>

@@ -19,25 +19,25 @@
                         <div>Dashboard</div>
                     </Link>
                     <Link 
-                        :href="route('foundation.index')" 
+                        :href="route('go-beyond-books.index')" 
                         class="text-decoration-none text-center small" 
-                        :class="$page.url.startsWith('/foundation') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                        :class="$page.url.startsWith('/go-beyond-books') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
                     >
                         <div class="mb-1"><i class="fas fa-book-open fa-lg"></i></div>
                         <div>Go Beyond Books</div>
                     </Link>
                     <Link 
-                        :href="route('towns.index')" 
+                        :href="route('dare-to-discover.index')" 
                         class="text-decoration-none text-center small" 
-                        :class="$page.url.startsWith('/towns') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                        :class="$page.url.startsWith('/dare-to-discover') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
                     >
                         <div class="mb-1"><i class="fas fa-compass fa-lg"></i></div>
                         <div>Dare to Discover</div>
                     </Link>
                     <Link
-                        :href="route('simulation.index')" 
+                        :href="route('adventure-awaits.index')" 
                         class="text-decoration-none text-center small" 
-                        :class="$page.url.startsWith('/simulation') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                        :class="$page.url.startsWith('/adventure-awaits') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
                     >
                         <div class="mb-1"><i class="fas fa-mountain fa-lg"></i></div>
                         <div>Adventure Awaits</div>

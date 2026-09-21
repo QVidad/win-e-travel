@@ -293,7 +293,7 @@
                             <h2 class="display-6 fw-bold mb-2">Explore Ilocos Norte</h2>
                             <p class="text-muted mb-0">21 municipalities and cities waiting to be discovered</p>
                         </div>
-                        <Link v-if="$page.props.auth?.user" :href="route('towns.index')" class="btn btn-outline-mmsu mt-3 mt-sm-0">
+                        <Link v-if="$page.props.auth?.user" :href="route('dare-to-discover.index')" class="btn btn-outline-mmsu mt-3 mt-sm-0">
                             View All Municipalities <i class="fas fa-arrow-right ms-2"></i>
                         </Link>
                         <button v-else @click="openRegisterModal" class="btn btn-outline-mmsu mt-3 mt-sm-0">
@@ -325,7 +325,7 @@
                                         <span class="badge bg-success bg-opacity-10 text-success">
                                             <i class="fas fa-check-circle me-1"></i>{{ town.modules || 4 }} Modules
                                         </span>
-                                        <Link v-if="$page.props.auth?.user" :href="route('towns.show', town.slug || town.id)" class="btn btn-sm btn-outline-mmsu rounded-pill px-3">
+                                        <Link v-if="$page.props.auth?.user" :href="route('dare-to-discover.show', town.slug || town.id)" class="btn btn-sm btn-outline-mmsu rounded-pill px-3">
                                             Explore <i class="fas fa-arrow-right ms-1"></i>
                                         </Link>
                                         <button v-else @click="openRegisterModal" class="btn btn-sm btn-outline-mmsu rounded-pill px-3">

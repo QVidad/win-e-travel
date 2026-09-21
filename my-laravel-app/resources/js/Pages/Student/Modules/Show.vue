@@ -5,7 +5,7 @@
             <nav class="mb-4" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 align-items-center">
                     <li class="breadcrumb-item">
-                        <Link :href="route('foundation.index')" class="text-decoration-none text-secondary fw-semibold hover-text-primary">
+                        <Link :href="route('go-beyond-books.index')" class="text-decoration-none text-secondary fw-semibold hover-text-primary">
                             <i class="fas fa-book-open me-1"></i> Go Beyond Books
                         </Link>
                     </li>
@@ -483,7 +483,7 @@ const saveProgressToServer = () => {
         passed: completedAttempts.value['final'] ? completedAttempts.value['final'].passed : false
     };
     
-    router.post(route('student.modules.progress', props.module.id), payload, {
+    router.post(route('go-beyond-books.modules.progress', props.module.id), payload, {
         preserveScroll: true,
         preserveState: true,
     });

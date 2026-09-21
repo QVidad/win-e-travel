@@ -74,7 +74,7 @@
                         <Link
                             :id="'town-card-' + town.slug"
                             v-if="town.progress_status !== 'locked'"
-                            :href="route('towns.show', town.slug)"
+                            :href="route('dare-to-discover.show', town.slug)"
                             class="town-card"
                             :class="getTownCardClass(town)"
                         >

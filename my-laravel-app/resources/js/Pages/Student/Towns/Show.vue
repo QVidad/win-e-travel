@@ -5,7 +5,7 @@
             <nav class="breadcrumb-nav">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <Link :href="route('towns.index')" class="text-decoration-none">
+                        <Link :href="route('dare-to-discover.index')" class="text-decoration-none">
                             <i class="fas fa-compass me-1"></i>Dare to Discover
                         </Link>
                     </li>
@@ -119,7 +119,7 @@
                         <i class="fas fa-check-circle me-2"></i>
                         Passed the {{ town.name }} Simulation
                     </button>
-                    <Link v-else-if="town.simulation" :href="route('simulation.show', town.simulation.id)" class="btn btn-primary simulation-btn w-100 shadow-sm text-center text-white text-decoration-none fs-5 py-3">
+                    <Link v-else-if="town.simulation" :href="route('adventure-awaits.show', town.simulation.id)" class="btn btn-primary simulation-btn w-100 shadow-sm text-center text-white text-decoration-none fs-5 py-3">
                         <i class="fas fa-play me-2"></i>
                         Launch {{ town.name }} Simulation
                     </Link>

@@ -38,7 +38,7 @@
                                 <p class="text-muted small mb-0">Begin with <strong>Go Beyond Books</strong> to learn core tour guiding skills and unlock town chapters.</p>
                             </div>
                         </div>
-                        <Link :href="route('foundation.index')" class="btn btn-mmsu px-4 rounded-pill fw-bold">
+                        <Link :href="route('go-beyond-books.index')" class="btn btn-mmsu px-4 rounded-pill fw-bold">
                             Start Module 1 <i class="fas fa-arrow-right ms-2"></i>
                         </Link>
                     </div>
@@ -56,7 +56,7 @@
                                 <p class="text-muted small mb-0">You've passed some lessons, but you need to pass the End-of-Module Evaluation to complete your first chapter.</p>
                             </div>
                         </div>
-                        <Link :href="route('foundation.index')" class="btn btn-warning px-4 rounded-pill fw-bold">
+                        <Link :href="route('go-beyond-books.index')" class="btn btn-warning px-4 rounded-pill fw-bold">
                             Continue Module 1 <i class="fas fa-arrow-right ms-2"></i>
                         </Link>
                     </div>
@@ -74,7 +74,7 @@
                                 <p class="text-muted mb-0">Continue with <strong>{{ progress.continueModule.title }}</strong></p>
                             </div>
                         </div>
-                        <Link :href="route('student.modules.show', progress.continueModule.id)" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
+                        <Link :href="route('go-beyond-books.modules.show', progress.continueModule.id)" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
                             Continue Learning <i class="fas fa-play ms-2"></i>
                         </Link>
                     </div>
@@ -106,7 +106,7 @@
                                 <div v-for="i in 4" :key="i" class="chapter-dot" :class="{ completed: i <= foundationCompleted, current: i === foundationCompleted + 1 }"></div>
                             </div>
 
-                            <Link :href="route('foundation.index')" class="btn btn-outline-success w-100 btn-journey">
+                            <Link :href="route('go-beyond-books.index')" class="btn btn-outline-success w-100 btn-journey">
                                 <i class="fas fa-arrow-right me-2"></i>Continue Learning
                             </Link>
                         </div>
@@ -142,7 +142,7 @@
                             <div v-if="foundationCompleted < 4" class="text-secondary small mt-2">
                                 <i class="fas fa-lock me-1"></i>Complete Foundation Modules First
                             </div>
-                            <Link v-else :href="route('towns.index')" class="btn btn-journey w-100" style="background-color: #ff9ed2; color: white;">
+                            <Link v-else :href="route('dare-to-discover.index')" class="btn btn-journey w-100" style="background-color: #ff9ed2; color: white;">
                                 <i class="fas fa-arrow-right me-2"></i>Explore Towns
                             </Link>
                         </div>
@@ -179,7 +179,7 @@
                             <div v-if="discoverCompleted < 21" class="text-secondary small mt-2">
                                 <i class="fas fa-lock me-1"></i>Complete Dare to Discover First
                             </div>
-                            <Link v-else :href="route('simulation.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
+                            <Link v-else :href="route('adventure-awaits.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
                                 <i class="fas fa-arrow-right me-2"></i>Adventure Awaits
                             </Link>
                         </div>

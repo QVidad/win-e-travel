@@ -19,7 +19,7 @@
                 <h4 class="fw-bold mb-3 text-dark">Explore the Municipalities</h4>
                 <div class="carousel-container position-relative overflow-hidden">
                     <div class="d-flex gap-3 overflow-auto pb-3 custom-scrollbar">
-                        <Link v-for="town in towns" :key="town.id" :href="route('towns.show', town.slug)" class="town-card flex-shrink-0 position-relative rounded overflow-hidden shadow-sm text-decoration-none" style="width: 200px; height: 120px; cursor: pointer;">
+                        <Link v-for="town in towns" :key="town.id" :href="route('dare-to-discover.show', town.slug)" class="town-card flex-shrink-0 position-relative rounded overflow-hidden shadow-sm text-decoration-none" style="width: 200px; height: 120px; cursor: pointer;">
                             <img :src="town.hero_image || '/assets/images/Laoag.jpg'" :alt="town.name" class="w-100 h-100 object-fit-cover">
                             <div class="position-absolute bottom-0 w-100 p-2" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
                                 <span class="text-white fw-bold small">{{ town.name }}</span>
@@ -43,7 +43,7 @@
                 </div>
                 
                 <div>
-                    <Link v-if="isUnlocked && finalSimulationId" :href="route('simulation.final')" class="btn btn-light fw-bold px-4 py-2 rounded shadow-sm text-dark">
+                    <Link v-if="isUnlocked && finalSimulationId" :href="route('adventure-awaits.final')" class="btn btn-light fw-bold px-4 py-2 rounded shadow-sm text-dark">
                         <i class="fas fa-play text-success me-2"></i> Start Virtual Tour
                     </Link>
                     <button v-else class="btn btn-light opacity-75 fw-bold px-4 py-2 rounded text-dark" disabled>

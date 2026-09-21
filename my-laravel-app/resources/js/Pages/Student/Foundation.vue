@@ -118,7 +118,7 @@ const completedModulesCount = computed(() => Math.min(props.unlockedLevel - 1, p
 
 const selectModule = (mod, index) => {
     if (index + 1 <= props.unlockedLevel) {
-        router.visit(route('student.modules.show', mod.id));
+        router.visit(route('go-beyond-books.modules.show', mod.id));
     }
 };
 
