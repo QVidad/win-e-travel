@@ -277,7 +277,7 @@ onMounted(() => {
 }
 
 .journey-stage-card.locked {
-    /* Opacity removed so the button can have full visibility above the overlay */
+    opacity: 0.8;
 }
 
 .journey-stage-card.locked::before {
@@ -287,7 +287,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.7);
     border-radius: 20px;
     z-index: 1;
 }
