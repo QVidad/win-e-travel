@@ -54,8 +54,9 @@
                         :aria-expanded="isMenuOpen"
                         @click="toggleMenu"
                     >
-                        <div class="avatar-circle bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                            <i class="fas fa-user"></i>
+                        <div class="avatar-circle bg-success text-white rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm" style="width: 36px; height: 36px;">
+                            <img v-if="$page.props.auth?.user?.avatar" :src="$page.props.auth.user.avatar" alt="Avatar" class="w-100 h-100 object-fit-cover">
+                            <i v-else class="fas fa-user"></i>
                         </div>
                         <span class="fw-bold text-dark">{{ $page.props.auth?.user ? $page.props.auth.user.name : 'Queenee' }}</span>
                     </button>
@@ -73,6 +74,13 @@
                             </div>
                         </li>
                         
+                        <li class="my-1">
+                            <Link :href="route('profile.edit')" class="dropdown-item rounded-3 py-2 px-2 d-flex align-items-center text-dark fw-medium" @click="isMenuOpen = false">
+                                <i class="fas fa-user-circle text-primary me-3 fa-lg" style="width: 20px;"></i>
+                                <span>Profile Settings</span>
+                            </Link>
+                        </li>
+
                         <li class="my-1">
                             <Link :href="route('achievements.index')" class="dropdown-item rounded-3 py-2 px-2 d-flex align-items-center text-dark fw-medium" @click="isMenuOpen = false">
                                 <i class="fas fa-trophy text-warning me-3 fa-lg" style="width: 20px;"></i>

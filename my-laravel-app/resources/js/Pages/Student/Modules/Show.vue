@@ -509,7 +509,6 @@ const currentLessonTopic = computed(() => {
     const lesson = lessons.value[activeLessonIndex.value];
     const lessonTitle = lesson ? lesson.title : `Lesson ${activeLessonIndex.value + 1}`;
 
-    // 1. Check if educator has created content or key points for this lesson
     if (lesson) {
         let educatorPoints = [];
         if (Array.isArray(lesson.key_points)) {
@@ -518,133 +517,19 @@ const currentLessonTopic = computed(() => {
             try { educatorPoints = JSON.parse(lesson.key_points); } catch(e) {}
         }
 
-        if (lesson.content || educatorPoints.length > 0) {
-            return {
-                title: lesson.title,
-                description: lesson.content || `Master the essential concepts for ${lesson.title}.`,
-                quiz_question_count: lesson.quiz_question_count ?? 5,
-                points: educatorPoints.length > 0 ? educatorPoints : [
-                    {
-                        icon: 'fas fa-compass',
-                        title: 'Know the Core Principles',
-                        description: 'Understand the fundamental guidelines, safety standards, and historical background.'
-                    }
-                ]
-            };
-        }
-    }
-
-    const topicsMap = {
-        'General Preparation Before the Tour': {
-            title: 'General Preparation Before the Tour',
-            description: "Even if you've guided the same tour many times, no two are ever the same. Weather, traffic, guest expectations, and site conditions can change overnight. Being prepared means you're ready for anything — from sudden route changes to unexpected guest needs.",
-            points: [
-                {
-                    icon: 'fas fa-walking',
-                    title: 'Know the tour style',
-                    description: 'Walking tours require stamina and weather planning. Coach tours need precise timing to avoid delays. Museum or cultural tours demand accurate knowledge and respectful conduct.'
-                },
-                {
-                    icon: 'fas fa-map-marked-alt',
-                    title: 'Review the itinerary',
-                    description: 'Things change. Check each stop, travel time, and sequence. Identify areas that may require flexibility.'
-                },
-                {
-                    icon: 'fas fa-briefcase',
-                    title: "Understand employer's standards",
-                    description: 'Dress codes, documentation, and specific service expectations vary by operator. Always represent your company professionally.'
-                }
-            ]
-        },
-        'Researching Your Incoming Group': {
-            title: 'Researching Your Incoming Group',
-            description: 'Understanding your guests before they arrive allows you to tailor your commentary, pacing, and interaction style to their cultural background, interests, and age demographics.',
-            points: [
-                {
-                    icon: 'fas fa-users',
-                    title: 'Demographics & Interest Mapping',
-                    description: 'Identify whether your group consists of eco-tourists, history enthusiasts, families, or corporate delegates.'
-                },
-                {
-                    icon: 'fas fa-globe',
-                    title: 'Cultural Norms & Dietary Restrictions',
-                    description: 'Respect dietary needs, religious customs, and language preferences.'
-                },
-                {
-                    icon: 'fas fa-wheelchair',
-                    title: 'Special Assistance Needs',
-                    description: 'Plan ahead for accessibility requirements and senior mobility support.'
-                }
-            ]
-        },
-        'Coordinating with Suppliers': {
-            title: 'Coordinating with Suppliers',
-            description: 'Seamless tours rely on strong communication with drivers, restaurant owners, local heritage caretakers, and municipal tourism officers.',
-            points: [
-                {
-                    icon: 'fas fa-bus',
-                    title: 'Driver & Transport Alignment',
-                    description: 'Confirm pickup points, route options, parking zones, and emergency contact channels.'
-                },
-                {
-                    icon: 'fas fa-utensils',
-                    title: 'Meal & Attraction Vouchers',
-                    description: 'Verify group headcounts and meal reservations prior to arrival at local dining spots.'
-                },
-                {
-                    icon: 'fas fa-phone-alt',
-                    title: 'Site Capacity & Operating Hours',
-                    description: 'Call ahead to confirm opening hours, weather alerts, and site capacity limits.'
-                }
-            ]
-        },
-        'Site Familiarization & Safety Check': {
-            title: 'Site Familiarization & Safety Check',
-            description: 'Conducting site walk-throughs ensures you are aware of emergency exits, rest facilities, first-aid locations, and potential hazards.',
-            points: [
-                {
-                    icon: 'fas fa-exclamation-triangle',
-                    title: 'Hazard Identification',
-                    description: 'Note slippery pathways, steep steps, or high-density crowd points.'
-                },
-                {
-                    icon: 'fas fa-first-aid',
-                    title: 'Emergency Exit Points',
-                    description: 'Locate nearest medical stations, assembly points, and emergency contacts.'
-                },
-                {
-                    icon: 'fas fa-restroom',
-                    title: 'Facility Spotting',
-                    description: 'Identify clean restrooms, water refill stations, and shaded rest spots for guests.'
-                }
-            ]
-        }
-    };
-
-    if (topicsMap[lessonTitle]) {
-        return topicsMap[lessonTitle];
+        return {
+            title: lesson.title,
+            description: lesson.content || 'No content provided for this lesson yet.',
+            quiz_question_count: lesson.questions || 0,
+            points: educatorPoints.length > 0 ? educatorPoints : []
+        };
     }
 
     return {
         title: lessonTitle,
-        description: `Master the essential competencies for ${lessonTitle}. Being prepared means you are ready to deliver authentic, informative, and engaging experiences for your tour group.`,
-        points: [
-            {
-                icon: 'fas fa-compass',
-                title: 'Know the Core Principles',
-                description: 'Understand the fundamental guidelines, safety standards, and historical background.'
-            },
-            {
-                icon: 'fas fa-list-check',
-                title: 'Review Key Operational Steps',
-                description: 'Verify timing, group coordination, and site contingencies before starting.'
-            },
-            {
-                icon: 'fas fa-user-shield',
-                title: 'Maintain Professional Standards',
-                description: 'Represent local tourism values with accuracy, hospitality, and respect.'
-            }
-        ]
+        description: 'Lesson content not found.',
+        quiz_question_count: 0,
+        points: []
     };
 });
 
@@ -765,14 +650,7 @@ const startLessonQuizFromTopic = () => {
     if (lesson.questions && lesson.questions.length > 0) {
         currentQuestions.value = loadQuestionsForQuiz(lesson.questions, limit);
     } else {
-        const fallback = [
-            { text: 'What is the primary responsibility of a tour guide before starting a tour?', options: ['Ensuring tourist safety and reviewing the itinerary', 'Buying souvenirs for guests', 'Ignoring weather forecasts', 'Changing ticket prices'], correct_answer_index: 0 },
-            { text: 'Why is it important to research your incoming guest group in advance?', options: ['To tailor commentary and accommodate dietary/accessibility needs', 'To cancel the tour early', 'To skip historical landmarks', 'To force everyone to buy extra meals'], correct_answer_index: 0 },
-            { text: 'How should a tour guide coordinate with transport drivers and local suppliers?', options: ['Confirm pickup times, route options, and contact channels in advance', 'Arrive unannounced without reservation', 'Let guests drive the bus', 'Ignore supplier schedules'], correct_answer_index: 0 },
-            { text: 'What is the first step during site familiarization before guests arrive?', options: ['Identify emergency exit paths, rest facilities, and potential hazards', 'Leave the site immediately', 'Start selling merchandise', 'Take a nap'], correct_answer_index: 0 },
-            { text: 'How should unexpected delays or route changes be handled during a live tour?', options: ['Execute contingency plans and communicate clearly with guests', 'Panic and abandon the group', 'Blame guests for the delay', 'Refuse to answer questions'], correct_answer_index: 0 }
-        ];
-        currentQuestions.value = loadQuestionsForQuiz(fallback, limit);
+        currentQuestions.value = [];
     }
 
     currentQuestionIndex.value = 0;
@@ -797,14 +675,7 @@ const startFinalEvaluation = () => {
     if (props.module.questions && props.module.questions.length > 0) {
         currentQuestions.value = loadQuestionsForQuiz(props.module.questions, 10); // Or module.quiz_question_count if it exists
     } else {
-        const fallback = [
-            { text: 'What is the cornerstone duty of care for a DOT-accredited tour guide?', options: ['Prioritizing tourist health, emergency readiness, and safety protocols', 'Maximizing personal tips', 'Rushing through site commentary', 'Ignoring guest feedback'], correct_answer_index: 0 },
-            { text: 'In crisis management, what is the best initial action during a minor medical issue?', options: ['Contact local first-aid responders and follow established emergency protocols', 'Ignore the guest and keep walking', 'Tell the group the tour is over', 'Offer unapproved medication'], correct_answer_index: 0 },
-            { text: 'How should historical facts and cultural narratives be presented to visitors?', options: ['Accurately, respectfully, and engagingly without fabrication', 'By inventing fictional stories as real history', 'By skipping all historical details', 'By arguing with guests about beliefs'], correct_answer_index: 0 },
-            { text: 'What is essential when concluding a tour at the final destination?', options: ['Conducting debriefing, collecting feedback, and ensuring all guests depart safely', 'Leaving guests at the site without assistance', 'Refusing to answer final questions', 'Demanding extra cash tips'], correct_answer_index: 0 },
-            { text: 'Why is group dynamics management vital during multi-stop municipality tours?', options: ['It maintains tour pacing, inclusivity, and guest satisfaction', 'It allows aggressive guests to dominate the tour', 'It eliminates rest stops', 'It ensures no guest enjoys the experience'], correct_answer_index: 0 }
-        ];
-        currentQuestions.value = loadQuestionsForQuiz(fallback, 10);
+        currentQuestions.value = [];
     }
 
     currentQuestionIndex.value = 0;

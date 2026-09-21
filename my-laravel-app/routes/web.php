@@ -23,10 +23,7 @@ use Illuminate\Support\Facades\Route;
 // Public Home Landing
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Sandbox test route
-Route::get('/speech-tester', function () {
-    return \Inertia\Inertia::render('SpeechTester');
-});
+
 
 
 // Student Portal Routes (Authenticated Students)
@@ -48,7 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/adventure-awaits/{id}/complete', [SimulationController::class, 'complete'])->name('adventure-awaits.complete');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
