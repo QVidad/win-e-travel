@@ -31,64 +31,48 @@
                     <div 
                         v-for="(mod, index) in foundationModules" 
                         :key="mod.id" 
-                        class="card border-0 shadow-sm rounded-4 overflow-hidden transition-all hover-lift"
+                        class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden transition-all hover-lift text-decoration-none d-flex flex-column justify-content-center"
+                        style="padding: 10px;"
                         :class="index + 1 <= unlockedLevel ? 'cursor-pointer' : 'opacity-50'"
                         :style="index + 1 > unlockedLevel ? 'cursor: not-allowed; filter: grayscale(100%);' : 'cursor: pointer;'"
                         @click="selectModule(mod, index)"
                     >
-                        <div class="card-body p-4 p-md-5">
-                            <div class="d-flex align-items-start gap-4">
-                                <!-- Icon Box -->
-                                <div 
-                                    class="rounded-4 d-flex align-items-center justify-content-center flex-shrink-0 mt-1" 
-                                    style="width: 70px; height: 70px; font-size: 28px;"
-                                    :class="getIconColorClass(index)"
-                                >
-                                    <i :class="mod.icon || 'fas fa-book-open'"></i>
-                                </div>
-                                
-                                <!-- Content -->
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h3 class="fw-bold text-dark mb-0">Module {{ index + 1 }}: {{ mod.title }}</h3>
-                                        
-                                        <!-- Status Badges for Completed/Available -->
-                                        <span 
-                                            v-if="index + 1 < unlockedLevel" 
-                                            class="badge bg-success rounded-pill px-4 py-2 fs-8 fw-bold"
-                                        >
-                                            Completed
-                                        </span>
-                                        <span 
-                                            v-else-if="index + 1 === unlockedLevel" 
-                                            class="badge bg-primary rounded-pill px-4 py-2 fs-8 fw-bold"
-                                        >
-                                            Available
-                                        </span>
-                                    </div>
-                                    
-                                    <!-- Absolutely Positioned Locked Badge -->
-                                    <span 
-                                        v-if="index + 1 > unlockedLevel" 
-                                        class="badge rounded-pill fw-bold position-absolute"
-                                        style="top: 20px; right: 20px; background: rgba(108, 117, 125, 0.85); color: white; padding: 6px 14px; font-size: 0.85rem;"
-                                    >
-                                        Locked <i class="fas fa-lock ms-1"></i>
-                                    </span>
-                                    
-                                    <p class="text-muted fs-6 mb-4">{{ mod.description || 'Essential foundational concepts for tour guiding.' }}</p>
-                                    
-                                    <!-- Lesson Tags -->
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <span 
-                                            v-for="(tag, tIndex) in mod.tags" 
-                                            :key="tIndex" 
-                                            class="badge bg-light text-secondary rounded-pill px-3 py-2 fw-medium border"
-                                        >
-                                            {{ tag }}
-                                        </span>
-                                    </div>
-                                </div>
+                        <div class="card-body p-3 p-md-4 d-flex align-items-center position-relative">
+                            <!-- Absolutely Positioned Locked Badge -->
+                            <span 
+                                v-if="index + 1 > unlockedLevel" 
+                                class="badge rounded-pill fw-bold position-absolute"
+                                style="top: 15px; right: 15px; background: rgba(108, 117, 125, 0.85); color: white; padding: 6px 14px; font-size: 0.85rem;"
+                            >
+                                Locked <i class="fas fa-lock ms-1"></i>
+                            </span>
+
+                            <!-- Status Badges for Completed/Available (if unlocked) -->
+                            <span 
+                                v-else-if="index + 1 < unlockedLevel" 
+                                class="badge bg-success rounded-pill px-4 py-2 fs-8 fw-bold position-absolute"
+                                style="top: 15px; right: 15px;"
+                            >
+                                Completed
+                            </span>
+                            <span 
+                                v-else-if="index + 1 === unlockedLevel" 
+                                class="badge bg-primary rounded-pill px-4 py-2 fs-8 fw-bold position-absolute"
+                                style="top: 15px; right: 15px;"
+                            >
+                                Available
+                            </span>
+
+                            <!-- Icon Box -->
+                            <div class="rounded-4 d-flex align-items-center justify-content-center me-4" 
+                                 style="width: 72px; height: 72px; background-color: #eaf5f0; flex-shrink: 0;">
+                                <i class="fas fa-clipboard-list" style="color: #198754; font-size: 28px;"></i>
+                            </div>
+                            
+                            <!-- Text Content -->
+                            <div>
+                                <div class="text-dark fw-bold mb-1" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">MODULE {{ index + 1 }}</div>
+                                <h3 class="fw-bolder text-dark mb-0 pe-5" style="font-size: 1.75rem; letter-spacing: -0.5px;">{{ mod.title }}</h3>
                             </div>
                         </div>
                     </div>

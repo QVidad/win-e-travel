@@ -21,7 +21,7 @@
                 <div class="town-hero-overlay">
                     <span v-if="isCompleted" class="badge bg-success mb-2 px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i>Completed</span>
                     <span v-else class="badge bg-warning text-dark mb-2 px-3 py-2 rounded-pill"><i class="fas fa-clock me-1"></i>In Progress</span>
-                    <h1 class="display-5 fw-bold mb-2">{{ town.name }}</h1>
+                    <h1 class="display-5 fw-bold mb-2">{{ module?.title || town.name }}</h1>
                     <p class="lead mb-0">{{ module?.subtitle || town.title || town.description }}</p>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                             <i class="fas fa-info-circle text-primary me-2"></i>
                             About {{ town.name }}
                         </h3>
-                        <div class="text-secondary mb-3 fs-5" style="white-space: pre-wrap; line-height: 1.7;" v-html="module?.description || town.description"></div>
+                        <div class="text-dark mb-3 fs-6 lh-lg  html-content ql-editor" style="white-space: pre-wrap; padding: 0;" v-html="module?.description || town.description"></div>
                     </div>
 
                     <!-- Key Attractions List -->
@@ -49,13 +49,13 @@
                                 <img v-if="lesson.cover_image" :src="lesson.cover_image" class="w-100 object-fit-cover" :style="{ height: '250px', objectPosition: lesson.cover_image_position || 'center 50%' }" :alt="lesson.title">
                                 <div class="p-3">
                                     <h5 class="fw-bold mb-2 text-dark fs-4">{{ lesson.title }}</h5>
-                                    <div class="text-muted mb-0 html-content fs-6" style="line-height: 1.6;" v-html="lesson.content"></div>
+                                    <div class="text-dark mb-0 html-content ql-editor fs-6" style="line-height: 1.6; padding: 0;" v-html="lesson.content"></div>
                                 </div>
                             </div>
                         </template>
                         <div v-else class="attraction-card p-3 border rounded shadow-sm">
                             <h5 class="fw-bold mb-2 text-dark fs-4">Historical Landmarks</h5>
-                            <p class="text-muted mb-0 fs-6">Includes historical cathedrals, bell towers, heritage parks, and cultural museums.</p>
+                            <p class="text-dark mb-0 fs-6">Includes historical cathedrals, bell towers, heritage parks, and cultural museums.</p>
                         </div>
                     </div>
                 </div>
@@ -81,11 +81,11 @@
                         </h5>
                         <ul class="list-unstyled mb-0">
                             <li class="mb-3 py-1 border-bottom d-flex justify-content-between">
-                                <span class="text-muted"><i class="fas fa-globe me-2 text-muted"></i>Province:</span>
+                                <span class="text-dark"><i class="fas fa-globe me-2 text-dark"></i>Province:</span>
                                 <strong class="text-dark">{{ town.region || 'Ilocos Norte' }}</strong>
                             </li>
                             <li class="mb-3 py-1 border-bottom d-flex justify-content-between">
-                                <span class="text-muted"><i class="fas fa-landmark me-2 text-muted"></i>Attractions:</span>
+                                <span class="text-dark"><i class="fas fa-landmark me-2 text-dark"></i>Attractions:</span>
                                 <strong class="text-dark">{{ town.destinations ? town.destinations.length : 0 }} Sites</strong>
                             </li>
                         </ul>
@@ -111,7 +111,7 @@
                                 <i class="fas fa-external-link-alt me-1"></i> Watch Video Reference {{ index + 1 }}
                             </a>
                         </div>
-                        <p class="small text-muted mb-0">Review the training video anytime for voice & pacing tips.</p>
+                        <p class="small text-dark mb-0">Review the training video anytime for voice & pacing tips.</p>
                     </div>
 
                     <!-- Completed / Launch Simulation Button -->
@@ -136,6 +136,7 @@
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 defineProps({
     town: Object,
@@ -145,14 +146,14 @@ defineProps({
 
 const getFactIcon = (fact) => {
     const lowerFact = fact.toLowerCase();
-    if (lowerFact.includes('status') || lowerFact.includes('date') || lowerFact.includes('founded')) return 'fa-calendar-alt text-secondary';
-    if (lowerFact.includes('area') || lowerFact.includes('size')) return 'fa-map text-secondary';
-    if (lowerFact.includes('barangay') || lowerFact.includes('population') || lowerFact.includes('people') || lowerFact.includes('demographic')) return 'fa-users text-secondary';
-    if (lowerFact.includes('nickname') || lowerFact.includes('region') || lowerFact.includes('province')) return 'fa-globe text-secondary';
-    if (lowerFact.includes('meaning') || lowerFact.includes('name')) return 'fa-id-card text-secondary';
-    if (lowerFact.includes('patron') || lowerFact.includes('saint') || lowerFact.includes('religion') || lowerFact.includes('church') || lowerFact.includes('cathedral')) return 'fa-church text-secondary';
-    if (lowerFact.includes('level') || lowerFact.includes('difficulty')) return 'fa-signal text-secondary';
-    if (lowerFact.includes('attraction') || lowerFact.includes('spot') || lowerFact.includes('site')) return 'fa-landmark text-secondary';
+    if (lowerFact.includes('status') || lowerFact.includes('date') || lowerFact.includes('founded')) return 'fa-calendar-alt text-dark';
+    if (lowerFact.includes('area') || lowerFact.includes('size')) return 'fa-map text-dark';
+    if (lowerFact.includes('barangay') || lowerFact.includes('population') || lowerFact.includes('people') || lowerFact.includes('demographic')) return 'fa-users text-dark';
+    if (lowerFact.includes('nickname') || lowerFact.includes('region') || lowerFact.includes('province')) return 'fa-globe text-dark';
+    if (lowerFact.includes('meaning') || lowerFact.includes('name')) return 'fa-id-card text-dark';
+    if (lowerFact.includes('patron') || lowerFact.includes('saint') || lowerFact.includes('religion') || lowerFact.includes('church') || lowerFact.includes('cathedral')) return 'fa-church text-dark';
+    if (lowerFact.includes('level') || lowerFact.includes('difficulty')) return 'fa-signal text-dark';
+    if (lowerFact.includes('attraction') || lowerFact.includes('spot') || lowerFact.includes('site')) return 'fa-landmark text-dark';
     return 'fa-check text-success';
 };
 

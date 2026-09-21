@@ -78,15 +78,15 @@
                             class="town-card"
                             :class="getTownCardClass(town)"
                         >
-                            <div class="town-image" :style="{ backgroundImage: `url('${town.hero_image || '/assets/images/INBackground.jpg'}')` }">
+                            <div class="town-image" :style="{ backgroundImage: `url('${town.module?.cover_image || town.hero_image || '/assets/images/INBackground.jpg'}')`, backgroundPosition: town.module?.cover_image_position || 'center' }">
                                 <span class="town-badge" :class="getBadgeClass(town)">
                                     {{ getBadgeLabel(town) }}
                                     <i v-if="town.progress_status === 'completed'" class="fas fa-check-circle ms-1"></i>
                                 </span>
                             </div>
                             <div class="town-content">
-                                <h5 class="fw-bold mb-1 text-dark">{{ town.name }}</h5>
-                                <p class="text-muted small mb-2">{{ town.title || town.description }}</p>
+                                <h5 class="fw-bold mb-1 text-dark">{{ town.module?.title || town.name }}</h5>
+
                                 <div class="progress-bar-custom">
                                     <div class="progress-fill bg-success" :style="{ width: (town.progress_status === 'completed' ? 100 : 0) + '%', height: '6px', borderRadius: '10px' }"></div>
                                 </div>
@@ -104,14 +104,13 @@
                         </Link>
 
                         <div v-else :id="'town-card-' + town.slug" class="town-card locked opacity-75">
-                            <div class="town-image" :style="{ backgroundImage: `url('${town.hero_image || '/assets/images/INBackground.jpg'}')` }">
+                            <div class="town-image" :style="{ backgroundImage: `url('${town.module?.cover_image || town.hero_image || '/assets/images/INBackground.jpg'}')`, backgroundPosition: town.module?.cover_image_position || 'center' }">
                                 <span class="town-badge bg-secondary text-white">
                                     Locked <i class="fas fa-lock ms-1"></i>
                                 </span>
                             </div>
                             <div class="town-content">
-                                <h5 class="fw-bold mb-1 text-dark">{{ town.name }}</h5>
-                                <p class="text-muted small mb-2">{{ town.title || town.description }}</p>
+                                <h5 class="fw-bold mb-1 text-dark">{{ town.module?.title || town.name }}</h5>
                                 <p class="small text-muted mb-0"><i class="fas fa-lock me-1"></i>Complete Previous Town First</p>
                             </div>
                         </div>

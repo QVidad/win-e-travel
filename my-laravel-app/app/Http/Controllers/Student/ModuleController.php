@@ -13,26 +13,7 @@ use Inertia\Response;
 
 class ModuleController extends Controller
 {
-    /**
-     * Display listing of published modules for students.
-     */
-    public function index(): Response
-    {
-        $modules = Cache::remember('published_student_modules', 3600, function () {
-            return CourseModule::where('status', 'published')
-                ->with('questions')
-                ->orderBy('order')
-                ->get();
-        });
 
-        $user = Auth::user();
-        $userProgress = ModuleProgress::where('user_id', $user->id)->get()->keyBy('course_module_id');
-
-        return Inertia::render('Student/Modules/Index', [
-            'modules' => $modules,
-            'userProgress' => $userProgress,
-        ]);
-    }
 
     /**
      * Display a specific published module for students.
@@ -41,6 +22,7 @@ class ModuleController extends Controller
     public function show(string $id): Response
     {
         $module = CourseModule::where('status', 'published')
+            ->where('type', 'foundation')
             ->with(['questions', 'lessons.questions' => function ($q) {
                 $q->orderBy('id');
             }])
@@ -64,8 +46,11 @@ class ModuleController extends Controller
                 'description' => $module->description,
                 'key_spots' => $module->key_spots,
                 'cover_image' => $module->cover_image,
+                'cover_image_position' => $module->cover_image_position,
                 'icon' => $module->icon,
                 'status' => $module->status,
+                'quick_facts' => $module->quick_facts,
+                'video_references' => $module->video_references,
                 'questions' => $module->questions,
                 'lessons' => $module->lessons,
             ],

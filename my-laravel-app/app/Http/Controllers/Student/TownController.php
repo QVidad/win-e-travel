@@ -13,17 +13,20 @@ class TownController extends Controller
     {
         $user = \Illuminate\Support\Facades\Auth::user();
         
-        $publishedModuleCodes = \App\Models\CourseModule::where('type', 'town_chapter')
+        $publishedModules = \App\Models\CourseModule::where('type', 'town_chapter')
             ->where('status', 'published')
-            ->pluck('code')
-            ->toArray();
+            ->get()
+            ->keyBy('code');
 
         $towns = Town::with('destinations')
             ->where('status', 'published')
             ->orderBy('order')
             ->get()
-            ->filter(function ($town) use ($publishedModuleCodes) {
-                return in_array('town-' . $town->slug, $publishedModuleCodes);
+            ->filter(function ($town) use ($publishedModules) {
+                return $publishedModules->has('town-' . $town->slug);
+            })->map(function ($town) use ($publishedModules) {
+                $town->module = $publishedModules['town-' . $town->slug];
+                return $town;
             })->values();
         // Fetch user progress for town modules
         $progresses = \App\Models\ModuleProgress::where('user_id', $user->id)

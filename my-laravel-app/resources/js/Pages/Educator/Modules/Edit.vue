@@ -89,7 +89,7 @@
 
                 <!-- 1. Module Title & Subtitle -->
                 <div class="row g-4 mb-4">
-                    <div class="col-md-7">
+                    <div :class="module.type === 'town_chapter' ? 'col-md-7' : 'col-md-12'">
                         <label class="form-label fw-bold text-dark">Module Title <span class="text-danger">*</span></label>
                         <input 
                             v-model="form.title" 
@@ -101,7 +101,7 @@
                         <div v-if="form.errors.title" class="text-danger small mt-1">{{ form.errors.title }}</div>
                     </div>
 
-                    <div class="col-md-5">
+                    <div v-if="module.type === 'town_chapter'" class="col-md-5">
                         <label class="form-label fw-bold text-dark">Subtitle / Tagline</label>
                         <input 
                             v-model="form.subtitle" 
@@ -121,12 +121,13 @@
                         </label>
                         <small class="text-muted">Supports Markdown & HTML formatting</small>
                     </div>
-                    <textarea 
-                        v-model="form.description" 
-                        class="form-control rounded-3 font-sans" 
-                        rows="6" 
+                    <QuillEditor 
+                        theme="snow" 
+                        v-model:content="form.description" 
+                        contentType="html" 
                         placeholder="Detail the educational goals, background lore, and tour guiding competencies required for this module..."
-                    ></textarea>
+                        style="min-height: 150px; background-color: white; border-radius: 0 0 0.5rem 0.5rem;"
+                    />
                     <div v-if="form.errors.description" class="text-danger small mt-1">{{ form.errors.description }}</div>
                 </div>
 
@@ -171,23 +172,8 @@
                     </div>
                 </div>
 
-                <!-- 3. Key Spots / Itinerary Points (For Foundation) -->
-                <div v-else class="mb-4">
-                    <label class="form-label fw-bold text-dark">
-                        Key Spots & Itinerary Highlights
-                    </label>
-                    <textarea 
-                        v-model="form.key_spots" 
-                        class="form-control rounded-3" 
-                        rows="4" 
-                        placeholder="e.g. St. William's Cathedral & Sinking Bell Tower, Aurora Park, La Paz Sand Dunes (Include location names, descriptions, and highlight tags)..."
-                    ></textarea>
-                    <small class="text-muted d-block mt-1">Specify key heritage stops, landmark descriptions, and student commentary focal points.</small>
-                    <div v-if="form.errors.key_spots" class="text-danger small mt-1">{{ form.errors.key_spots }}</div>
-                </div>
-
                 <!-- 4. Media Upload / Cover Image URL -->
-                <div class="mb-4">
+                <div v-if="module.type === 'town_chapter'" class="mb-4">
                     <label class="form-label fw-bold text-dark">Cover Image & Media Asset</label>
                     
                     <div class="row g-3 align-items-center">
@@ -517,13 +503,14 @@
                         <!-- Lesson Description / Overview -->
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark">{{ module.type === 'town_chapter' ? 'Attraction Information' : 'Topic Overview & Introduction Paragraph' }}</label>
-                            <textarea 
-                                v-model="lessonForm.content" 
-                                class="form-control rounded-3" 
-                                rows="4" 
+                            <QuillEditor 
+                                theme="snow" 
+                                v-model:content="lessonForm.content" 
+                                contentType="html" 
                                 placeholder="Describe the lesson context (e.g. Even if you've guided the same tour many times, no two are ever the same...)"
-                            ></textarea>
-                            <small class="text-muted">This overview will be displayed to students when they open this lesson topic.</small>
+                                style="min-height: 100px; background-color: white; border-radius: 0 0 0.5rem 0.5rem;"
+                            />
+                            <small class="text-muted mt-1 d-block">This overview will be displayed to students when they open this lesson topic.</small>
                         </div>
 
                         <!-- Attraction Cover Image (Town Chapters Only) -->
@@ -575,69 +562,7 @@
                             </div>
                         </div>
 
-                        <!-- Key Topics & Subtopics List -->
-                        <div v-if="module.type !== 'town_chapter'" class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <label class="form-label fw-bold text-dark mb-0">Key Subtopic Points & Guidelines</label>
-                                <button type="button" @click="addKeyPoint" class="btn btn-sm btn-outline-success rounded-pill fw-bold">
-                                    <i class="fas fa-plus me-1"></i> Add Subtopic
-                                </button>
-                            </div>
 
-                            <div v-if="lessonForm.key_points.length === 0" class="text-muted small p-3 bg-light rounded-3 text-center border">
-                                No key points added. Click "Add Subtopic" to include key bullet points.
-                            </div>
-
-                            <div class="d-flex flex-column gap-3">
-                                <div 
-                                    v-for="(point, pIdx) in lessonForm.key_points" 
-                                    :key="pIdx"
-                                    class="p-3 border rounded-3 bg-light-subtle position-relative"
-                                >
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge bg-secondary rounded-pill px-3 py-1 fs-8 fw-bold">Point #{{ pIdx + 1 }}</span>
-                                        <button 
-                                            type="button" 
-                                            @click="removeKeyPoint(pIdx)" 
-                                            class="btn btn-sm btn-link text-danger p-0 text-decoration-none"
-                                            title="Remove Point"
-                                        >
-                                            <i class="fas fa-trash me-1"></i> Remove
-                                        </button>
-                                    </div>
-
-                                    <div class="row g-2">
-                                        <div class="col-md-4">
-                                            <label class="form-label small fw-bold text-muted mb-1">Icon Class</label>
-                                            <input 
-                                                v-model="point.icon" 
-                                                type="text" 
-                                                class="form-control form-control-sm rounded-2" 
-                                                placeholder="e.g. fas fa-walking"
-                                            >
-                                        </div>
-                                        <div class="col-md-8">
-                                            <label class="form-label small fw-bold text-muted mb-1">Subtopic Title</label>
-                                            <input 
-                                                v-model="point.title" 
-                                                type="text" 
-                                                class="form-control form-control-sm rounded-2" 
-                                                placeholder="e.g. Know the tour style"
-                                            >
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label small fw-bold text-muted mb-1">Description / Guideline</label>
-                                            <textarea 
-                                                v-model="point.description" 
-                                                class="form-control form-control-sm rounded-2" 
-                                                rows="2" 
-                                                placeholder="Walking tours require stamina and weather planning..."
-                                            ></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div class="modal-footer border-top p-4">
                         <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" @click="closeLessonModal">Cancel</button>
@@ -669,6 +594,8 @@
 import { ref, computed, watch } from 'vue';
 import { useForm, Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 import ImagePositionEditor from '@/Components/ImagePositionEditor.vue';
 

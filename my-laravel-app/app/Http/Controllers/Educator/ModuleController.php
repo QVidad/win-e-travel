@@ -135,6 +135,7 @@ class ModuleController extends Controller
         ]);
 
         Cache::forget('published_student_modules');
+        Cache::forget('published_student_modules_foundation');
 
         return redirect()->back()
             ->with('success', 'Module updated successfully.');
