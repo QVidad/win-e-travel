@@ -3,7 +3,7 @@
         <div class="foundation-container">
             <div>
                 <!-- Page Header matching dashboard banner -->
-                <div class="welcome-banner text-white mb-5 shadow-sm" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 30px; padding: 40px; position: relative; overflow: hidden;">
+                <div class="welcome-banner text-white mb-5 shadow-sm" style="background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%); border-radius: 30px; padding: 40px; position: relative; overflow: hidden;">
                     <div class="row align-items-center">
                         <div class="col-lg-8">
                             <h1 class="display-5 fw-bold mb-3">
@@ -157,7 +157,7 @@ const getIconColorClass = (index) => {
     position: absolute;
     width: 80px;
     height: 80px;
-    background-color: #1a5f7a; /* matching banner */
+    background-color: #7b1fa2; /* matching banner */
     border-radius: 50%;
 }
 

@@ -772,7 +772,7 @@ const proceedNextStep = () => {
 }
 
 .welcome-banner {
-    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    background: linear-gradient(135deg, #01579b 0%, #0277bd 100%);
     border-radius: 30px;
     padding: 40px;
     color: white;
@@ -798,7 +798,7 @@ const proceedNextStep = () => {
     position: absolute;
     width: 80px;
     height: 80px;
-    background-color: #1a5f7a; /* matching banner */
+    background-color: #0277bd; /* matching banner */
     border-radius: 50%;
 }
 

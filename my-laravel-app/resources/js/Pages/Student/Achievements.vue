@@ -238,7 +238,7 @@ const totalBadgesCount = computed(() => props.achievements.length);
 const progressCircleStyle = computed(() => {
     const percentage = Math.round((earnedCount.value / totalBadgesCount.value) * 100) || 0;
     return {
-        background: `conic-gradient(var(--bs-warning) ${percentage}%, rgba(255,255,255,0.2) 0)`
+        background: `conic-gradient(#ffc107 ${percentage}%, rgba(255,255,255,0.2) 0)`
     };
 });
 
@@ -253,12 +253,12 @@ const downloadCertificate = () => {
 }
 
 .welcome-banner {
-    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    background: linear-gradient(135deg, #e65100 0%, #ff8f00 100%);
     border-radius: 20px;
     padding: 40px;
     color: white;
     margin-bottom: 30px;
-    box-shadow: 0 10px 30px rgba(10, 71, 46, 0.2);
+    box-shadow: 0 10px 30px rgba(230, 81, 0, 0.2);
 }
 
 .certificate-card {
@@ -378,7 +378,7 @@ const downloadCertificate = () => {
     position: absolute;
     width: 80px;
     height: 80px;
-    background-color: #1a5f7a; /* matching banner */
+    background-color: #ff8f00; /* matching banner */
     border-radius: 50%;
 }
 

@@ -193,7 +193,7 @@ const progressCircleStyle = computed(() => {
 }
 
 .welcome-banner {
-    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    background: linear-gradient(135deg, #880e4f 0%, #c2185b 100%);
     border-radius: 30px;
     padding: 40px;
     color: white;
@@ -219,7 +219,7 @@ const progressCircleStyle = computed(() => {
     position: absolute;
     width: 80px;
     height: 80px;
-    background-color: #1a5f7a; /* matching banner */
+    background-color: #c2185b; /* matching banner */
     border-radius: 50%;
 }
 

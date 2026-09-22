@@ -74,7 +74,7 @@ const isUnlocked = computed(() => {
 
 <style scoped>
 .welcome-banner {
-    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    background: linear-gradient(135deg, #01579b 0%, #0277bd 100%);
     border-radius: 30px;
     padding: 40px;
     color: white;

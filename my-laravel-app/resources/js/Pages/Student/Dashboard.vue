@@ -133,7 +133,7 @@
                                 <div v-for="i in 4" :key="i" class="chapter-dot" :class="{ completed: i <= foundationCompleted, current: i === foundationCompleted + 1 }"></div>
                             </div>
 
-                            <Link :href="route('go-beyond-books.index')" class="btn btn-outline-success w-100 btn-journey">
+                            <Link :href="route('go-beyond-books.index')" class="btn btn-outline-purple btn-journey w-100">
                                 <i class="fas fa-arrow-right me-2"></i>Continue Learning
                             </Link>
                         </div>
@@ -141,8 +141,7 @@
 
                     <!-- Stage 2: Dare to Discover -->
                     <div class="col-lg-4">
-                        <div class="journey-stage-card stage-discover" :class="{ locked: foundationCompleted < 4 }" id="discoverStage">
-                            <span v-if="foundationCompleted < 4" class="locked-badge-top">Locked <i class="fas fa-lock"></i></span>
+                        <div class="journey-stage-card stage-discover" id="discoverStage">
                             <div class="stage-icon">
                                 <i class="fas fa-compass"></i>
                             </div>
@@ -166,10 +165,7 @@
                                 <div class="chapter-dot">...</div>
                             </div>
 
-                            <div v-if="foundationCompleted < 4" class="text-secondary small mt-2">
-                                <i class="fas fa-lock me-1"></i>Complete Foundation Modules First
-                            </div>
-                            <Link v-else :href="route('dare-to-discover.index')" class="btn btn-journey w-100" style="background-color: #ff9ed2; color: white;">
+                            <Link :href="route('dare-to-discover.index')" class="btn btn-outline-pink btn-journey w-100">
                                 <i class="fas fa-arrow-right me-2"></i>Explore Towns
                             </Link>
                         </div>
@@ -199,7 +195,7 @@
                                 <div class="chapter-dot" :class="{'completed': adventureCompleted > 0}"></div>
                             </div>
 
-                            <Link :href="route('adventure-awaits.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
+                            <Link :href="route('adventure-awaits.index')" class="btn btn-outline-blue btn-journey w-100">
                                 <i class="fas fa-arrow-right me-2"></i>Adventure Awaits
                             </Link>
                         </div>
@@ -337,18 +333,18 @@ onMounted(() => {
 }
 
 .stage-foundation .stage-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #d3cce3 0%, #e9e4f0 100%);
+    color: #6a1b9a;
 }
 
 .stage-discover .stage-icon {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
+    background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
+    color: #d81b60;
 }
 
 .stage-adventure .stage-icon {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    color: white;
+    background: linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%);
+    color: #1565c0;
 }
 
 .progress-bar-custom {
@@ -445,6 +441,36 @@ onMounted(() => {
     position: relative;
     font-weight: 800;
     color: white;
+}
+
+.btn-outline-purple {
+    color: #8e24aa;
+    border-color: #8e24aa;
+}
+.btn-outline-purple:hover {
+    color: #fff;
+    background-color: #8e24aa;
+    border-color: #8e24aa;
+}
+
+.btn-outline-pink {
+    color: #d81b60;
+    border-color: #d81b60;
+}
+.btn-outline-pink:hover {
+    color: #fff;
+    background-color: #d81b60;
+    border-color: #d81b60;
+}
+
+.btn-outline-blue {
+    color: #1976d2;
+    border-color: #1976d2;
+}
+.btn-outline-blue:hover {
+    color: #fff;
+    background-color: #1976d2;
+    border-color: #1976d2;
 }
 </style>
  
