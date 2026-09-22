@@ -26,6 +26,33 @@
                     </div>
                 </div>
 
+                <!-- Gamification Stats Card -->
+                <div class="progress-overview-card mb-4" style="border-left: 4px solid var(--bs-warning);">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
+                        <div class="d-flex align-items-center gap-3 flex-grow-1">
+                            <div class="bg-warning text-dark rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 60px; height: 60px;">
+                                <i class="fas fa-star fa-xl"></i>
+                            </div>
+                            <div class="flex-grow-1" style="max-width: 500px;">
+                                <div class="d-flex justify-content-between align-items-end mb-1">
+                                    <h5 class="fw-bold mb-0 text-dark">Current Level: {{ $page.props.auth.user.level || 1 }}</h5>
+                                    <div class="fw-bold text-warning">{{ $page.props.auth.user.xp || 0 }} XP</div>
+                                </div>
+                                <div class="progress mb-1 shadow-sm" style="height: 10px; border-radius: 10px; background-color: #e9ecef;">
+                                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar" :style="`width: ${(($page.props.auth.user.xp || 0) % 500) / 5}%`"></div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted fw-bold">0 XP</small>
+                                    <small class="text-muted fw-bold">Next Level at {{ (Math.floor(($page.props.auth.user.xp || 0) / 500) + 1) * 500 }} XP</small>
+                                </div>
+                            </div>
+                        </div>
+                        <Link :href="route('achievements.index')" class="btn btn-warning px-4 py-2 rounded-pill fw-bold shadow-sm">
+                            View Badges <i class="fas fa-trophy ms-2"></i>
+                        </Link>
+                    </div>
+                </div>
+
                 <!-- Show when new user (0 progress entries) -->
                 <div v-if="!progress.hasStarted" class="card shadow-sm bg-white p-4 mb-4 rounded-4" style="border: none; border-left: 4px solid var(--bs-success);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -63,14 +90,14 @@
                 </div>
 
                 <!-- Progress Overview Card -->
-                <div v-if="progress.continueModule" class="progress-overview-card">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px;">
+                <div v-if="progress.continueModule" class="progress-overview-card mb-4" style="border-left: 4px solid var(--bs-success);">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
+                        <div class="d-flex align-items-center gap-3 flex-grow-1">
+                            <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 60px; height: 60px;">
                                 <i class="fas fa-book-open fa-xl"></i>
                             </div>
-                            <div>
-                                <h4 class="fw-bold mb-1 text-dark">Pick up where you left off</h4>
+                            <div class="flex-grow-1" style="max-width: 500px;">
+                                <h5 class="fw-bold mb-1 text-dark">Pick up where you left off</h5>
                                 <p class="text-muted mb-0">Continue with <strong>{{ progress.continueModule.title }}</strong></p>
                             </div>
                         </div>
@@ -150,8 +177,7 @@
 
                     <!-- Stage 3: Adventure Awaits -->
                     <div class="col-lg-4">
-                        <div class="journey-stage-card stage-adventure" :class="{ locked: discoverCompleted < 21 }" id="adventureStage">
-                            <span v-if="discoverCompleted < 21" class="locked-badge-top">Locked <i class="fas fa-lock"></i></span>
+                        <div class="journey-stage-card stage-adventure" id="adventureStage">
                             <div class="stage-icon">
                                 <i class="fas fa-mountain"></i>
                             </div>
@@ -159,27 +185,21 @@
                             <p class="text-muted small mb-3">Simulation Practice</p>
 
                             <div class="progress-bar-custom mb-3">
-                                <div class="progress-fill" :style="{ width: (adventureCompleted / 22) * 100 + '%' }"></div>
+                                <div class="progress-fill" :style="{ width: (adventureCompleted > 0 ? 100 : 0) + '%' }"></div>
                             </div>
 
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="small text-muted">
-                                    <span>{{ adventureCompleted }}</span>/22 Unlocked
+                                    <span>{{ adventureCompleted > 0 ? 1 : 0 }}</span>/1 Completed
                                 </span>
-                                <span class="small fw-bold text-success">{{ Math.round((adventureCompleted / 22) * 100) }}%</span>
+                                <span class="small fw-bold text-success">{{ adventureCompleted > 0 ? '100%' : '0%' }}</span>
                             </div>
 
                             <div class="chapter-progress mb-3">
-                                <div class="chapter-dot"></div>
-                                <div class="chapter-dot"></div>
-                                <div class="chapter-dot"></div>
-                                <div class="chapter-dot">...</div>
+                                <div class="chapter-dot" :class="{'completed': adventureCompleted > 0}"></div>
                             </div>
 
-                            <div v-if="discoverCompleted < 21" class="text-secondary small mt-2">
-                                <i class="fas fa-lock me-1"></i>Complete Dare to Discover First
-                            </div>
-                            <Link v-else :href="route('adventure-awaits.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
+                            <Link :href="route('adventure-awaits.index')" class="btn btn-journey w-100" style="background-color: #00f2fe; color: white;">
                                 <i class="fas fa-arrow-right me-2"></i>Adventure Awaits
                             </Link>
                         </div>

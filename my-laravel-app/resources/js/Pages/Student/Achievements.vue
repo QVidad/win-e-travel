@@ -2,19 +2,24 @@
     <StudentLayout>
         <div class="achievements-container py-4">
             <div class="container">
-                <!-- Page Header matching achievements.html -->
-                <div class="page-header">
+                <!-- Page Header matching dashboard.html -->
+                <div class="welcome-banner">
                     <div class="row align-items-center">
                         <div class="col-lg-8">
-                            <h2 class="fw-bold mb-2">
+                            <h2 class="display-6 fw-bold mb-3">
                                 <i class="fas fa-trophy me-2"></i>
                                 Achievements & Badges
                             </h2>
-                            <p class="mb-0 opacity-90">Track your progress and collect badges as you master tour guiding</p>
+                            <p class="mb-0 opacity-90 fs-5">Track your progress and collect badges as you master tour guiding</p>
                         </div>
-                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                            <div class="d-inline-block bg-white bg-opacity-25 rounded-4 px-4 py-2 fw-bold">
-                                <span id="totalBadgesEarned">{{ earnedCount }}</span>/{{ totalBadgesCount }} Badges Earned
+                        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                            <div class="d-flex justify-content-lg-end">
+                                <div class="text-center">
+                                    <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
+                                        <span class="progress-percentage fs-4">{{ earnedCount }}/{{ totalBadgesCount }}</span>
+                                    </div>
+                                    <span class="small fw-bold text-white opacity-75">Badges Earned</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -23,24 +28,24 @@
                 <div class="row g-4">
                     <div class="col-lg-8">
                         <!-- Certificate Section matching achievements.html -->
-                        <div class="certificate-card" :class="{ locked: progressPercentage < 100 }">
+                        <div class="certificate-card shadow" :class="{ locked: progressPercentage < 100 }">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
                                     <div class="certificate-icon">
                                         <i class="fas fa-scroll"></i>
                                     </div>
-                                    <h4 class="fw-bold mb-2">Certificate of Completion</h4>
-                                    <p class="mb-2 opacity-90">
+                                    <h2 class="display-6 fw-bold mb-3 text-dark">Certificate of Completion</h2>
+                                    <p class="fs-5 mb-3 text-dark opacity-90">
                                         Complete all foundation modules and town simulations to earn your certificate!
                                     </p>
-                                    <p class="mb-0 small opacity-75">
-                                        <i class="fas fa-tasks me-1"></i>
+                                    <p class="mb-0 fs-6 fw-bold text-dark opacity-75">
+                                        <i class="fas fa-tasks me-2"></i>
                                         <span>{{ progressPercentage }}% Complete</span>
                                     </p>
                                 </div>
-                                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                    <button @click="showCertificateModal = true" class="btn btn-warning btn-lg fw-bold rounded-pill px-4 shadow">
-                                        <i class="fas fa-certificate me-2"></i>View Certificate
+                                <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                                    <button @click="showCertificateModal = true" class="btn btn-dark btn-lg fw-bold rounded-pill px-4 shadow-sm">
+                                        <i class="fas fa-certificate me-2 text-warning"></i>View Certificate
                                     </button>
                                 </div>
                             </div>
@@ -50,7 +55,7 @@
                         <div class="d-flex justify-content-center mb-4">
                             <div class="btn-group rounded-pill p-1 bg-white shadow-sm" role="group">
                                 <button
-                                    v-for="cat in ['All', 'foundation', 'exploration', 'simulation', 'mastery']"
+                                    v-for="cat in ['All', 'foundation', 'simulation', 'mastery']"
                                     :key="cat"
                                     type="button"
                                     class="btn btn-sm text-capitalize px-4 rounded-pill"
@@ -63,47 +68,53 @@
                         </div>
 
                         <!-- Foundation Badges -->
-                        <h5 class="section-title mt-4">
-                            <i class="fas fa-book-open text-warning me-2"></i>
-                            Foundation Badges
-                        </h5>
-                        <div class="badge-grid mb-4">
-                            <div v-for="badge in foundationBadges" :key="badge.id" class="badge-item earned">
-                                <div class="badge-icon shadow-sm">
-                                    <i class="fas fa-award"></i>
+                        <div v-if="selectedCategory === 'All' || selectedCategory === 'foundation'">
+                            <h5 class="section-title mt-4">
+                                <i class="fas fa-book-open text-warning me-2"></i>
+                                Foundation Badges
+                            </h5>
+                            <div class="badge-grid mb-4">
+                                <div v-for="badge in foundationBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
+                                    <div class="badge-icon shadow-sm">
+                                        <i class="fas fa-award"></i>
+                                    </div>
+                                    <div class="badge-name">{{ badge.title }}</div>
+                                    <div class="badge-status" :class="{'text-success': badge.earned}">{{ badge.earned ? 'Earned' : 'Locked' }} <i v-if="badge.earned" class="fas fa-check-circle"></i></div>
                                 </div>
-                                <div class="badge-name">{{ badge.title }}</div>
-                                <div class="badge-status text-success">Earned <i class="fas fa-check-circle"></i></div>
                             </div>
                         </div>
 
                         <!-- Town Badges -->
-                        <h5 class="section-title mt-4">
-                            <i class="fas fa-map-marked-alt text-warning me-2"></i>
-                            Town Badges
-                        </h5>
-                        <div class="badge-grid mb-4">
-                            <div v-for="badge in townBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
-                                <div class="badge-icon shadow-sm">
-                                    <i class="fas fa-map-marker-alt"></i>
+                        <div v-if="selectedCategory === 'All' || selectedCategory === 'simulation'">
+                            <h5 class="section-title mt-4">
+                                <i class="fas fa-map-marked-alt text-warning me-2"></i>
+                                Town Badges
+                            </h5>
+                            <div class="badge-grid mb-4">
+                                <div v-for="badge in townBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
+                                    <div class="badge-icon shadow-sm">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="badge-name">{{ badge.title }}</div>
+                                    <div class="badge-status" :class="{'text-success': badge.earned}">{{ badge.earned ? 'Earned' : 'Locked' }} <i v-if="badge.earned" class="fas fa-check-circle"></i></div>
                                 </div>
-                                <div class="badge-name">{{ badge.title }}</div>
-                                <div class="badge-status">{{ badge.earned ? 'Earned' : 'Locked' }}</div>
                             </div>
                         </div>
 
                         <!-- Special Badges -->
-                        <h5 class="section-title mt-4">
-                            <i class="fas fa-star text-warning me-2"></i>
-                            Special Badges
-                        </h5>
-                        <div class="badge-grid mb-4">
-                            <div v-for="badge in specialBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
-                                <div class="badge-icon shadow-sm">
-                                    <i class="fas fa-trophy"></i>
+                        <div v-if="selectedCategory === 'All' || selectedCategory === 'mastery'">
+                            <h5 class="section-title mt-4">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                Special Badges
+                            </h5>
+                            <div class="badge-grid mb-4">
+                                <div v-for="badge in specialBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
+                                    <div class="badge-icon shadow-sm">
+                                        <i class="fas fa-trophy"></i>
+                                    </div>
+                                    <div class="badge-name">{{ badge.title }}</div>
+                                    <div class="badge-status" :class="{'text-success': badge.earned}">{{ badge.earned ? 'Earned' : 'Locked' }} <i v-if="badge.earned" class="fas fa-check-circle"></i></div>
                                 </div>
-                                <div class="badge-name">{{ badge.title }}</div>
-                                <div class="badge-status">{{ badge.earned ? 'Earned' : 'Locked' }}</div>
                             </div>
                         </div>
                     </div>
@@ -170,7 +181,7 @@
                         <button type="button" class="btn-close btn-close-white" @click="showCertificateModal = false"></button>
                     </div>
                     <div class="modal-body text-center p-5 bg-white">
-                        <div class="border border-4 border-warning p-4 rounded-4 position-relative" style="background: #faf8f5;">
+                        <div class="border-4 border-warning p-4 rounded-4 position-relative" style="background: #faf8f5;">
                             <img src="/assets/images/WINLogo.png" alt="MMSU Logo" style="width: 70px;" class="mb-3">
                             <h6 class="text-uppercase text-muted letter-spacing-2">Mariano Marcos State University</h6>
                             <h2 class="fw-bold text-dark font-serif my-3">Certificate of Completion</h2>
@@ -217,25 +228,19 @@ const selectedCategory = ref('All');
 const showCertificateModal = ref(false);
 const progressPercentage = ref(45);
 
-const earnedCount = computed(() => 4);
-const totalBadgesCount = computed(() => 29);
+const foundationBadges = computed(() => props.achievements.filter(a => a.category === 'foundation').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
+const townBadges = computed(() => props.achievements.filter(a => a.category === 'simulation').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
+const specialBadges = computed(() => props.achievements.filter(a => a.category === 'mastery').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
 
-const foundationBadges = [
-    { id: 1, title: 'Orientation Master', earned: true },
-    { id: 2, title: 'Ethics Scholar', earned: true },
-    { id: 3, title: 'Speech Delivery', earned: true },
-];
+const earnedCount = computed(() => props.achievements.filter(a => a.is_unlocked).length);
+const totalBadgesCount = computed(() => props.achievements.length);
 
-const townBadges = [
-    { id: 4, title: 'Laoag Navigator', earned: true },
-    { id: 5, title: 'Paoay Expert', earned: false },
-    { id: 6, title: 'Pagudpud Guide', earned: false },
-];
-
-const specialBadges = [
-    { id: 7, title: 'Simulation Pro', earned: true },
-    { id: 8, title: 'Master Tour Guide', earned: false },
-];
+const progressCircleStyle = computed(() => {
+    const percentage = Math.round((earnedCount.value / totalBadgesCount.value) * 100) || 0;
+    return {
+        background: `conic-gradient(var(--bs-warning) ${percentage}%, rgba(255,255,255,0.2) 0)`
+    };
+});
 
 const downloadCertificate = () => {
     alert('Digital Certificate PDF download initiated!');
@@ -244,20 +249,20 @@ const downloadCertificate = () => {
 
 <style scoped>
 .achievements-container {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
     min-height: 100vh;
 }
 
-.page-header {
-    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
     border-radius: 20px;
-    padding: 30px;
+    padding: 40px;
     color: white;
-    margin: 30px 0;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(10, 71, 46, 0.2);
 }
 
 .certificate-card {
-    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
     border-radius: 20px;
     padding: 30px;
     color: white;
@@ -268,7 +273,7 @@ const downloadCertificate = () => {
 
 .certificate-icon {
     font-size: 50px;
-    color: #ffd700;
+    color: #0a472e;
     margin-bottom: 10px;
 }
 
@@ -355,5 +360,31 @@ const downloadCertificate = () => {
     font-weight: 700;
     margin-bottom: 15px;
     color: #333;
+}
+.overall-progress-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(#ffc107 0deg 0deg, rgba(255,255,255,0.2) 0deg 360deg);
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.overall-progress-circle::before {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background-color: #1a5f7a; /* matching banner */
+    border-radius: 50%;
+}
+
+.progress-percentage {
+    position: relative;
+    font-weight: 800;
+    color: white;
 }
 </style>

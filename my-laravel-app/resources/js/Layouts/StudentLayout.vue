@@ -121,14 +121,83 @@
                 <slot />
             </div>
         </main>
+        <!-- Toast Container -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+            <div 
+                v-for="toast in toasts" 
+                :key="toast.id" 
+                class="toast show align-items-center text-white border-0 mb-2"
+                :class="`bg-${toast.type}`"
+                role="alert" 
+                aria-live="assertive" 
+                aria-atomic="true"
+            >
+                <div class="d-flex">
+                    <div class="toast-body fw-bold">
+                        <i class="fas me-2" :class="toast.icon"></i>
+                        {{ toast.message }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" @click="removeToast(toast.id)"></button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 
+const page = usePage();
 const isMenuOpen = ref(false);
+const toasts = ref([]);
+
+const addToast = (message, type = 'info', icon = 'fa-info-circle') => {
+    const id = Date.now() + Math.random();
+    toasts.value.push({ id, message, type, icon });
+    setTimeout(() => {
+        removeToast(id);
+    }, 5000);
+};
+
+const removeToast = (id) => {
+    toasts.value = toasts.value.filter(t => t.id !== id);
+};
+
+watch(() => page.props.flash?.gamification, (newVal) => {
+    if (newVal) {
+        if (newVal.leveled_up) {
+            addToast(`Level Up! You are now Level ${newVal.new_level}!`, 'success', 'fa-arrow-up');
+        }
+        if (newVal.unlocked_badges && newVal.unlocked_badges.length > 0) {
+            newVal.unlocked_badges.forEach(badge => {
+                addToast(`Badge Unlocked: ${badge.title}`, 'warning', 'fa-trophy');
+            });
+        }
+        if (newVal.xp_awarded > 0) {
+            addToast(`You earned ${newVal.xp_awarded} XP!`, 'info', 'fa-star');
+        }
+    }
+}, { immediate: true });
+
+onMounted(() => {
+    window.addEventListener('gamification-event', (e) => {
+        const gamification = e.detail;
+        if (gamification) {
+            if (gamification.leveled_up) {
+                addToast(`Level Up! You are now Level ${gamification.new_level}!`, 'success', 'fa-arrow-up');
+            }
+            if (gamification.unlocked_badges && gamification.unlocked_badges.length > 0) {
+                gamification.unlocked_badges.forEach(badge => {
+                    addToast(`Badge Unlocked: ${badge.title}`, 'warning', 'fa-trophy');
+                });
+            }
+            if (gamification.xp_awarded > 0) {
+                addToast(`You earned ${gamification.xp_awarded} XP!`, 'info', 'fa-star');
+            }
+        }
+    });
+});
 
 const toggleMenu = () => {
     isMenuOpen.value = !isMenuOpen.value;

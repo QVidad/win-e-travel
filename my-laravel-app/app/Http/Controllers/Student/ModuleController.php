@@ -78,6 +78,8 @@ class ModuleController extends Controller
             ['lesson_data' => []]
         );
 
+        $wasPassed = $progress->passed;
+
         if (array_key_exists('lesson_data', $validated)) {
             $progress->lesson_data = $validated['lesson_data'];
         }
@@ -92,6 +94,12 @@ class ModuleController extends Controller
         }
 
         $progress->save();
+
+        if ($progress->passed && !$wasPassed) {
+            $gamification = new \App\Services\GamificationService();
+            $gamificationResult = $gamification->awardXp($user, 50, 'Completed Foundation Module');
+            session()->flash('gamification', $gamificationResult);
+        }
 
         return redirect()->back();
     }

@@ -51,7 +51,7 @@ class SimulationController extends Controller
                     ->first();
                 
                 if (!$progress) {
-                    return redirect()->route('towns.show', $simulation->town->slug)->with('error', 'You must visit the town chapter first to unlock this simulation.');
+                    return redirect()->route('dare-to-discover.show', $simulation->town->slug)->with('error', 'You must visit the town chapter first to unlock this simulation.');
                 }
             }
         }
@@ -262,7 +262,31 @@ class SimulationController extends Controller
             // Check exact word
             if (str_contains($cleanTranscript, $cleanKw)) {
                 $matched = true;
-            } else if (!empty($kw['aliases']) && is_array($kw['aliases'])) {
+            } else if (str_contains($cleanTranscript, \Illuminate\Support\Str::singular($cleanKw)) || str_contains($cleanTranscript, \Illuminate\Support\Str::plural($cleanKw))) {
+                $matched = true;
+            } else {
+                // Tokenize for long phrases/sentences
+                $kwTokens = array_filter(explode(' ', trim(preg_replace('/[^a-z0-9\s]/', '', $word))));
+                $stopWords = ['the','a','an','and','or','in','on','at','to','for','of','with','by','is','are','was','were','it'];
+                $significantTokens = array_diff($kwTokens, $stopWords);
+                
+                if (count($significantTokens) > 2) {
+                    $hitCount = 0;
+                    foreach ($significantTokens as $token) {
+                        $token = trim($token);
+                        $tokenSing = \Illuminate\Support\Str::singular($token);
+                        $tokenPlur = \Illuminate\Support\Str::plural($token);
+                        if (str_contains($cleanTranscript, $token) || str_contains($cleanTranscript, $tokenSing) || str_contains($cleanTranscript, $tokenPlur)) {
+                            $hitCount++;
+                        }
+                    }
+                    if ($hitCount / count($significantTokens) >= 0.6) {
+                        $matched = true;
+                    }
+                }
+            }
+            
+            if (!$matched && !empty($kw['aliases']) && is_array($kw['aliases'])) {
                 // Check aliases
                 foreach ($kw['aliases'] as $alias) {
                     $alias = strtolower(trim($alias));
@@ -289,8 +313,10 @@ class SimulationController extends Controller
         // Update authenticated user stats if available
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
-        if ($user) {
-            $user->increment('xp', $xpEarned);
+        $gamificationResult = null;
+        if ($user && $xpEarned > 0) {
+            $gamification = new \App\Services\GamificationService();
+            $gamificationResult = $gamification->awardXp($user, $xpEarned, 'Speech keywords matched');
         }
 
         return response()->json([
@@ -299,6 +325,7 @@ class SimulationController extends Controller
             'match_count' => $matchCount,
             'score_percent' => $scorePercent,
             'xp_earned' => $xpEarned,
+            'gamification' => $gamificationResult
         ]);
     }
 
@@ -359,12 +386,18 @@ class SimulationController extends Controller
                 }
             }
 
+            $gamificationResult = null;
             // Only award progress if they just passed for the first time
             if ($passed && (!$record || !$record->passed)) {
-                // Future: award XP here if user table has an xp column
+                $gamification = new \App\Services\GamificationService();
+                $baseXp = ($simulation->type === 'final') ? 500 : 100;
+                $gamificationResult = $gamification->awardXp($user, $baseXp, 'Simulation completed');
             }
         }
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'gamification' => $gamificationResult ?? null
+        ]);
     }
 }

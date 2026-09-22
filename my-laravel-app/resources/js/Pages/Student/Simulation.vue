@@ -127,7 +127,7 @@
                                 <div class="row">
                                     <template v-if="currentStepData.is_surprise">
                                         <div class="col-12">
-                                            <div class="tourist-question-card mb-4 shadow-sm border-0 bg-warning bg-opacity-10 border-warning border-start border-4">
+                                            <div class="tourist-question-card mb-4 shadow-sm bg-warning bg-opacity-10 border-warning border-start border-4">
                                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                                     <h4 class="fw-bold text-dark mb-0"><i class="fas fa-question-circle me-2 text-warning"></i>Surprise Tourist Question!</h4>
                                                     <div class="bg-success bg-opacity-10 px-4 py-2 rounded-pill border border-success">
