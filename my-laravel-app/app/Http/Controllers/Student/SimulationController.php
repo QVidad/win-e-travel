@@ -102,10 +102,130 @@ class SimulationController extends Controller
 
     public function finalBoss(): Response
     {
-        $simulation = \App\Models\Simulation::where('type', 'final')->firstOrFail();
+        $simulation = \App\Models\Simulation::firstOrCreate(
+            ['type' => 'final'],
+            [
+                'title' => 'Final Virtual Tour: Ilocos Norte', 
+                'scenarios' => [], 
+                'status' => 'published',
+                'passing_score' => 80
+            ]
+        );
+
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        // 1. Get up to 5 completed towns
+        $completedTowns = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->whereHas('courseModule', function ($q) {
+                $q->where('type', 'town_chapter');
+            })
+            ->where('passed', true)
+            ->with('courseModule')
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+
+        $townSlugs = $completedTowns->map(function($progress) {
+            return str_replace('town-', '', $progress->courseModule->code);
+        });
+
+        $townSimulations = collect();
+        if ($townSlugs->isNotEmpty()) {
+            $townSimulations = \App\Models\Simulation::where('type', 'town')
+                ->whereHas('town', function($q) use ($townSlugs) {
+                    $q->whereIn('slug', $townSlugs);
+                })
+                ->get();
+        }
+
+        // Fallback for demo mode if no completed towns
+        if ($townSimulations->isEmpty()) {
+            $townSimulations = \App\Models\Simulation::where('type', 'town')
+                ->inRandomOrder()
+                ->take(5)
+                ->get();
+        }
+
+        $finalScenarios = [];
+        
+        // 2. Extract up to 2 random scenarios from each town
+        foreach ($townSimulations as $ts) {
+            $scens = is_string($ts->scenarios) ? json_decode($ts->scenarios, true) : $ts->scenarios;
+            if (!is_array($scens)) continue;
+            
+            shuffle($scens);
+            $taken = array_slice($scens, 0, 2);
+            
+            $module = \App\Models\CourseModule::where('code', 'town-' . $ts->town->slug)->first();
+            
+            foreach ($taken as $scenario) {
+                $lesson = \App\Models\ModuleLesson::find($scenario['lesson_id'] ?? null);
+                $keywords = [];
+                if (!empty($scenario['keywords'])) {
+                    if (is_string($scenario['keywords'])) {
+                        $parsed = array_values(array_filter(array_map('trim', explode(',', $scenario['keywords']))));
+                        foreach ($parsed as $word) {
+                            $keywords[] = ['word' => $word, 'points' => 10, 'aliases' => []];
+                        }
+                    } else if (is_array($scenario['keywords'])) {
+                        $keywords = $scenario['keywords'];
+                    }
+                }
+
+                $image = '/assets/images/INBackground.jpg';
+                if ($lesson && $lesson->cover_image) {
+                    $image = $lesson->cover_image;
+                } else if (!$lesson && $module && $module->cover_image) {
+                    $image = $module->cover_image;
+                }
+
+                $finalScenarios[] = [
+                    'is_surprise' => false,
+                    'title' => ($scenario['title'] ?? 'Attraction') . ' (' . $ts->town->name . ')',
+                    'image' => $image,
+                    'keywords' => $keywords,
+                    'time_limit' => (int)($scenario['time_limit'] ?? 60),
+                ];
+            }
+        }
+
+        // 3. Inject Surprise Questions from Question Bank
+        $surpriseCount = min(5, max(1, count($townSimulations)));
+        $questions = \App\Models\QuizQuestion::inRandomOrder()->take($surpriseCount)->get();
+
+        foreach ($questions as $q) {
+            $correctOptionField = 'option_' . $q->correct_option; // option_a, option_b...
+            $correctAnswerText = $q->$correctOptionField;
+            
+            if (!$correctAnswerText) continue;
+
+            $finalScenarios[] = [
+                'is_surprise' => true,
+                'title' => 'Surprise Tourist Question!',
+                'question' => $q->question_text ?? $q->question,
+                'options' => [
+                    'a' => $q->option_a,
+                    'b' => $q->option_b,
+                    'c' => $q->option_c,
+                    'd' => $q->option_d,
+                ],
+                'correct_option' => $q->correct_option,
+                'image' => '/assets/images/INBackground.jpg', // Standard background for questions
+                'keywords' => [
+                    ['word' => $correctAnswerText, 'points' => 20, 'aliases' => []]
+                ],
+                'time_limit' => 30, // 30 seconds to answer
+            ];
+        }
+
+        // Shuffle all scenarios so questions are interleaved
+        shuffle($finalScenarios);
+
+        $simulationArray = $simulation->toArray();
+        $simulationArray['scenarios'] = $finalScenarios;
 
         return Inertia::render('Student/Simulation', [
-            'simulation' => $simulation,
+            'simulation' => $simulationArray,
         ]);
     }
 

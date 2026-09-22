@@ -43,7 +43,7 @@
                 </div>
                 
                 <div>
-                    <Link v-if="isUnlocked && finalSimulationId" :href="route('adventure-awaits.final')" class="btn btn-light fw-bold px-4 py-2 rounded shadow-sm text-dark">
+                    <Link v-if="isUnlocked" :href="route('adventure-awaits.final')" class="btn btn-light fw-bold px-4 py-2 rounded shadow-sm text-dark">
                         <i class="fas fa-play text-success me-2"></i> Start Virtual Tour
                     </Link>
                     <button v-else class="btn btn-light opacity-75 fw-bold px-4 py-2 rounded text-dark" disabled>

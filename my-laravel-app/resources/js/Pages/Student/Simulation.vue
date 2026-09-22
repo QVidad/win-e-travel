@@ -125,35 +125,74 @@
 
                             <div class="card-body p-4">
                                 <div class="row">
-                                    <div class="col-md-7">
-                                        <!-- Scenario Prompt -->
-                                        <div class="tourist-question-card mb-4 shadow-sm border-0 h-100">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <h4 class="fw-bold text-dark mb-0"><i class="fas fa-bullhorn me-2 text-primary"></i>Your Turn to Guide</h4>
+                                    <template v-if="currentStepData.is_surprise">
+                                        <div class="col-12">
+                                            <div class="tourist-question-card mb-4 shadow-sm border-0 bg-warning bg-opacity-10 border-warning border-start border-4">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h4 class="fw-bold text-dark mb-0"><i class="fas fa-question-circle me-2 text-warning"></i>Surprise Tourist Question!</h4>
+                                                    <div class="bg-success bg-opacity-10 px-4 py-2 rounded-pill border border-success">
+                                                        <span class="text-success fw-bold fs-5">Points: {{ currentStepData.keywords.filter(kw => isKeywordMatched(kw)).reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }} / 20</span>
+                                                    </div>
+                                                </div>
+                                                <p class="mb-3 text-dark fs-4 fw-semibold">{{ currentStepData.question }}</p>
+                                                <p class="mb-2 text-muted fs-6"><i class="fas fa-microphone me-1"></i> Speak the content of the correct option to answer.</p>
                                                 
-                                                <div class="bg-success bg-opacity-10 px-4 py-2 rounded-pill border border-success">
-                                                    <span class="text-success fw-bold fs-5">Points: {{ currentStepData.keywords.filter(kw => isKeywordMatched(kw)).reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }} / {{ currentStepData.keywords.reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }}</span>
+                                                <div class="row g-3 mt-1">
+                                                    <div v-if="currentStepData.options?.a" class="col-md-6">
+                                                        <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'a'}">
+                                                            <strong>A.</strong> {{ currentStepData.options.a }}
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="currentStepData.options?.b" class="col-md-6">
+                                                        <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'b'}">
+                                                            <strong>B.</strong> {{ currentStepData.options.b }}
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="currentStepData.options?.c" class="col-md-6">
+                                                        <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'c'}">
+                                                            <strong>C.</strong> {{ currentStepData.options.c }}
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="currentStepData.options?.d" class="col-md-6">
+                                                        <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'd'}">
+                                                            <strong>D.</strong> {{ currentStepData.options.d }}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <p class="mb-0 text-muted fs-5">You are now at <strong>{{ currentStepData.title }}</strong>. Begin your commentary and make sure to mention the required keywords before the timer runs out!</p>
                                         </div>
-                                    </div>
-                                    <div class="col-md-5">
-                                        <!-- Validation Keyword Cloud -->
-                                        <div class="h-100 p-4 bg-light rounded-4 border">
-                                            <h5 class="fw-bold text-dark mb-3"><i class="fas fa-tags me-2 text-primary"></i>Validation Keywords:</h5>
-                                            <div class="keyword-cloud">
-                                                <span
-                                                    v-for="(kw, idx) in currentStepData.keywords"
-                                                    :key="'kw-'+idx"
-                                                    class="keyword-tag fs-6"
-                                                    :class="isKeywordMatched(kw) ? 'covered bg-success text-white border-success' : ''"
-                                                >
-                                                    <i class="fas fa-check me-1" v-if="isKeywordMatched(kw)"></i>{{ kw.word }} ({{ kw.points }} pts)
-                                                </span>
+                                    </template>
+                                    <template v-else>
+                                        <div class="col-md-7">
+                                            <!-- Scenario Prompt -->
+                                            <div class="tourist-question-card mb-4 shadow-sm border-0 h-100">
+                                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                                    <h4 class="fw-bold text-dark mb-0"><i class="fas fa-bullhorn me-2 text-primary"></i>Your Turn to Guide</h4>
+                                                    
+                                                    <div class="bg-success bg-opacity-10 px-4 py-2 rounded-pill border border-success">
+                                                        <span class="text-success fw-bold fs-5">Points: {{ currentStepData.keywords.filter(kw => isKeywordMatched(kw)).reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }} / {{ currentStepData.keywords.reduce((sum, kw) => sum + (Number(kw.points) || 0), 0) }}</span>
+                                                    </div>
+                                                </div>
+                                                <p class="mb-0 text-muted fs-5">You are now at <strong>{{ currentStepData.title }}</strong>. Begin your commentary and make sure to mention the required keywords before the timer runs out!</p>
                                             </div>
                                         </div>
-                                    </div>
+                                        <div class="col-md-5">
+                                            <!-- Validation Keyword Cloud -->
+                                            <div class="h-100 p-4 bg-light rounded-4 border">
+                                                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-tags me-2 text-primary"></i>Validation Keywords:</h5>
+                                                <div class="keyword-cloud">
+                                                    <span
+                                                        v-for="(kw, idx) in currentStepData.keywords"
+                                                        :key="'kw-'+idx"
+                                                        class="keyword-tag fs-6"
+                                                        :class="isKeywordMatched(kw) ? 'covered bg-success text-white border-success' : ''"
+                                                    >
+                                                        <i class="fas fa-check me-1" v-if="isKeywordMatched(kw)"></i>{{ kw.word }} ({{ kw.points }} pts)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
 
                                 <!-- Action Buttons -->
