@@ -7,11 +7,11 @@
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
-                        Quiz Question Banks
+                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
+                        <i class="fas fa-tasks me-2 opacity-75"></i>Quiz Question Banks
                     </h1>
                     <p class="mb-0 text-white fst-italic fs-6 opacity-90">
-                        Manage multiple-choice question banks and correct answer keys across all CBEA modules.
+                        Manage multiple-choice question banks and correct answer keys for Foundation Modules. (Town Chapters are simulation-based).
                     </p>
                 </div>
 

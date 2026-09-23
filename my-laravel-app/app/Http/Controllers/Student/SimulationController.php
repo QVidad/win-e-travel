@@ -380,7 +380,7 @@ class SimulationController extends Controller
                     if ($module) {
                         \App\Models\ModuleProgress::updateOrCreate(
                             ['user_id' => $user->id, 'course_module_id' => $module->id],
-                            ['passed' => true]
+                            ['passed' => true, 'score_percentage' => $score]
                         );
                     }
                 }

@@ -68,10 +68,11 @@
                         @click.stop="toggleProfileMenu"
                     >
                         <div 
-                            class="avatar-circle text-white rounded-circle d-flex align-items-center justify-content-center shadow-xs" 
+                            class="avatar-circle text-white rounded-circle d-flex align-items-center justify-content-center shadow-xs overflow-hidden" 
                             style="width: 36px; height: 36px; background-color: #0d4b38;"
                         >
-                            <i class="fas fa-chalkboard-teacher"></i>
+                            <img v-if="$page.props.auth?.user?.avatar" :src="$page.props.auth.user.avatar" alt="Avatar" class="w-100 h-100 object-fit-cover">
+                            <i v-else class="fas fa-chalkboard-teacher"></i>
                         </div>
                         <span class="fw-bold text-dark">{{ $page.props.auth?.user ? $page.props.auth.user.name : 'Educator' }}</span>
                     </button>

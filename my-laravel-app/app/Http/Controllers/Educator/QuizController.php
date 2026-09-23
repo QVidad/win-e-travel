@@ -17,11 +17,18 @@ class QuizController extends Controller
      */
     public function index(Request $request): Response
     {
-        $modules = CourseModule::with(['questions', 'updatedBy', 'lessons.questions'])->orderBy('order')->get();
+        $modules = CourseModule::with(['questions', 'updatedBy', 'lessons.questions'])
+            ->where('type', 'foundation')
+            ->orderBy('order')
+            ->get();
+
+        $totalFoundationQuestions = QuizQuestion::whereHas('courseModule', function($q) {
+            $q->where('type', 'foundation');
+        })->count();
 
         return Inertia::render('Educator/Quizzes/Index', [
             'modules' => $modules,
-            'totalQuestions' => QuizQuestion::count(),
+            'totalQuestions' => $totalFoundationQuestions,
         ]);
     }
 

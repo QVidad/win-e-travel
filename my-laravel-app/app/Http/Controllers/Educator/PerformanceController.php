@@ -20,7 +20,7 @@ class PerformanceController extends Controller
         $allProgress = ModuleProgress::whereIn('user_id', $studentIds)->get();
         $totalAttempts = $allProgress->count();
         
-        $passedAttempts = $allProgress->where('score_percentage', '>=', 90)->count();
+        $passedAttempts = $allProgress->where('passed', true)->count();
         $quizPassRate = $totalAttempts > 0 ? round(($passedAttempts / $totalAttempts) * 100) : 0;
         
         $classAverageScore = $totalAttempts > 0 ? round($allProgress->avg('score_percentage')) : 0;
@@ -30,7 +30,7 @@ class PerformanceController extends Controller
         $completedCertificates = 0;
         if ($totalModules > 0) {
             foreach ($students as $student) {
-                $passedModulesCount = $allProgress->where('user_id', $student->id)->where('score_percentage', '>=', 90)->count();
+                $passedModulesCount = $allProgress->where('user_id', $student->id)->where('passed', true)->count();
                 if ($passedModulesCount >= $totalModules) {
                     $completedCertificates++;
                 }
@@ -46,7 +46,7 @@ class PerformanceController extends Controller
             ->map(function ($module) {
                 $attempts = $module->progress->count();
                 $avgScore = $attempts > 0 ? round($module->progress->avg('score_percentage')) : 0;
-                $passed = $module->progress->where('score_percentage', '>=', 90)->count();
+                $passed = $module->progress->where('passed', true)->count();
                 $passRate = $attempts > 0 ? round(($passed / $attempts) * 100) : 0;
                 
                 return [
@@ -66,7 +66,7 @@ class PerformanceController extends Controller
             $studentProgress = $allProgress->where('user_id', $student->id);
             $attempts = $studentProgress->count();
             $avgScore = $attempts > 0 ? round($studentProgress->avg('score_percentage')) : 0;
-            $completedChapters = $studentProgress->where('score_percentage', '>=', 90)->count();
+            $completedChapters = $studentProgress->where('passed', true)->count();
             
             $status = ($totalModules > 0 && $completedChapters >= $totalModules) ? 'Eligible' : 'In Progress';
             
@@ -112,7 +112,7 @@ class PerformanceController extends Controller
             $studentProgress = $allProgress->where('user_id', $student->id);
             $attempts = $studentProgress->count();
             $avgScore = $attempts > 0 ? round($studentProgress->avg('score_percentage')) : 0;
-            $completedChapters = $studentProgress->where('score_percentage', '>=', 90)->count();
+            $completedChapters = $studentProgress->where('passed', true)->count();
             $status = ($totalModules > 0 && $completedChapters >= $totalModules) ? 'Eligible' : 'In Progress';
             
             return [
@@ -170,7 +170,7 @@ class PerformanceController extends Controller
             $progress = $progressRecords->where('course_module_id', $module->id)->first();
             
             $score = $progress ? $progress->score_percentage : null;
-            $passed = $progress ? $progress->score_percentage >= 90 : false;
+            $passed = $progress ? $progress->passed : false;
             
             if ($passed) {
                 $completedModules++;

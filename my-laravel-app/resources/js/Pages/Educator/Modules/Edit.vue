@@ -10,8 +10,8 @@
                     <Link :href="route('educator.modules.index')" class="text-decoration-none text-white-50 small fw-bold mb-2 d-inline-block">
                         <i class="fas fa-arrow-left me-1"></i> Back to Modules List
                     </Link>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
-                        {{ form.title }}
+                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
+                        <i class="fas fa-edit me-2 opacity-75"></i>{{ form.title }}
                     </h1>
                     <div class="d-flex align-items-center gap-2">
                         <span 

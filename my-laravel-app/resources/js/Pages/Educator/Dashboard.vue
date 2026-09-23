@@ -7,8 +7,8 @@
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h1 class="display-6 fw-extrabold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
-                        Faculty CMS & Curriculum Control
+                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
+                        <i class="fas fa-desktop me-2 opacity-75"></i>Faculty CMS & Curriculum Control
                     </h1>
                     <p class="mb-0 text-white fst-italic fs-6 opacity-90">
                         "Manage curriculum modules, assessment question banks, and monitor student completion progress."

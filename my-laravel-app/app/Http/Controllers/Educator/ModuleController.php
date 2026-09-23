@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class ModuleController extends Controller
 {
@@ -73,6 +74,43 @@ class ModuleController extends Controller
             'defaultTownImage' => $defaultTownImage,
             'simulation' => $simulation,
         ]);
+    }
+
+    /**
+     * Store a newly created module.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'required|in:foundation,town_chapter',
+        ]);
+
+        $order = CourseModule::where('type', $validated['type'])->max('order') + 1;
+        $code = Str::slug($validated['title']);
+        
+        if ($validated['type'] === 'town_chapter') {
+            $code = 'town-' . $code;
+        } else {
+            $code = 'mod-' . $code;
+        }
+
+        $module = CourseModule::create([
+            'title' => $validated['title'],
+            'type' => $validated['type'],
+            'code' => $code,
+            'status' => 'draft',
+            'order' => $order,
+            'quiz_question_count' => 0,
+            'updated_by' => $request->user()->id,
+            'last_modified_at' => now(),
+        ]);
+
+        Cache::forget('published_student_modules');
+        Cache::forget('published_student_modules_foundation');
+
+        return redirect()->route('educator.modules.edit', $module->id)
+            ->with('success', 'Module created successfully. You can now edit its contents.');
     }
 
     /**
@@ -213,5 +251,19 @@ class ModuleController extends Controller
         \Illuminate\Support\Facades\Log::info('Saved Simulation Scenarios: ', $validated['scenarios'] ?? []);
 
         return redirect()->back()->with('success', 'Simulation settings updated successfully.');
+    }
+
+    /**
+     * Remove the specified module.
+     */
+    public function destroy(Request $request, string $id): RedirectResponse
+    {
+        $module = CourseModule::findOrFail($id);
+        $module->delete();
+
+        Cache::forget('published_student_modules');
+        Cache::forget('published_student_modules_foundation');
+
+        return redirect()->back()->with('success', 'Module deleted successfully.');
     }
 }

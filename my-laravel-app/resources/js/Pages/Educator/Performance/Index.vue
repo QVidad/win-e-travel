@@ -9,8 +9,8 @@
         >
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
-                        Student Performance & Quiz Analytics
+                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
+                        <i class="fas fa-chart-line me-2 opacity-75"></i>Student Performance & Quiz Analytics
                     </h1>
                     <p class="mb-0 text-white fst-italic fs-6 opacity-90">
                         Track class mastery, average assessment scores, and module pass rates.

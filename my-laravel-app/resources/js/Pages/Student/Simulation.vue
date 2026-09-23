@@ -709,6 +709,10 @@ const validateSpeechWithServer = async () => {
             totalXpEarned.value += response.data.xp_earned;
             feedbackText.value = `Speech processed! Score: ${Math.round(stepScore)}% (${response.data.match_count} keywords matched)`;
             feedbackIsGood.value = response.data.match_count > 0 || totalKw === 0;
+
+            if (response.data.gamification) {
+                window.dispatchEvent(new CustomEvent('gamification-event', { detail: response.data.gamification }));
+            }
         }
     } catch (e) {
         // Fallback to local keyword validation
@@ -761,7 +765,13 @@ const proceedNextStep = () => {
     } else {
         isPassed.value = satisfactionScore.value >= (props.simulation.passing_score || 80);
         showCompleteModal.value = true;
-        axios.post(route('adventure-awaits.complete', props.simulation.id), { passed: isPassed.value, score: Math.round(satisfactionScore.value) }).catch(err => console.error(err));
+        axios.post(route('adventure-awaits.complete', props.simulation.id), { passed: isPassed.value, score: Math.round(satisfactionScore.value) })
+            .then(res => {
+                if (res.data && res.data.gamification) {
+                    window.dispatchEvent(new CustomEvent('gamification-event', { detail: res.data.gamification }));
+                }
+            })
+            .catch(err => console.error(err));
     }
 };
 </script>
