@@ -176,29 +176,59 @@
         <div v-if="showCertificateModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.7);">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title fw-bold"><i class="fas fa-certificate me-2"></i>Official Tour Guide Certificate</h5>
+                    <div class="modal-header text-white" style="background-color: #0d4b38;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-certificate me-2 text-warning"></i>Official Tour Guide Certificate</h5>
                         <button type="button" class="btn-close btn-close-white" @click="showCertificateModal = false"></button>
                     </div>
-                    <div class="modal-body text-center p-5 bg-white">
-                        <div class="border-4 border-warning p-4 rounded-4 position-relative" style="background: #faf8f5;">
-                            <img src="/assets/images/WINLogo.png" alt="MMSU Logo" style="width: 70px;" class="mb-3">
-                            <h6 class="text-uppercase text-muted letter-spacing-2">Mariano Marcos State University</h6>
-                            <h2 class="fw-bold text-dark font-serif my-3">Certificate of Completion</h2>
-                            <p class="lead text-secondary">This certifies that</p>
-                            <h3 class="fw-bold text-success text-decoration-underline mb-3">{{ $page.props.auth.user.name }}</h3>
-                            <p class="text-muted max-w-xl mx-auto">has successfully completed the computer-based interactive simulation training for tour guiding across the 21 municipalities of Ilocos Norte.</p>
-
-                            <div class="row mt-5 pt-3">
-                                <div class="col-6 text-center">
-                                    <hr class="w-50 mx-auto mb-1">
-                                    <small class="fw-bold text-dark d-block">Prof. Maria Santos</small>
-                                    <small class="text-muted">Lead Instructor</small>
+                    <div class="modal-body text-center p-0 bg-white position-relative d-flex justify-content-center align-items-center" style="min-height: 50vh;">
+                        <div id="certificate-print-area" class="mx-auto" style="container-type: inline-size;" :style="{
+                            backgroundImage: certificateSettings?.background_image_path ? `url(${certificateSettings.background_image_path})` : 'none',
+                            backgroundSize: '100% 100%',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            aspectRatio: '297 / 210',
+                            width: '100%',
+                            maxWidth: 'calc(70vh * (297 / 210))'
+                        }">
+                            <!-- Print Overlay to hide elements not meant for PDF -->
+                            <div class="position-relative d-flex flex-column justify-content-center h-100" style="background: transparent; padding: 4cqw 6cqw;">
+                                
+                                <div class="d-flex justify-content-center align-items-center" style="gap: 2cqw; margin-bottom: 1cqw;">
+                                    <img v-if="certificateSettings?.university_logo_path" :src="certificateSettings.university_logo_path" alt="Uni Logo" style="height: 8cqw; width: 8cqw; object-fit: contain;">
+                                    <img v-else src="/assets/images/WINLogo.png" alt="Fallback Logo" style="height: 8cqw; width: 8cqw; object-fit: contain; opacity: 0.2;">
+                                    
+                                    <img v-if="certificateSettings?.college_logo_path" :src="certificateSettings.college_logo_path" alt="Col Logo" style="height: 8cqw; width: 8cqw; object-fit: contain;">
                                 </div>
-                                <div class="col-6 text-center">
-                                    <hr class="w-50 mx-auto mb-1">
-                                    <small class="fw-bold text-dark d-block">WIN e-Travel System</small>
-                                    <small class="text-muted">Digital Verification Code: WIN-2026-8891</small>
+
+                                <div class="text-center">
+                                    <h6 class="text-uppercase text-muted fw-bold" style="font-size: 2cqw; letter-spacing: 0.2cqw; margin-bottom: 0.5cqw;">{{ certificateSettings?.university_name || 'Mariano Marcos State University' }}</h6>
+                                    <p class="text-muted" style="font-size: 1.6cqw; margin-bottom: 1cqw;">{{ certificateSettings?.college_name || 'College Business, Economics and Accountancy' }}</p>
+                                    
+                                    <h2 class="fw-bold text-dark font-serif" style="font-size: 4.5cqw; margin-top: 1cqw; margin-bottom: 1cqw;">Certificate of Completion</h2>
+                                    <p class="text-secondary" style="font-size: 2.2cqw; margin-bottom: 0.5cqw;">This certifies that</p>
+                                    <h3 class="fw-bold text-success text-decoration-underline font-serif fst-italic" style="font-size: 4cqw; margin-bottom: 1cqw;">{{ $page.props.auth.user.name }}</h3>
+                                    
+                                    <p class="text-muted mx-auto lh-base" style="max-width: 85%; font-size: 1.8cqw; margin-bottom: 1cqw;">
+                                        {{ certificateSettings?.description || 'has successfully completed the computer-based interactive simulation training for tour guiding across the 21 municipalities of Ilocos Norte.' }}
+                                    </p>
+
+                                    <div class="row" style="margin-top: 2cqw; padding-left: 4cqw; padding-right: 4cqw;">
+                                        <div class="col-6 text-center">
+                                            <div class="signature-container mx-auto position-relative" style="height: 4cqw; width: 32cqw; margin-bottom: 0.5cqw;">
+                                                <img v-if="certificateSettings?.signature_image_path" :src="certificateSettings.signature_image_path" alt="e-Sign" class="position-absolute bottom-0 start-50 translate-middle-x" style="max-height: 6cqw; max-width: 30cqw; z-index: 10; margin-bottom: -1.5cqw;">
+                                            </div>
+                                            <hr class="mx-auto mt-0" style="width: 32cqw; border-color: #333; opacity: 1; border-width: 0.2cqw; margin-bottom: 0.5cqw;">
+                                            <small class="fw-bold text-dark d-block text-truncate mx-auto" style="font-size: 1.8cqw; max-width: 32cqw;">{{ certificateSettings?.signer_name || 'Prof. Maria Santos' }}</small>
+                                            <small class="text-muted text-truncate mx-auto d-block" style="font-size: 1.5cqw; max-width: 32cqw;">{{ certificateSettings?.signer_title || 'Lead Instructor' }}</small>
+                                        </div>
+                                        <div class="col-6 text-center d-flex flex-column justify-content-end align-items-center">
+                                            <div style="height: 4cqw;"></div>
+                                            <div style="margin-top: 1cqw;" class="text-center">
+                                                <small class="fw-bold text-dark d-block" style="font-size: 1.8cqw;">WIN e-Travel System</small>
+                                                <small class="text-muted" style="font-size: 1.5cqw;">Code: {{ certificateCode }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -206,7 +236,7 @@
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary rounded-pill px-4" @click="showCertificateModal = false">Close</button>
                         <button type="button" class="btn btn-success rounded-pill px-4" @click="downloadCertificate">
-                            <i class="fas fa-download me-1"></i> Download PDF
+                            <i class="fas fa-print me-1"></i> Print / Save PDF
                         </button>
                     </div>
                 </div>
@@ -222,11 +252,13 @@ import { ref, computed } from 'vue';
 const props = defineProps({
     achievements: Array,
     stats: Object,
+    userStats: Object,
+    certificateSettings: Object,
 });
 
 const selectedCategory = ref('All');
 const showCertificateModal = ref(false);
-const progressPercentage = ref(45);
+const progressPercentage = ref(45); // This is just a placeholder, maybe derived?
 
 const foundationBadges = computed(() => props.achievements.filter(a => a.category === 'foundation').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
 const townBadges = computed(() => props.achievements.filter(a => a.category === 'simulation').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
@@ -242,8 +274,58 @@ const progressCircleStyle = computed(() => {
     };
 });
 
+import { usePage } from '@inertiajs/vue3';
+const page = usePage();
+
+const certificateCode = computed(() => {
+    const userId = page.props.auth.user.id.toString().padStart(3, '0');
+    const year = new Date().getFullYear();
+    const hash = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `CERT-${userId}-${year}-${hash}`;
+});
+
 const downloadCertificate = () => {
-    alert('Digital Certificate PDF download initiated!');
+    // Use outerHTML to capture the background image and container-type styles on the main div
+    const printContent = document.getElementById('certificate-print-area').outerHTML;
+    const originalContent = document.body.innerHTML;
+    
+    // Add print styles dynamically
+    const printStyles = `
+        <style>
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            @media print {
+                body {
+                    margin: 0;
+                    padding: 0;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    background-color: white;
+                }
+                #print-section {
+                    width: 297mm;
+                    height: 210mm;
+                    margin: 0;
+                    padding: 0;
+                    display: block;
+                }
+                #certificate-print-area {
+                    max-width: none !important;
+                    max-height: none !important;
+                    width: 297mm !important;
+                    height: 210mm !important;
+                    margin: 0 !important;
+                }
+            }
+        </style>
+    `;
+
+    document.body.innerHTML = printStyles + '<div id="print-section">' + printContent + '</div>';
+    window.print();
+    document.body.innerHTML = originalContent;
+    location.reload(); // Reload to restore Vue bindings after modifying DOM
 };
 </script>
 

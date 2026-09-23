@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
+use App\Http\Controllers\Educator\CertificateController;
 use App\Http\Controllers\Educator\DashboardController as EducatorDashboardController;
 use App\Http\Controllers\Educator\LessonController;
 use App\Http\Controllers\Educator\ModuleController as EducatorModuleController;
@@ -71,6 +72,9 @@ Route::middleware(['auth'])->prefix('educator')->name('educator.')->group(functi
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::get('/performance/export', [PerformanceController::class, 'export'])->name('performance.export');
     Route::get('/performance/{id}', [PerformanceController::class, 'show'])->name('performance.show');
+    
+    Route::get('/certificate', [CertificateController::class, 'edit'])->name('certificate.edit');
+    Route::post('/certificate', [CertificateController::class, 'update'])->name('certificate.update');
 });
 
 // Admin Panel Routes (Admin Only)

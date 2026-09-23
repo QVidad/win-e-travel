@@ -55,6 +55,17 @@
                         </div>
                         <div>Student Performance</div>
                     </Link>
+
+                    <Link 
+                        :href="route('educator.certificate.edit')" 
+                        class="text-decoration-none text-center small transition-all"
+                        :class="isRouteActive('/educator/certificate') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                    >
+                        <div class="mb-1">
+                            <i class="fas fa-certificate fa-lg" :class="isRouteActive('/educator/certificate') ? 'text-success' : ''" style="color: #0d4b38 !important;"></i>
+                        </div>
+                        <div>Certificate Editor</div>
+                    </Link>
                 </div>
 
                 <!-- Right: Educator Profile Dropdown -->
