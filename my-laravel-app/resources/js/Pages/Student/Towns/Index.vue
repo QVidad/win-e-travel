@@ -1,7 +1,8 @@
 <template>
+    <Head title="Dare to Discover" />
     <StudentLayout>
-        <div class="discover-container py-4">
-            <div class="container">
+        <div class="dashboard-container">
+            <div>
                 <!-- Welcome Banner matching dashboard.html -->
                 <div class="welcome-banner">
                     <div class="row align-items-center">
@@ -124,7 +125,7 @@
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { ref, computed, defineAsyncComponent } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, Head } from '@inertiajs/vue3';
 import 'leaflet/dist/leaflet.css';
 
 const TownMap = defineAsyncComponent(() => import('@/Components/TownMap.vue'));

@@ -1,8 +1,10 @@
 <template>
+    <Head title="Adventure Awaits" />
     <StudentLayout>
-        <div class="container py-4">
-            <!-- Welcome Banner -->
-            <div class="welcome-banner mb-5">
+        <div class="dashboard-container">
+            <div>
+                <!-- Welcome Banner -->
+                <div class="welcome-banner mb-5">
                 <div class="row align-items-center">
                     <div class="col-lg-12">
                         <h2 class="display-6 fw-bold mb-3 text-white">
@@ -52,12 +54,13 @@
                 </div>
             </div>
         </div>
+        </div>
     </StudentLayout>
 </template>
 
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({

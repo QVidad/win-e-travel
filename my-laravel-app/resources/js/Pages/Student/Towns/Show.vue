@@ -1,4 +1,5 @@
 <template>
+    <Head :title="town.name" />
     <StudentLayout>
         <div class="container py-4">
             <!-- Breadcrumb Navigation matching town-laoag.html -->
@@ -135,7 +136,7 @@
 
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, Head } from '@inertiajs/vue3';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 defineProps({

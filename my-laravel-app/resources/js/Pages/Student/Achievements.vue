@@ -1,7 +1,8 @@
 <template>
+    <Head title="Achievements" />
     <StudentLayout>
-        <div class="achievements-container py-4">
-            <div class="container">
+        <div class="dashboard-container">
+            <div>
                 <!-- Page Header matching dashboard.html -->
                 <div class="welcome-banner">
                     <div class="row align-items-center">
@@ -274,7 +275,7 @@ const progressCircleStyle = computed(() => {
     };
 });
 
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Head } from '@inertiajs/vue3';
 const page = usePage();
 
 const certificateCode = computed(() => {

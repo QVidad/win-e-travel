@@ -1,4 +1,5 @@
 <template>
+    <Head title="Dashboard" />
     <StudentLayout>
         <div class="dashboard-container">
             <div>
@@ -211,7 +212,7 @@
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { ref, computed, onMounted } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, Head } from '@inertiajs/vue3';
 
 const props = defineProps({
     towns: Array,

@@ -1,4 +1,5 @@
 <template>
+    <Head title="Welcome" />
     <StudentLayout>
         <!-- Progress Indicator Bar -->
         <div class="progress-indicator">
@@ -305,7 +306,7 @@
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, usePage, Head } from '@inertiajs/vue3';
 
 const page = usePage();
 const userName = computed(() => page.props.auth?.user?.name || 'Trainee');

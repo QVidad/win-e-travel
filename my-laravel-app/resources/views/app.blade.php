@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title inertia>{{ config('app.name', 'WIN e-Travel Training') }}</title>
+        <link rel="icon" type="image/png" href="/assets/images/WINLogo.png?v=2">
 
         <!-- Google Fonts: Poppins -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -1,6 +1,7 @@
 <template>
+    <Head title="Go Beyond Books" />
     <StudentLayout>
-        <div class="foundation-container">
+        <div class="dashboard-container">
             <div>
                 <!-- Page Header matching dashboard banner -->
                 <div class="welcome-banner text-white mb-5 shadow-sm" style="background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%); border-radius: 30px; padding: 40px; position: relative; overflow: hidden;">
@@ -85,7 +86,7 @@
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, Head } from '@inertiajs/vue3';
 
 const props = defineProps({
     foundationModules: {

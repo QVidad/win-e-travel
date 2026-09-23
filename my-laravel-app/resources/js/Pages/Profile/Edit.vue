@@ -26,18 +26,21 @@ const layout = computed(() => {
     <Head title="My Profile" />
 
     <component :is="layout">
-        <div class="container-fluid py-4">
+        <div class="dashboard-container">
             <!-- Dark Teal Hero Banner Section (Target Hero Design System) -->
             <div 
-                class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm mx-2" 
+                class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
                 style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
             >
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <!-- Scaled & Bold Header -->
-                        <h1 class="display-6 fw-extrabold mb-2 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
-                            My Profile
-                        </h1>
+                        <div class="d-flex align-items-center mb-2">
+                            <img v-if="$page.props.auth.user.role === 'student'" src="/assets/images/WINLogo.png" alt="WIN Logo" style="height: 48px; object-fit: contain;" class="me-3">
+                            <!-- Scaled & Bold Header -->
+                            <h1 class="display-6 fw-extrabold mb-0 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
+                                My Profile
+                            </h1>
+                        </div>
                         
                         <!-- Italicized Subtitle Quote Format -->
                         <p class="mb-0 text-white fst-italic fs-6 opacity-90">
@@ -47,7 +50,7 @@ const layout = computed(() => {
                 </div>
             </div>
 
-            <div class="row g-4 px-2">
+            <div class="row g-4">
                 <!-- Profile Information -->
                 <div class="col-lg-6">
                     <div class="card border-0 shadow-sm rounded-4 h-100">

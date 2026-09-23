@@ -1,4 +1,5 @@
 <template>
+    <Head title="Adventure Awaits" />
     <StudentLayout>
         <div class="simulation-container py-4">
             <div class="container">
@@ -296,7 +297,7 @@
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, Head } from '@inertiajs/vue3';
 import axios from 'axios';
 import { ImageSegmenter, FilesetResolver } from '@mediapipe/tasks-vision';
 

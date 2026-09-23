@@ -1,4 +1,5 @@
 <template>
+    <Head :title="module.title" />
     <StudentLayout>
         <div>
             <!-- Breadcrumb Navigation -->
@@ -453,7 +454,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, Head } from '@inertiajs/vue3';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
