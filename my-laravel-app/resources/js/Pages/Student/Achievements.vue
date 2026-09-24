@@ -27,7 +27,7 @@
                 </div>
 
                 <div class="row g-4">
-                    <div class="col-lg-8">
+                    <div class="col-lg-12">
                         <!-- Certificate Section matching achievements.html -->
                         <div class="certificate-card shadow" :class="{ locked: progressPercentage < 100 }">
                             <div class="row align-items-center">
@@ -118,56 +118,6 @@
                                     </div>
                                     <div class="badge-name">{{ badge.title }}</div>
                                     <div class="badge-status" :class="{'text-success': badge.earned}">{{ badge.earned ? 'Earned' : 'Locked' }} <i v-if="badge.earned" class="fas fa-check-circle"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Statistics Card Column matching achievements.html -->
-                    <div class="col-lg-4">
-                        <div class="stats-card">
-                            <h5 class="fw-bold mb-3 text-dark">
-                                <i class="fas fa-chart-bar me-2" style="color: var(--mmsu-green);"></i>
-                                Statistics
-                            </h5>
-
-                            <div class="stat-item py-3 border-bottom d-flex align-items-center">
-                                <div class="stat-icon me-3">
-                                    <i class="fas fa-key"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value">15</div>
-                                    <div class="stat-label">Keywords Mastered</div>
-                                </div>
-                            </div>
-
-                            <div class="stat-item py-3 border-bottom d-flex align-items-center">
-                                <div class="stat-icon me-3">
-                                    <i class="fas fa-microphone-alt"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value">2</div>
-                                    <div class="stat-label">Simulations Passed</div>
-                                </div>
-                            </div>
-
-                            <div class="stat-item py-3 border-bottom d-flex align-items-center">
-                                <div class="stat-icon me-3">
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value">1</div>
-                                    <div class="stat-label">Perfect Scores</div>
-                                </div>
-                            </div>
-
-                            <div class="stat-item py-3 d-flex align-items-center">
-                                <div class="stat-icon me-3">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <div class="stat-value">45m</div>
-                                    <div class="stat-label">Time Spent Training</div>
                                 </div>
                             </div>
                         </div>
