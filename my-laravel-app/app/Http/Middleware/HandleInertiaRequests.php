@@ -34,22 +34,31 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'isFinalBossUnlocked' => function () use ($request) {
+            'isDareToDiscoverUnlocked' => function () use ($request) {
                 if (!$request->user() || $request->user()->role !== 'student') {
                     return false;
                 }
+                $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
+                if ($foundationTotal === 0) return false;
                 
-                return true; // TEMP UNLOCK FOR TESTING
+                $completed = \App\Models\ModuleProgress::where('user_id', $request->user()->id)
+                    ->whereHas('courseModule', function ($q) {
+                        $q->where('type', 'foundation');
+                    })->where('passed', true)->count();
+                return $completed >= $foundationTotal;
+            },
+            'isAdventureAwaitsUnlocked' => function () use ($request) {
+                if (!$request->user() || $request->user()->role !== 'student') {
+                    return false;
+                }
+                $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
+                if ($townsTotal === 0) return false;
                 
-                $townsCount = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
-                $completedTownsCount = \App\Models\ModuleProgress::where('user_id', $request->user()->id)
+                $completed = \App\Models\ModuleProgress::where('user_id', $request->user()->id)
                     ->whereHas('courseModule', function ($q) {
                         $q->where('type', 'town_chapter');
-                    })
-                    ->where('passed', true)
-                    ->count();
-
-                return $townsCount > 0 && $completedTownsCount >= $townsCount;
+                    })->where('passed', true)->count();
+                return $completed >= $townsTotal;
             },
             'flash' => [
                 'gamification' => $request->session()->get('gamification'),

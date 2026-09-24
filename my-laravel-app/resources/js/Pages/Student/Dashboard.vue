@@ -143,7 +143,10 @@
 
                     <!-- Stage 2: Dare to Discover -->
                     <div class="col-lg-4">
-                        <div class="journey-stage-card stage-discover" id="discoverStage">
+                        <div class="journey-stage-card stage-discover position-relative" :class="{ 'opacity-75': isDareToDiscoverLocked }" id="discoverStage">
+                            <div v-if="isDareToDiscoverLocked" class="position-absolute top-0 end-0 m-3 text-secondary">
+                                <i class="fas fa-lock fs-5"></i>
+                            </div>
                             <div class="stage-icon">
                                 <i class="fas fa-compass"></i>
                             </div>
@@ -165,15 +168,21 @@
                                 <div v-if="townsTotal > 5" class="chapter-dot">...</div>
                             </div>
 
-                            <Link :href="route('dare-to-discover.index')" class="btn btn-outline-pink btn-journey w-100">
+                            <Link v-if="!isDareToDiscoverLocked" :href="route('dare-to-discover.index')" class="btn btn-outline-pink btn-journey w-100">
                                 <i class="fas fa-arrow-right me-2"></i>Explore Towns
                             </Link>
+                            <button v-else class="btn btn-secondary text-white w-100 fw-bold border-0" disabled>
+                                <i class="fas fa-lock me-2"></i>Complete Go Beyond Books First
+                            </button>
                         </div>
                     </div>
 
                     <!-- Stage 3: Adventure Awaits -->
                     <div class="col-lg-4">
-                        <div class="journey-stage-card stage-adventure" id="adventureStage">
+                        <div class="journey-stage-card stage-adventure position-relative" :class="{ 'opacity-75': isAdventureAwaitsLocked }" id="adventureStage">
+                            <div v-if="isAdventureAwaitsLocked" class="position-absolute top-0 end-0 m-3 text-secondary">
+                                <i class="fas fa-lock fs-5"></i>
+                            </div>
                             <div class="stage-icon">
                                 <i class="fas fa-mountain"></i>
                             </div>
@@ -196,9 +205,12 @@
                                 <div v-if="simulationsTotal > 5" class="chapter-dot">...</div>
                             </div>
 
-                            <Link :href="route('adventure-awaits.index')" class="btn btn-outline-blue btn-journey w-100">
+                            <Link v-if="!isAdventureAwaitsLocked" :href="route('adventure-awaits.index')" class="btn btn-outline-blue btn-journey w-100">
                                 <i class="fas fa-arrow-right me-2"></i>Adventure Awaits
                             </Link>
+                            <button v-else class="btn btn-secondary text-white w-100 fw-bold border-0" disabled>
+                                <i class="fas fa-lock me-2"></i>Complete Dare to Discover First
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -242,6 +254,9 @@ const townsTotal = computed(() => props.progress?.townsTotal ?? 0);
 const maxTargetXp = computed(() => props.progress?.maxTargetXp ?? 1000);
 const adventureCompleted = computed(() => props.progress?.simulationsCompleted ?? 0);
 const simulationsTotal = computed(() => props.progress?.simulationsTotal ?? 0);
+
+const isDareToDiscoverLocked = computed(() => foundationTotal.value > 0 && foundationCompleted.value < foundationTotal.value);
+const isAdventureAwaitsLocked = computed(() => isDareToDiscoverLocked.value || (townsTotal.value > 0 && discoverCompleted.value < townsTotal.value));
 
 const totalCompletedChapters = computed(() => props.progress?.completedChapters ?? (foundationCompleted.value + discoverCompleted.value + adventureCompleted.value));
 const overallPercent = computed(() => props.progress?.overallPercentage ?? Math.round((totalCompletedChapters.value / (props.progress?.totalChapters || 25)) * 100));

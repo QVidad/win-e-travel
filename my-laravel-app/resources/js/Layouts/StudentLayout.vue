@@ -27,19 +27,27 @@
                         <div>Go Beyond Books</div>
                     </Link>
                     <Link 
-                        :href="route('dare-to-discover.index')" 
+                        :href="$page.props.isDareToDiscoverUnlocked ? route('dare-to-discover.index') : '#'" 
                         class="text-decoration-none text-center small" 
-                        :class="$page.url.startsWith('/dare-to-discover') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                        :class="[!$page.props.isDareToDiscoverUnlocked ? 'text-muted opacity-50' : ($page.url.startsWith('/dare-to-discover') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75')]"
+                        style="position: relative;"
                     >
-                        <div class="mb-1"><i class="fas fa-compass fa-lg"></i></div>
+                        <div class="mb-1">
+                            <i class="fas fa-compass fa-lg"></i>
+                            <i v-if="!$page.props.isDareToDiscoverUnlocked" class="fas fa-lock position-absolute top-0 end-0" style="font-size: 0.6rem;"></i>
+                        </div>
                         <div>Dare to Discover</div>
                     </Link>
                     <Link
-                        :href="route('adventure-awaits.index')" 
+                        :href="$page.props.isAdventureAwaitsUnlocked ? route('adventure-awaits.index') : '#'" 
                         class="text-decoration-none text-center small" 
-                        :class="$page.url.startsWith('/adventure-awaits') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75'"
+                        :class="[!$page.props.isAdventureAwaitsUnlocked ? 'text-muted opacity-50' : ($page.url.startsWith('/adventure-awaits') ? 'text-dark fw-bold opacity-100' : 'text-muted opacity-75')]"
+                        style="position: relative;"
                     >
-                        <div class="mb-1"><i class="fas fa-mountain fa-lg"></i></div>
+                        <div class="mb-1">
+                            <i class="fas fa-mountain fa-lg"></i>
+                            <i v-if="!$page.props.isAdventureAwaitsUnlocked" class="fas fa-lock position-absolute top-0 end-0" style="font-size: 0.6rem;"></i>
+                        </div>
                         <div>Adventure Awaits</div>
                     </Link>
                 </div>
@@ -125,11 +133,23 @@
                 <Link :href="route('go-beyond-books.index')" class="text-decoration-none small text-center" :class="$page.url.startsWith('/go-beyond-books') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-book-open d-block mb-1"></i> Books
                 </Link>
-                <Link :href="route('dare-to-discover.index')" class="text-decoration-none small text-center" :class="$page.url.startsWith('/dare-to-discover') ? 'fw-bold text-dark' : 'text-muted'">
-                    <i class="fas fa-compass d-block mb-1"></i> Discover
+                <Link 
+                    :href="$page.props.isDareToDiscoverUnlocked ? route('dare-to-discover.index') : '#'" 
+                    class="text-decoration-none small text-center" 
+                    :class="[!$page.props.isDareToDiscoverUnlocked ? 'text-muted opacity-50' : ($page.url.startsWith('/dare-to-discover') ? 'fw-bold text-dark' : 'text-muted')]"
+                >
+                    <i v-if="!$page.props.isDareToDiscoverUnlocked" class="fas fa-lock d-block mb-1"></i>
+                    <i v-else class="fas fa-compass d-block mb-1"></i>
+                    Discover
                 </Link>
-                <Link :href="route('adventure-awaits.index')" class="text-decoration-none small text-center" :class="$page.url.startsWith('/adventure-awaits') ? 'fw-bold text-dark' : 'text-muted'">
-                    <i class="fas fa-mountain d-block mb-1"></i> Adventure
+                <Link 
+                    :href="$page.props.isAdventureAwaitsUnlocked ? route('adventure-awaits.index') : '#'" 
+                    class="text-decoration-none small text-center" 
+                    :class="[!$page.props.isAdventureAwaitsUnlocked ? 'text-muted opacity-50' : ($page.url.startsWith('/adventure-awaits') ? 'fw-bold text-dark' : 'text-muted')]"
+                >
+                    <i v-if="!$page.props.isAdventureAwaitsUnlocked" class="fas fa-lock d-block mb-1"></i>
+                    <i v-else class="fas fa-mountain d-block mb-1"></i>
+                    Adventure
                 </Link>
             </div>
         </div>

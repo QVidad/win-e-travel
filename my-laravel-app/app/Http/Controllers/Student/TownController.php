@@ -9,9 +9,22 @@ use Inertia\Response;
 
 class TownController extends Controller
 {
-    public function index(): Response
+    public function index(): Response|\Illuminate\Http\RedirectResponse
     {
         $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // Progression Lock Check
+        $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
+        $foundationCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->whereHas('courseModule', function ($q) {
+                $q->where('type', 'foundation');
+            })
+            ->where('passed', true)
+            ->count();
+            
+        if ($foundationTotal > 0 && $foundationCompleted < $foundationTotal) {
+            return redirect()->route('dashboard')->with('error', 'You must complete all Go Beyond Books foundation modules first.');
+        }
         
         $publishedModules = \App\Models\CourseModule::with('lessons')
             ->where('type', 'town_chapter')
@@ -89,8 +102,23 @@ class TownController extends Controller
         ]);
     }
 
-    public function show(string $slug): Response
+    public function show(string $slug): Response|\Illuminate\Http\RedirectResponse
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // Progression Lock Check
+        $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
+        $foundationCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->whereHas('courseModule', function ($q) {
+                $q->where('type', 'foundation');
+            })
+            ->where('passed', true)
+            ->count();
+            
+        if ($foundationTotal > 0 && $foundationCompleted < $foundationTotal) {
+            return redirect()->route('dashboard')->with('error', 'You must complete all Go Beyond Books foundation modules first.');
+        }
+
         $town = Town::with(['destinations' => function ($query) {
             $query->where('is_visible', true)->orderBy('order');
         }, 'simulation'])->where('slug', $slug)->firstOrFail();

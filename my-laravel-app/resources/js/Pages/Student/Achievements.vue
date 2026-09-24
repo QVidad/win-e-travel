@@ -45,8 +45,11 @@
                                     </p>
                                 </div>
                                 <div class="col-md-4 text-md-end mt-4 mt-md-0">
-                                    <button @click="showCertificateModal = true" class="btn btn-dark btn-lg fw-bold rounded-pill px-4 shadow-sm">
+                                    <button v-if="progressPercentage >= 100" @click="showCertificateModal = true" class="btn btn-dark btn-lg fw-bold rounded-pill px-4 shadow-sm">
                                         <i class="fas fa-certificate me-2 text-warning"></i>View Certificate
+                                    </button>
+                                    <button v-else class="btn btn-secondary btn-lg fw-bold rounded-pill px-4 shadow-sm" disabled>
+                                        <i class="fas fa-lock me-2 text-white"></i>Locked
                                     </button>
                                 </div>
                             </div>

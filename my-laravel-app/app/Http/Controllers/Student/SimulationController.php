@@ -10,10 +10,23 @@ use Inertia\Response;
 
 class SimulationController extends Controller
 {
-    public function index(): Response
+    public function index(): Response|\Illuminate\Http\RedirectResponse
     {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // Progression Lock Check
+        $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
+        $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->whereHas('courseModule', function ($q) {
+                $q->where('type', 'town_chapter');
+            })
+            ->where('passed', true)
+            ->count();
+            
+        if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
+            return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+        }
         $publishedModules = \App\Models\CourseModule::where('type', 'town_chapter')
             ->where('status', 'published')
             ->get()
@@ -48,6 +61,21 @@ class SimulationController extends Controller
 
     public function show(string $id)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        
+        // Progression Lock Check
+        $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
+        $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+            ->whereHas('courseModule', function ($q) {
+                $q->where('type', 'town_chapter');
+            })
+            ->where('passed', true)
+            ->count();
+            
+        if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
+            return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+        }
+
         $simulation = \App\Models\Simulation::with('town')->findOrFail($id);
 
         $module = null;
