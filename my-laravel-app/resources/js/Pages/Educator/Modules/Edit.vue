@@ -394,17 +394,28 @@
                                         <div class="mt-2 pt-2 border-top">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <small class="text-muted fw-bold" style="font-size: 0.75rem;">Phonetic Aliases</small>
-                                                <button type="button" @click="startRecordingAlias(kw, index, kIdx)" class="btn btn-sm py-0 px-2 rounded-pill" :class="activeRecordingId === `${index}-${kIdx}` ? 'btn-danger' : 'btn-outline-primary'" style="font-size: 0.7rem;">
-                                                    <i class="fas" :class="activeRecordingId === `${index}-${kIdx}` ? 'fa-spinner fa-spin' : 'fa-microphone'"></i>
-                                                    {{ activeRecordingId === `${index}-${kIdx}` ? 'Listening...' : 'Test Pronunciation' }}
+                                                <button type="button" @click="toggleRecordingAlias(kw, index, kIdx)" class="btn btn-sm py-0 px-2 rounded-pill" :class="activeRecordingId === `${index}-${kIdx}` ? 'btn-danger' : 'btn-outline-primary'" style="font-size: 0.7rem;">
+                                                    <i class="fas" :class="activeRecordingId === `${index}-${kIdx}` ? 'fa-stop-circle' : 'fa-microphone'"></i>
+                                                    {{ activeRecordingId === `${index}-${kIdx}` ? 'Stop Recording' : 'Test Pronunciation' }}
                                                 </button>
                                             </div>
-                                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                            <div class="d-flex flex-wrap gap-1 mt-1 align-items-center">
                                                 <span v-for="(alias, aIdx) in (kw.aliases || [])" :key="aIdx" class="badge bg-secondary rounded-pill px-2" style="font-size: 0.7rem;">
                                                     {{ alias }}
                                                     <i @click="removeAlias(kw, aIdx)" class="fas fa-times ms-1" style="cursor: pointer;"></i>
                                                 </span>
-                                                <span v-if="!kw.aliases || kw.aliases.length === 0" class="text-muted fst-italic" style="font-size: 0.7rem;">No aliases added. Click "Test Pronunciation" to train the AI.</span>
+                                                <div class="input-group input-group-sm" style="width: 120px;">
+                                                    <input 
+                                                        type="text" 
+                                                        class="form-control form-control-sm py-0 bg-light border-secondary border-opacity-25" 
+                                                        style="font-size: 0.7rem; border-radius: 50rem 0 0 50rem;" 
+                                                        placeholder="type alias..." 
+                                                        @keydown.enter.prevent="addManualAlias($event, kw)"
+                                                    >
+                                                    <button type="button" class="btn btn-outline-secondary py-0 px-2" style="border-radius: 0 50rem 50rem 0; border-color: rgba(108, 117, 125, 0.25);" @click="addManualAlias($event, kw)">
+                                                        <i class="fas fa-plus" style="font-size: 0.6rem;"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -738,8 +749,36 @@ const removeAlias = (kw, index) => {
     kw.aliases.splice(index, 1);
 };
 
-const startRecordingAlias = (kw, sIdx, kIdx) => {
-    if (activeRecordingId.value !== null) return;
+const addManualAlias = (event, kw) => {
+    let input = null;
+    if (event.target.tagName === 'INPUT') {
+        input = event.target;
+    } else if (event.currentTarget.previousElementSibling) {
+        input = event.currentTarget.previousElementSibling;
+    }
+    
+    if (input && input.value) {
+        const val = input.value.trim().toLowerCase();
+        if (!kw.aliases) kw.aliases = [];
+        if (val && !kw.aliases.includes(val) && val !== kw.word.toLowerCase()) {
+            kw.aliases.push(val);
+        }
+        input.value = '';
+    }
+};
+
+const toggleRecordingAlias = (kw, sIdx, kIdx) => {
+    const currentId = `${sIdx}-${kIdx}`;
+    if (activeRecordingId.value === currentId) {
+        // Stop current recording manually
+        if (aliasRecognition) {
+            aliasRecognition.stop();
+        }
+        return;
+    } else if (activeRecordingId.value !== null) {
+        // Stop any other active recording before starting a new one
+        if (aliasRecognition) aliasRecognition.stop();
+    }
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -748,26 +787,26 @@ const startRecordingAlias = (kw, sIdx, kIdx) => {
     }
     
     aliasRecognition = new SpeechRecognition();
-    aliasRecognition.continuous = false;
+    aliasRecognition.continuous = true; // Let the educator manually stop it
     aliasRecognition.interimResults = true;
     aliasRecognition.lang = 'en-PH'; // Use same language as simulation
     
-    activeRecordingId.value = `${sIdx}-${kIdx}`;
+    activeRecordingId.value = currentId;
     
     if (!kw.aliases) kw.aliases = [];
     
+    let finalTranscript = '';
     aliasRecognition.onresult = (e) => {
-        if (e.results[0].isFinal) {
-            const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
-            const alias = transcript.toLowerCase().trim();
-            // Add if not empty, not exact match to word, and not already in aliases
-            if (alias && alias !== kw.word.toLowerCase() && !kw.aliases.includes(alias)) {
-                kw.aliases.push(alias);
-            }
-        }
+        finalTranscript = Array.from(e.results).map(r => r[0].transcript).join('');
     };
     
     aliasRecognition.onend = () => {
+        if (finalTranscript) {
+            const alias = finalTranscript.toLowerCase().trim();
+            if (alias && !kw.aliases.includes(alias) && alias !== kw.word.toLowerCase()) {
+                kw.aliases.push(alias);
+            }
+        }
         activeRecordingId.value = null;
         aliasRecognition = null;
     };

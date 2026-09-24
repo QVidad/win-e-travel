@@ -89,6 +89,10 @@
                                     <div class="position-absolute top-0 start-0 m-3 badge bg-success bg-opacity-90 px-3 py-2 rounded-pill shadow-sm">
                                         <i class="fas fa-video me-1"></i> Virtual Background Overlay Active
                                     </div>
+                                    <div class="position-absolute top-0 start-0 badge px-3 py-2 rounded-pill shadow-sm" :class="isListening ? 'bg-danger' : 'bg-secondary'" style="margin-top: 3.5rem; margin-left: 1rem;">
+                                        <i class="fas" :class="isListening ? 'fa-microphone fa-beat me-1' : 'fa-microphone-slash me-1'"></i> 
+                                        {{ isListening ? 'MIC ON: RECORDING' : 'MIC OFF' }}
+                                    </div>
                                 </div>
 
                                 <!-- Subtitle Overlay -->
@@ -188,6 +192,10 @@
                                                         <i class="fas fa-check me-1" v-if="isKeywordMatched(kw)"></i>{{ kw.word }} ({{ kw.points }} pts)
                                                     </span>
                                                 </div>
+                                                <div class="mt-3 pt-3 border-top border-secondary border-opacity-25">
+                                                    <small class="text-danger fw-bold d-block mb-1" style="font-size: 0.75rem;"><i class="fas fa-exclamation-circle me-1"></i>NOTE FOR TESTING PHASE:</small>
+                                                    <small class="text-muted lh-sm d-block" style="font-size: 0.7rem;">These validation keywords are currently visible for testing and debugging purposes. Once the system is deployed, this entire keyword section will be invisible to students to ensure a realistic simulation.</small>
+                                                </div>
                                             </div>
                                         </div>
                                     </template>
@@ -207,17 +215,18 @@
                                     </button>
                                 </div>
 
-                                <!-- Typing Fallback (Hidden normally, exposed only if no transcript and disabled api) -->
-                                <div class="mt-4" v-if="!speechSupported && !isListening && !spokenTranscript">
-                                    <h6 class="fw-bold text-dark mb-2 fs-6"><i class="fas fa-keyboard me-2 text-success"></i>Type Your Commentary (Fallback):</h6>
+                                <!-- Review & Edit Section -->
+                                <div class="mt-4" v-if="(!speechSupported || spokenTranscript) && !stepAnswered">
+                                    <h6 class="fw-bold text-dark mb-2 fs-6"><i class="fas fa-edit me-2 text-primary"></i>Review & Edit Your Commentary:</h6>
                                     <textarea 
                                         v-model="spokenTranscript" 
-                                        class="form-control rounded-3" 
-                                        rows="2" 
-                                        placeholder="Type your commentary here if you cannot use the microphone..." 
-                                        :disabled="stepAnswered || isListening" 
+                                        class="form-control rounded-3 border-primary border-opacity-25 shadow-sm bg-light" 
+                                        rows="3" 
+                                        placeholder="Type your commentary here if you cannot use the microphone, or review/edit your spoken text above..." 
+                                        :disabled="isListening" 
                                         @input="parseKeywordsFromTranscript(spokenTranscript)"
                                     ></textarea>
+                                    <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle me-1"></i>You must click the red <strong>"Stop Speech Commentary"</strong> button first to unlock this box and edit your text.</small>
                                 </div>
 
                                 <!-- Feedback Section -->
@@ -617,17 +626,22 @@ const resetTranscript = () => {
     
     // Web Speech API retains all previous speech in the current session's event.results.
     // To truly clear it, we must restart the engine.
-    if (recognition && isListening.value) {
-        recognition.stop();
+    if (recognition) {
+        if (isListening.value) {
+            recognition.stop();
+        }
         // Give it a moment to fully stop and fire onend before restarting
         setTimeout(() => {
             isResetting.value = false;
-            if (speechSupported.value && !isListening.value && !stepAnswered.value) {
+            if (speechSupported.value && !stepAnswered.value) {
                 try {
                     recognition.start();
                     isListening.value = true;
                 } catch (e) {
                     console.error("Restart error:", e);
+                    if (e.name === 'InvalidStateError') {
+                        isListening.value = true;
+                    }
                 }
             }
         }, 400);
