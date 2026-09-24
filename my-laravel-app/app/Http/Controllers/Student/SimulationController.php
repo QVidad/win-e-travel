@@ -50,33 +50,44 @@ class SimulationController extends Controller
             ->count();
             
         $finalSimulation = \App\Models\Simulation::where('type', 'final')->first();
+        
+        $finalSimPassed = false;
+        if ($finalSimulation) {
+            $finalSimPassed = \Illuminate\Support\Facades\DB::table('simulation_user')
+                ->where('user_id', $user->id)
+                ->where('simulation_id', $finalSimulation->id)
+                ->where('passed', true)
+                ->exists();
+        }
 
         return Inertia::render('Student/Simulations/Index', [
             'towns' => $towns,
             'completedTowns' => $completedTowns,
             'totalTowns' => $totalTowns,
             'finalSimulationId' => $finalSimulation ? $finalSimulation->id : null,
+            'finalSimPassed' => $finalSimPassed,
         ]);
     }
 
     public function show(string $id)
     {
+        $simulation = \App\Models\Simulation::with('town')->findOrFail($id);
         $user = \Illuminate\Support\Facades\Auth::user();
         
-        // Progression Lock Check
-        $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
-        $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
-            ->whereHas('courseModule', function ($q) {
-                $q->where('type', 'town_chapter');
-            })
-            ->where('passed', true)
-            ->count();
-            
-        if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
-            return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+        // Progression Lock Check ONLY for final boss
+        if ($simulation->type === 'final') {
+            $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
+            $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+                ->whereHas('courseModule', function ($q) {
+                    $q->where('type', 'town_chapter');
+                })
+                ->where('passed', true)
+                ->count();
+                
+            if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
+                return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+            }
         }
-
-        $simulation = \App\Models\Simulation::with('town')->findOrFail($id);
 
         $module = null;
         if ($simulation->type === 'town' && $simulation->town) {

@@ -89,8 +89,31 @@ class StudentDashboardController extends Controller
             }
         }
         
-        if (!$continueModule) {
-            $continueModule = \App\Models\CourseModule::where('status', 'published')->orderBy('order')->first();
+        $continueModuleArray = null;
+        if ($continueModule) {
+            $continueModuleArray = [
+                'id' => $continueModule->id,
+                'title' => $continueModule->title,
+                'type' => $continueModule->type,
+                'code' => $continueModule->code,
+            ];
+        } else if ($hasStarted && $townsCompleted >= $townsTotal && $finalSimulation && !$finalSimPassed) {
+            $continueModuleArray = [
+                'id' => $finalSimulation->id,
+                'title' => 'Adventure Awaits (Final Tour)',
+                'type' => 'final_simulation',
+                'code' => 'final',
+            ];
+        } else if (!$hasStarted) {
+            $firstModule = \App\Models\CourseModule::where('status', 'published')->orderBy('order')->first();
+            if ($firstModule) {
+                $continueModuleArray = [
+                    'id' => $firstModule->id,
+                    'title' => $firstModule->title,
+                    'type' => $firstModule->type,
+                    'code' => $firstModule->code,
+                ];
+            }
         }
 
 
@@ -117,11 +140,7 @@ class StudentDashboardController extends Controller
                 'simulationsCompleted' => $finalSimPassed ? 1 : 0,
                 'simulationsTotal' => $finalSimulation ? 1 : 0,
                 'finalSimulationId' => $finalSimulation ? $finalSimulation->id : null,
-                'continueModule' => $continueModule ? [
-                    'id' => $continueModule->id,
-                    'title' => $continueModule->title,
-                    'type' => $continueModule->type,
-                ] : null,
+                'continueModule' => $continueModuleArray,
             ],
             'activities' => [],
         ]);

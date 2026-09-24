@@ -78,7 +78,7 @@ class AchievementSeeder extends Seeder
             [
                 'code' => 'straight-as',
                 'title' => 'Straight A\'s',
-                'description' => 'Get 100% on every single End-of-Module Evaluation in Phase 1.',
+                'description' => 'Get 100% on every single End-of-Module Evaluation in Go Beyond Books.',
                 'category' => 'foundation',
                 'badge_image' => '/assets/images/badges.jpg',
                 'required_xp' => 0,

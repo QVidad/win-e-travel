@@ -45,7 +45,10 @@
                 </div>
                 
                 <div>
-                    <Link v-if="isUnlocked" :href="route('adventure-awaits.final')" class="btn btn-light fw-bold px-4 py-2 rounded shadow-sm text-dark">
+                    <button v-if="finalSimPassed" class="btn btn-success fw-bold px-4 py-2 rounded shadow-sm" disabled>
+                        <i class="fas fa-check-circle text-white me-2"></i> Tour Completed!
+                    </button>
+                    <Link v-else-if="isUnlocked" :href="route('adventure-awaits.final')" class="btn btn-light fw-bold px-4 py-2 rounded shadow-sm text-dark">
                         <i class="fas fa-play text-success me-2"></i> Start Virtual Tour
                     </Link>
                     <button v-else class="btn btn-light opacity-75 fw-bold px-4 py-2 rounded text-dark" disabled>
@@ -68,6 +71,7 @@ const props = defineProps({
     completedTowns: Number,
     totalTowns: Number,
     finalSimulationId: Number,
+    finalSimPassed: Boolean,
 });
 
 const isUnlocked = computed(() => {

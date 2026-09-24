@@ -120,13 +120,13 @@ class GamificationService
 
     private function hasCompletedPhase1(User $user): bool
     {
-        $totalFoundation = \App\Models\CourseModule::where('type', 'foundation_chapter')->count();
+        $totalFoundation = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
         if ($totalFoundation === 0) return false;
 
         $completed = \App\Models\ModuleProgress::where('user_id', $user->id)
-            ->where('status', 'completed')
+            ->where('passed', true)
             ->whereHas('courseModule', function($q) {
-                $q->where('type', 'foundation_chapter');
+                $q->where('type', 'foundation');
             })->count();
             
         return $completed >= $totalFoundation;

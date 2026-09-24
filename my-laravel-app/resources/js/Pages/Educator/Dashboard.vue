@@ -166,7 +166,7 @@
 </template>
 
 <script setup>
-import { Link, useRouter } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
 
 defineProps({
@@ -180,11 +180,11 @@ defineProps({
     },
 });
 
-const router = useRouter();
+// Using imported router directly
 
 const toggleStatus = (mod) => {
     mod.isToggling = true;
-    router.patch(route('educator.modules.toggle', mod.id), {}, {
+    router.patch(window.route('educator.modules.toggle', mod.id), {}, {
         preserveScroll: true,
         onFinish: () => {
             mod.isToggling = false;

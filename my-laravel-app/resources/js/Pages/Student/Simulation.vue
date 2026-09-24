@@ -210,13 +210,13 @@
                                     <button v-if="spokenTranscript && !stepAnswered" @click="resetTranscript" class="btn btn-outline-secondary rounded-pill px-5 py-2 fs-5 fw-bold">
                                         Clear Text
                                     </button>
-                                    <button v-if="spokenTranscript && !stepAnswered" @click="validateSpeechWithServer" class="btn btn-primary rounded-pill px-5 py-2 fs-5 fw-bold ms-auto shadow-sm">
+                                    <button v-if="!stepAnswered" @click="validateSpeechWithServer" class="btn btn-primary rounded-pill px-5 py-2 fs-5 fw-bold ms-auto shadow-sm" :disabled="!spokenTranscript.trim()">
                                         Submit Answer <i class="fas fa-check ms-1"></i>
                                     </button>
                                 </div>
 
                                 <!-- Review & Edit Section -->
-                                <div class="mt-4" v-if="(!speechSupported || spokenTranscript) && !stepAnswered">
+                                <div class="mt-4" v-if="!stepAnswered && currentStepData.type !== 'multiple_choice'">
                                     <h6 class="fw-bold text-dark mb-2 fs-6"><i class="fas fa-edit me-2 text-primary"></i>Review & Edit Your Commentary:</h6>
                                     <textarea 
                                         v-model="spokenTranscript" 
@@ -443,7 +443,7 @@ onMounted(() => {
             for (let i = 0; i < event.results.length; i++) {
                 current += event.results[i][0].transcript;
             }
-            console.log("Speech Result Received:", current);
+
             spokenTranscript.value = (finalTranscriptBuffer.value + ' ' + current).trim();
             parseKeywordsFromTranscript(spokenTranscript.value);
         };
@@ -718,6 +718,10 @@ const isKeywordMatched = (kw) => {
 const stepScores = ref([]);
 
 const validateSpeechWithServer = async () => {
+    if (isListening.value && recognition) {
+        try { recognition.stop(); } catch(e) {}
+        isListening.value = false;
+    }
     if (timerInterval) clearInterval(timerInterval); // stop timer on submission
     
     const transcriptToSend = spokenTranscript.value ? spokenTranscript.value : ' ';

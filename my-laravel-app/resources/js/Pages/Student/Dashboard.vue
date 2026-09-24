@@ -102,7 +102,7 @@
                                 <p class="text-muted mb-0">Continue with <strong>{{ progress.continueModule.title }}</strong></p>
                             </div>
                         </div>
-                        <Link :href="route('go-beyond-books.modules.show', progress.continueModule.id)" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
+                        <Link :href="getContinueLink(progress.continueModule)" class="btn btn-success px-4 py-2 rounded-pill fw-bold shadow-sm">
                             Continue Learning <i class="fas fa-play ms-2"></i>
                         </Link>
                     </div>
@@ -246,6 +246,18 @@ const props = defineProps({
         default: () => []
     }
 });
+
+const getContinueLink = (module) => {
+    if (!module) return '#';
+    if (module.type === 'final_simulation') {
+        return `/adventure-awaits`;
+    }
+    if (module.type === 'town_chapter' && module.code) {
+        const slug = module.code.replace('town-', '');
+        return `/dare-to-discover/${slug}`;
+    }
+    return `/go-beyond-books/modules/${module.id}`;
+};
 
 const foundationCompleted = computed(() => props.progress?.foundationCompleted ?? 0);
 const foundationTotal = computed(() => props.progress?.foundationTotal ?? 0);

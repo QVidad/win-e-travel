@@ -78,7 +78,7 @@
                                 Foundation Badges
                             </h5>
                             <div class="badge-grid mb-4">
-                                <div v-for="badge in foundationBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
+                                <div v-for="badge in foundationBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'" style="cursor: pointer;" @click="openBadgeModal(badge)">
                                     <div class="badge-icon shadow-sm">
                                         <i class="fas fa-award"></i>
                                     </div>
@@ -95,7 +95,7 @@
                                 Town Badges
                             </h5>
                             <div class="badge-grid mb-4">
-                                <div v-for="badge in townBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
+                                <div v-for="badge in townBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'" style="cursor: pointer;" @click="openBadgeModal(badge)">
                                     <div class="badge-icon shadow-sm">
                                         <i class="fas fa-map-marker-alt"></i>
                                     </div>
@@ -112,7 +112,7 @@
                                 Special Badges
                             </h5>
                             <div class="badge-grid mb-4">
-                                <div v-for="badge in specialBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'">
+                                <div v-for="badge in specialBadges" :key="badge.id" class="badge-item" :class="badge.earned ? 'earned' : 'locked'" style="cursor: pointer;" @click="openBadgeModal(badge)">
                                     <div class="badge-icon shadow-sm">
                                         <i class="fas fa-trophy"></i>
                                     </div>
@@ -196,6 +196,38 @@
                 </div>
             </div>
         </div>
+
+        <!-- Badge Details Modal -->
+        <div v-if="showBadgeModal && selectedBadge" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                    <div class="modal-header text-white" :style="{ backgroundColor: selectedBadge.earned ? '#0d4b38' : '#6c757d' }">
+                        <h5 class="modal-title fw-bold">
+                            <i class="fas fa-medal me-2 text-warning"></i>
+                            Badge Details
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" @click="showBadgeModal = false"></button>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <div class="badge-icon shadow-sm mb-3 mx-auto" :class="selectedBadge.earned ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'" style="width: 80px; height: 80px; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+                            <i v-if="selectedCategory === 'foundation' || selectedCategory === 'All'" class="fas fa-award"></i>
+                            <i v-else-if="selectedCategory === 'simulation'" class="fas fa-map-marker-alt"></i>
+                            <i v-else class="fas fa-trophy"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1">{{ selectedBadge.title }}</h4>
+                        <div class="badge-status mb-3 fw-semibold" :class="selectedBadge.earned ? 'text-success' : 'text-muted'">
+                            {{ selectedBadge.earned ? 'Earned' : 'Locked' }}
+                            <i v-if="selectedBadge.earned" class="fas fa-check-circle"></i>
+                            <i v-else class="fas fa-lock"></i>
+                        </div>
+                        <p class="text-muted mb-0">{{ selectedBadge.description }}</p>
+                    </div>
+                    <div class="modal-footer bg-light justify-content-center">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" @click="showBadgeModal = false">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </StudentLayout>
 </template>
 
@@ -208,15 +240,24 @@ const props = defineProps({
     stats: Object,
     userStats: Object,
     certificateSettings: Object,
+    certificateProgress: Number,
 });
 
 const selectedCategory = ref('All');
 const showCertificateModal = ref(false);
-const progressPercentage = ref(45); // This is just a placeholder, maybe derived?
+const progressPercentage = computed(() => props.certificateProgress ?? 0);
 
-const foundationBadges = computed(() => props.achievements.filter(a => a.category === 'foundation').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
-const townBadges = computed(() => props.achievements.filter(a => a.category === 'simulation').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
-const specialBadges = computed(() => props.achievements.filter(a => a.category === 'mastery').map(a => ({ id: a.id, title: a.title, earned: a.is_unlocked })));
+const foundationBadges = computed(() => props.achievements.filter(a => a.category === 'foundation').map(a => ({ id: a.id, title: a.title, description: a.description, earned: a.is_unlocked })));
+const townBadges = computed(() => props.achievements.filter(a => a.category === 'simulation').map(a => ({ id: a.id, title: a.title, description: a.description, earned: a.is_unlocked })));
+const specialBadges = computed(() => props.achievements.filter(a => a.category === 'mastery').map(a => ({ id: a.id, title: a.title, description: a.description, earned: a.is_unlocked })));
+
+const selectedBadge = ref(null);
+const showBadgeModal = ref(false);
+
+const openBadgeModal = (badge) => {
+    selectedBadge.value = badge;
+    showBadgeModal.value = true;
+};
 
 const earnedCount = computed(() => props.achievements.filter(a => a.is_unlocked).length);
 const totalBadgesCount = computed(() => props.achievements.length);
