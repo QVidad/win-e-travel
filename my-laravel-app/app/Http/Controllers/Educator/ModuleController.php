@@ -32,7 +32,9 @@ class ModuleController extends Controller
                 'totalModules' => $modules->count(),
                 'publishedCount' => $modules->where('status', 'published')->count(),
                 'draftCount' => $modules->where('status', 'draft')->count(),
-                'totalQuestions' => QuizQuestion::count(),
+                'totalQuestions' => QuizQuestion::whereHas('courseModule', function($q) {
+                    $q->where('type', 'foundation');
+                })->count(),
             ],
         ]);
     }

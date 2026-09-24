@@ -26,45 +26,6 @@
             </div>
         </div>
 
-        <!-- Metric Cards Grid -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-3.5 h-100 d-flex flex-row align-items-center gap-3 bg-white">
-                    <div class="bg-primary-subtle text-primary rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
-                        <i class="fas fa-cubes fa-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0 text-dark">{{ stats?.totalModules || 0 }}</h3>
-                        <small class="text-muted fw-medium">Total Course Modules</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-3.5 h-100 d-flex flex-row align-items-center gap-3 bg-white">
-                    <div class="bg-warning-subtle text-warning-emphasis rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
-                        <i class="fas fa-question-circle fa-lg text-warning"></i>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0 text-dark">{{ stats?.totalQuestions || 0 }}</h3>
-                        <small class="text-muted fw-medium">Quiz Questions in Bank</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-3.5 h-100 d-flex flex-row align-items-center gap-3 bg-white">
-                    <div class="bg-success-subtle text-success rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
-                        <i class="fas fa-user-check fa-lg" style="color: #0d4b38 !important;"></i>
-                    </div>
-                    <div>
-                        <h3 class="fw-bold mb-0 text-success" style="color: #0d4b38 !important;">{{ stats?.totalStudentAttempts || 0 }}</h3>
-                        <small class="text-muted fw-medium">Active Student Attempts</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Content Activity & Status Breakdown -->
         <div class="row g-4 mb-4">
             <!-- Recent Module Edits -->

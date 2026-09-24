@@ -29,8 +29,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Student Portal Routes (Authenticated Students)
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/welcome', [WelcomeController::class, 'index'])->name('welcome');
-    Route::get('/student/welcome', [WelcomeController::class, 'index'])->name('student.welcome');
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/go-beyond-books/modules/{id}', [StudentModuleController::class, 'show'])->name('go-beyond-books.modules.show');
     Route::post('/go-beyond-books/modules/{id}/progress', [StudentModuleController::class, 'saveProgress'])->name('go-beyond-books.modules.progress');

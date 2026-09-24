@@ -17,7 +17,9 @@ class DashboardController extends Controller
     public function index(): Response
     {
         $totalModules = CourseModule::count();
-        $totalQuestions = QuizQuestion::count();
+        $totalQuestions = QuizQuestion::whereHas('courseModule', function($q) {
+            $q->where('type', 'foundation');
+        })->count();
         $totalStudentAttempts = ModuleProgress::count();
 
         $recentModules = CourseModule::with('updatedBy')
