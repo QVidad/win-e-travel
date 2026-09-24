@@ -36,15 +36,15 @@
                             </div>
                             <div class="flex-grow-1" style="max-width: 500px;">
                                 <div class="d-flex justify-content-between align-items-end mb-1">
-                                    <h5 class="fw-bold mb-0 text-dark">Current Level: {{ $page.props.auth.user.level || 1 }}</h5>
+                                    <h5 class="fw-bold mb-0 text-dark">Overall Experience</h5>
                                     <div class="fw-bold text-warning">{{ $page.props.auth.user.xp || 0 }} XP</div>
                                 </div>
                                 <div class="progress mb-1 shadow-sm" style="height: 10px; border-radius: 10px; background-color: #e9ecef;">
-                                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar" :style="`width: ${(($page.props.auth.user.xp || 0) % 500) / 5}%`"></div>
+                                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar" :style="`width: ${Math.min((($page.props.auth.user.xp || 0) / maxTargetXp) * 100, 100)}%`"></div>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <small class="text-muted fw-bold">0 XP</small>
-                                    <small class="text-muted fw-bold">Next Level at {{ (Math.floor(($page.props.auth.user.xp || 0) / 500) + 1) * 500 }} XP</small>
+                                    <small class="text-muted fw-bold">Target: {{ maxTargetXp }} XP</small>
                                 </div>
                             </div>
                         </div>
@@ -117,21 +117,22 @@
                                 <i class="fas fa-book-open"></i>
                             </div>
                             <h4 class="fw-bold mb-2">Go Beyond Books</h4>
-                            <p class="text-muted small mb-3">Foundation Modules 1-4</p>
+                            <p class="text-muted small mb-3">Foundation Modules ({{ foundationTotal }})</p>
 
                             <div class="progress-bar-custom mb-3">
-                                <div class="progress-fill" :style="{ width: (foundationCompleted / 4) * 100 + '%' }"></div>
+                                <div class="progress-fill" :style="{ width: (foundationCompleted / Math.max(1, foundationTotal)) * 100 + '%' }"></div>
                             </div>
 
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="small text-muted">
-                                    <span>{{ foundationCompleted }}</span>/4 Completed
+                                    <span>{{ foundationCompleted }}</span>/{{ foundationTotal }} Completed
                                 </span>
-                                <span class="small fw-bold text-success">{{ Math.round((foundationCompleted / 4) * 100) }}%</span>
+                                <span class="small fw-bold text-success">{{ Math.round((foundationCompleted / Math.max(1, foundationTotal)) * 100) }}%</span>
                             </div>
 
                             <div class="chapter-progress mb-3">
-                                <div v-for="i in 4" :key="i" class="chapter-dot" :class="{ completed: i <= foundationCompleted, current: i === foundationCompleted + 1 }"></div>
+                                <div v-for="i in Math.min(foundationTotal, 5)" :key="i" class="chapter-dot" :class="{ completed: i <= foundationCompleted, current: i === foundationCompleted + 1 }"></div>
+                                <div v-if="foundationTotal > 5" class="chapter-dot">...</div>
                             </div>
 
                             <Link :href="route('go-beyond-books.index')" class="btn btn-outline-purple btn-journey w-100">
@@ -147,23 +148,21 @@
                                 <i class="fas fa-compass"></i>
                             </div>
                             <h4 class="fw-bold mb-2">Dare to Discover</h4>
-                            <p class="text-muted small mb-3">21 Town Chapters</p>
+                            <p class="text-muted small mb-3">{{ townsTotal }} Town Chapters</p>
 
                             <div class="progress-bar-custom mb-3">
-                                <div class="progress-fill" :style="{ width: (discoverCompleted / 21) * 100 + '%' }"></div>
+                                <div class="progress-fill" :style="{ width: (discoverCompleted / Math.max(1, townsTotal)) * 100 + '%' }"></div>
                             </div>
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="small text-muted">
-                                    <span>{{ discoverCompleted }}</span>/21 Completed
+                                    <span>{{ discoverCompleted }}</span>/{{ townsTotal }} Completed
                                 </span>
-                                <span class="small fw-bold text-success">{{ Math.round((discoverCompleted / 21) * 100) }}%</span>
+                                <span class="small fw-bold text-success">{{ Math.round((discoverCompleted / Math.max(1, townsTotal)) * 100) }}%</span>
                             </div>
 
                             <div class="chapter-progress mb-3">
-                                <div class="chapter-dot" :class="{ 'completed': discoverCompleted >= 1 }"></div>
-                                <div class="chapter-dot" :class="{ 'completed': discoverCompleted >= 2 }"></div>
-                                <div class="chapter-dot" :class="{ 'completed': discoverCompleted >= 3 }"></div>
-                                <div class="chapter-dot">...</div>
+                                <div v-for="i in Math.min(townsTotal, 5)" :key="i" class="chapter-dot" :class="{ completed: i <= discoverCompleted, current: i === discoverCompleted + 1 }"></div>
+                                <div v-if="townsTotal > 5" class="chapter-dot">...</div>
                             </div>
 
                             <Link :href="route('dare-to-discover.index')" class="btn btn-outline-pink btn-journey w-100">
@@ -179,21 +178,22 @@
                                 <i class="fas fa-mountain"></i>
                             </div>
                             <h4 class="fw-bold mb-2">Adventure Awaits</h4>
-                            <p class="text-muted small mb-3">Simulation Practice</p>
+                            <p class="text-muted small mb-3">Final Virtual Tour ({{ simulationsTotal }})</p>
 
                             <div class="progress-bar-custom mb-3">
-                                <div class="progress-fill" :style="{ width: (adventureCompleted > 0 ? 100 : 0) + '%' }"></div>
+                                <div class="progress-fill" :style="{ width: (adventureCompleted / Math.max(1, simulationsTotal)) * 100 + '%' }"></div>
                             </div>
 
                             <div class="d-flex justify-content-between mb-3">
                                 <span class="small text-muted">
-                                    <span>{{ adventureCompleted > 0 ? 1 : 0 }}</span>/1 Completed
+                                    <span>{{ adventureCompleted }}</span>/{{ simulationsTotal }} Completed
                                 </span>
-                                <span class="small fw-bold text-success">{{ adventureCompleted > 0 ? '100%' : '0%' }}</span>
+                                <span class="small fw-bold text-success">{{ Math.round((adventureCompleted / Math.max(1, simulationsTotal)) * 100) }}%</span>
                             </div>
 
                             <div class="chapter-progress mb-3">
-                                <div class="chapter-dot" :class="{'completed': adventureCompleted > 0}"></div>
+                                <div v-for="i in Math.min(simulationsTotal, 5)" :key="i" class="chapter-dot" :class="{ completed: i <= adventureCompleted, current: i === adventureCompleted + 1 }"></div>
+                                <div v-if="simulationsTotal > 5" class="chapter-dot">...</div>
                             </div>
 
                             <Link :href="route('adventure-awaits.index')" class="btn btn-outline-blue btn-journey w-100">
@@ -236,8 +236,12 @@ const props = defineProps({
 });
 
 const foundationCompleted = computed(() => props.progress?.foundationCompleted ?? 0);
+const foundationTotal = computed(() => props.progress?.foundationTotal ?? 0);
 const discoverCompleted = computed(() => props.progress?.townsCompleted ?? 0);
-const adventureCompleted = computed(() => props.progress?.simulationsUnlocked ?? 0);
+const townsTotal = computed(() => props.progress?.townsTotal ?? 0);
+const maxTargetXp = computed(() => props.progress?.maxTargetXp ?? 1000);
+const adventureCompleted = computed(() => props.progress?.simulationsCompleted ?? 0);
+const simulationsTotal = computed(() => props.progress?.simulationsTotal ?? 0);
 
 const totalCompletedChapters = computed(() => props.progress?.completedChapters ?? (foundationCompleted.value + discoverCompleted.value + adventureCompleted.value));
 const overallPercent = computed(() => props.progress?.overallPercentage ?? Math.round((totalCompletedChapters.value / (props.progress?.totalChapters || 25)) * 100));

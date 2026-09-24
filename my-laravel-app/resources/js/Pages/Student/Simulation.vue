@@ -138,22 +138,22 @@
                                                 <div class="row g-3 mt-1">
                                                     <div v-if="currentStepData.options?.a" class="col-md-6">
                                                         <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'a'}">
-                                                            <strong>A.</strong> {{ currentStepData.options.a }}
+                                                            {{ currentStepData.options.a }}
                                                         </div>
                                                     </div>
                                                     <div v-if="currentStepData.options?.b" class="col-md-6">
                                                         <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'b'}">
-                                                            <strong>B.</strong> {{ currentStepData.options.b }}
+                                                            {{ currentStepData.options.b }}
                                                         </div>
                                                     </div>
                                                     <div v-if="currentStepData.options?.c" class="col-md-6">
                                                         <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'c'}">
-                                                            <strong>C.</strong> {{ currentStepData.options.c }}
+                                                            {{ currentStepData.options.c }}
                                                         </div>
                                                     </div>
                                                     <div v-if="currentStepData.options?.d" class="col-md-6">
                                                         <div class="p-3 border rounded-3 bg-white" :class="{'border-success bg-success bg-opacity-10': stepAnswered && currentStepData.correct_option === 'd'}">
-                                                            <strong>D.</strong> {{ currentStepData.options.d }}
+                                                            {{ currentStepData.options.d }}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -269,7 +269,7 @@
                         </div>
 
                         <div v-if="isPassed">
-                            <Link :href="route('achievements.index')" class="btn btn-warning rounded-pill px-4 fw-bold me-2 mb-2">
+                            <Link v-if="props.simulation.type === 'final'" :href="route('achievements.index')" class="btn btn-warning rounded-pill px-4 fw-bold me-2 mb-2">
                                 <i class="fas fa-certificate me-1"></i> View Certificate
                             </Link>
                             <Link :href="route('dashboard')" class="btn btn-success rounded-pill px-4 fw-bold mb-2">
@@ -668,6 +668,28 @@ const parseKeywordsFromTranscript = (text) => {
                         matches.push(kw.word);
                         return;
                     }
+                }
+            }
+
+            // Tokenization fallback for long phrases
+            const kwTokens = kw.word.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(' ').filter(t => t.trim() !== '');
+            const stopWords = ['the','a','an','and','or','in','on','at','to','for','of','with','by','is','are','was','were','it'];
+            const significantTokens = kwTokens.filter(t => !stopWords.includes(t));
+            
+            if (significantTokens.length > 2) {
+                let hitCount = 0;
+                significantTokens.forEach(token => {
+                    const tokenSingular = token.endsWith('s') ? token.slice(0, -1) : token;
+                    const tokenPlural = token.endsWith('s') ? token : token + 's';
+                    
+                    if (cleanText.includes(token) || cleanText.includes(tokenSingular) || cleanText.includes(tokenPlural)) {
+                        hitCount++;
+                    }
+                });
+                
+                if (hitCount / significantTokens.length >= 0.6) {
+                    matches.push(kw.word);
+                    return;
                 }
             }
         }

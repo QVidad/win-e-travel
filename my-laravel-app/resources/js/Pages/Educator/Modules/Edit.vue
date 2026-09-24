@@ -182,7 +182,7 @@
                                 v-model="form.cover_image" 
                                 type="text" 
                                 class="form-control rounded-3 mb-2" 
-                                placeholder="Image URL (e.g. /assets/images/laoag-belltower.jpg)"
+                                placeholder="Paste image URL (e.g., https://.../image.jpg)"
                             >
                             <div class="input-group input-group-sm mb-2">
                                 <span class="input-group-text bg-light text-muted">Or upload file</span>
@@ -210,6 +210,7 @@
                                     class="w-100 h-100 object-fit-cover"
                                     :style="{ objectPosition: form.cover_image_position || 'center 50%' }"
                                     alt="Cover preview"
+                                    @error="(e) => e.target.src = 'https://ui-avatars.com/api/?name=Invalid+Link&background=f8d7da&color=842029'"
                                 >
                                 <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
                                     <i class="fas fa-image fs-3 mb-1"></i>
@@ -537,7 +538,7 @@
                                         v-model="lessonForm.cover_image" 
                                         type="text" 
                                         class="form-control rounded-3 mb-2" 
-                                        placeholder="Image URL (e.g. /assets/images/attraction.jpg)"
+                                        placeholder="Paste image URL (e.g., https://.../image.jpg)"
                                     >
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text bg-light text-muted">Or upload file</span>
@@ -562,6 +563,7 @@
                                             :src="lessonImagePreview || lessonForm.cover_image" 
                                             class="w-100 h-100 object-fit-cover"
                                             :style="{ objectPosition: lessonForm.cover_image_position || 'center 50%' }"
+                                            @error="(e) => e.target.src = 'https://ui-avatars.com/api/?name=Invalid+Link&background=f8d7da&color=842029'"
                                         >
                                         <div v-else class="h-100 d-flex flex-column align-items-center justify-content-center text-muted small">
                                             <i class="fas fa-image fs-4 mb-1"></i>

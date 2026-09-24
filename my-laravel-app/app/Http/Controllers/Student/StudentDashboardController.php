@@ -23,6 +23,22 @@ class StudentDashboardController extends Controller
             ->count();
             
         $totalChapters = \App\Models\CourseModule::where('status', 'published')->count();
+        
+        $finalSimulation = \App\Models\Simulation::where('type', 'final')->where('status', 'published')->first();
+        $finalSimPassed = false;
+        
+        if ($finalSimulation) {
+            $totalChapters += 1;
+            $finalSimPassed = \Illuminate\Support\Facades\DB::table('simulation_user')
+                ->where('user_id', $user->id)
+                ->where('simulation_id', $finalSimulation->id)
+                ->where('passed', true)
+                ->exists();
+            if ($finalSimPassed) {
+                $completedChapters += 1;
+            }
+        }
+
         if ($totalChapters === 0) {
             $totalChapters = 1; // avoid division by zero
         }
@@ -40,6 +56,13 @@ class StudentDashboardController extends Controller
             ->whereHas('courseModule', function ($query) {
                 $query->where('type', 'town_chapter');
             })->count();
+
+        $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
+        $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
+        $townSimulationsTotal = \App\Models\Simulation::where('type', 'town')->where('status', 'published')->count();
+        
+        // Modules give 50 XP. Town simulations give 100 XP. Final simulation gives 500 XP.
+        $maxTargetXp = ($foundationTotal * 50) + ($townsTotal * 50) + ($townSimulationsTotal * 100) + ($finalSimulation ? 500 : 0);
 
         $hasStarted = \App\Models\ModuleProgress::where('user_id', $user->id)->exists();
         
@@ -70,7 +93,7 @@ class StudentDashboardController extends Controller
             $continueModule = \App\Models\CourseModule::where('status', 'published')->orderBy('order')->first();
         }
 
-        $finalSimulation = \App\Models\Simulation::where('type', 'final')->first();
+
 
         return Inertia::render('Student/Dashboard', [
             'towns' => $towns,
@@ -87,8 +110,12 @@ class StudentDashboardController extends Controller
                 'totalChapters' => $totalChapters,
                 'overallPercentage' => $overallProgress,
                 'foundationCompleted' => $foundationCompleted,
+                'foundationTotal' => $foundationTotal,
                 'townsCompleted' => $townsCompleted,
-                'simulationsUnlocked' => $user->simulations_completed ?? 0,
+                'townsTotal' => $townsTotal,
+                'maxTargetXp' => $maxTargetXp,
+                'simulationsCompleted' => $finalSimPassed ? 1 : 0,
+                'simulationsTotal' => $finalSimulation ? 1 : 0,
                 'finalSimulationId' => $finalSimulation ? $finalSimulation->id : null,
                 'continueModule' => $continueModule ? [
                     'id' => $continueModule->id,

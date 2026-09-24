@@ -189,6 +189,8 @@ class SimulationController extends Controller
                     $image = $lesson->cover_image;
                 } else if (!$lesson && $module && $module->cover_image) {
                     $image = $module->cover_image;
+                } else if ($ts && $ts->town && $ts->town->hero_image) {
+                    $image = $ts->town->hero_image;
                 }
 
                 $finalScenarios[] = [

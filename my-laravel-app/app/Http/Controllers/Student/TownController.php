@@ -13,7 +13,8 @@ class TownController extends Controller
     {
         $user = \Illuminate\Support\Facades\Auth::user();
         
-        $publishedModules = \App\Models\CourseModule::where('type', 'town_chapter')
+        $publishedModules = \App\Models\CourseModule::with('lessons')
+            ->where('type', 'town_chapter')
             ->where('status', 'published')
             ->get()
             ->keyBy('code');
@@ -25,7 +26,18 @@ class TownController extends Controller
             ->filter(function ($town) use ($publishedModules) {
                 return $publishedModules->has('town-' . $town->slug);
             })->map(function ($town) use ($publishedModules) {
-                $town->module = $publishedModules['town-' . $town->slug];
+                $module = $publishedModules['town-' . $town->slug];
+                $town->module = $module;
+                
+                // Override seeded destinations with the actual Educator-created attractions (lessons)
+                $customDestinations = $module->lessons->map(function($lesson) {
+                    return [
+                        'id' => 'lesson-' . $lesson->id,
+                        'name' => $lesson->title,
+                    ];
+                });
+                $town->setRelation('destinations', collect($customDestinations));
+                
                 return $town;
             })->values();
         // Fetch user progress for town modules
