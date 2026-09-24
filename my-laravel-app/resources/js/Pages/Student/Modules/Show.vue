@@ -138,7 +138,7 @@
                                     <i class="fas fa-trophy" :class="isEvaluationUnlocked ? 'text-warning' : 'text-white'"></i> 
                                     End-of-Module Evaluation
                                 </h5>
-                                <p class="mb-0  small">25 questions • 90% required to pass and unlock next module</p>
+                                <p class="mb-0  small">{{ props.module.questions?.length || 0 }} questions • 90% required to pass and unlock next module</p>
                             </div>
                             <div class="fs-4 d-flex align-items-center">
                                 <i v-if="isEvaluationUnlocked" class="fas fa-play-circle"></i>
@@ -696,7 +696,7 @@ const startFinalEvaluation = () => {
     
     activeAssessmentType.value = 'final';
     if (props.module.questions && props.module.questions.length > 0) {
-        currentQuestions.value = loadQuestionsForQuiz(props.module.questions, 10); // Or module.quiz_question_count if it exists
+        currentQuestions.value = loadQuestionsForQuiz(props.module.questions, null);
     } else {
         currentQuestions.value = [];
     }

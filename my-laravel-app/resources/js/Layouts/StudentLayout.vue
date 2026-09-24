@@ -9,7 +9,7 @@
                 </Link>
 
                 <!-- Center: Navigation Items with Icons Above Text -->
-                <div class="d-none d-md-flex mx-auto align-items-center gap-4">
+                <div class="d-none d-lg-flex mx-auto align-items-center gap-4">
                     <Link 
                         :href="route('dashboard')" 
                         class="text-decoration-none text-center small" 
@@ -65,18 +65,19 @@
                         class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 py-2 px-3 end-0" 
                         :class="{ show: isMenuOpen }"
                         aria-labelledby="userProfileDropdown" 
-                        style="min-width: 230px; border-radius: 14px; right: 0; left: auto;"
+                        style="min-width: 230px; border-radius: 14px; right: 0; left: auto; z-index: 1050;"
                     >
                         <li class="pb-2 pt-1 border-bottom mb-2">
                             <div class="fw-bold text-dark fs-6">{{ $page.props.auth?.user ? $page.props.auth.user.name : 'Queenee' }}</div>
                             <div class="text-muted small text-truncate" style="max-width: 190px;">
                                 {{ $page.props.auth?.user ? $page.props.auth.user.email : 'qvidad@gmail.com' }}
                             </div>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill mt-1 fs-8">Active Student</span>
                         </li>
                         
                         <li class="my-1">
                             <Link :href="route('profile.edit')" class="dropdown-item rounded-3 py-2 px-2 d-flex align-items-center text-dark fw-medium" @click="isMenuOpen = false">
-                                <i class="fas fa-user-circle text-primary me-3 fa-lg" style="width: 20px;"></i>
+                                <i class="fas fa-user-cog text-primary me-3 fa-lg" style="width: 20px;"></i>
                                 <span>Profile Settings</span>
                             </Link>
                         </li>
@@ -114,6 +115,24 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Sub-nav for Mobile Screens -->
+        <div class="bg-white border-bottom d-lg-none py-2 px-3 shadow-xs">
+            <div class="d-flex justify-content-around">
+                <Link :href="route('dashboard')" class="text-decoration-none small text-center" :class="$page.url === '/dashboard' ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-chart-pie d-block mb-1"></i> Dashboard
+                </Link>
+                <Link :href="route('go-beyond-books.index')" class="text-decoration-none small text-center" :class="$page.url.startsWith('/go-beyond-books') ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-book-open d-block mb-1"></i> Books
+                </Link>
+                <Link :href="route('dare-to-discover.index')" class="text-decoration-none small text-center" :class="$page.url.startsWith('/dare-to-discover') ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-compass d-block mb-1"></i> Discover
+                </Link>
+                <Link :href="route('adventure-awaits.index')" class="text-decoration-none small text-center" :class="$page.url.startsWith('/adventure-awaits') ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-mountain d-block mb-1"></i> Adventure
+                </Link>
+            </div>
+        </div>
 
         <!-- Main Content Area -->
         <main class="flex-grow-1 p-3 p-md-4">

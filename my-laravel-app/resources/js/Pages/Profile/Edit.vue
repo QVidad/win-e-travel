@@ -35,7 +35,12 @@ const layout = computed(() => {
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <div class="d-flex align-items-center mb-2">
-                            <img v-if="$page.props.auth.user.role === 'student'" src="/assets/images/WINLogo.png" alt="WIN Logo" style="height: 48px; object-fit: contain;" class="me-3">
+                            <div class="avatar-circle bg-white text-dark rounded-circle d-flex align-items-center justify-content-center overflow-hidden shadow-sm me-3" style="width: 48px; height: 48px;">
+                                <img v-if="$page.props.auth.user.avatar" :src="$page.props.auth.user.avatar" alt="Avatar" class="w-100 h-100 object-fit-cover">
+                                <i v-else-if="$page.props.auth.user.role === 'admin'" class="fas fa-user-shield fa-lg"></i>
+                                <i v-else-if="$page.props.auth.user.role === 'educator'" class="fas fa-chalkboard-teacher fa-lg"></i>
+                                <i v-else class="fas fa-user fa-lg"></i>
+                            </div>
                             <!-- Scaled & Bold Header -->
                             <h1 class="display-6 fw-extrabold mb-0 text-white" style="font-weight: 800; letter-spacing: -0.5px;">
                                 My Profile

@@ -11,7 +11,7 @@
                 </Link>
 
                 <!-- Center: Navigation Tabs with Icons Above Text -->
-                <div class="d-none d-md-flex mx-auto align-items-center gap-4">
+                <div class="d-none d-lg-flex mx-auto align-items-center gap-4">
                     <Link 
                         :href="route('educator.dashboard')" 
                         class="text-decoration-none text-center small transition-all" 
@@ -125,19 +125,22 @@
         </nav>
 
         <!-- Sub-nav for Mobile Screens -->
-        <div class="bg-white border-bottom d-md-none py-2 px-3 shadow-xs">
-            <div class="d-flex justify-content-around">
-                <Link :href="route('educator.dashboard')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/dashboard') ? 'fw-bold text-dark' : 'text-muted'">
+        <div class="bg-white border-bottom d-lg-none py-2 px-3 shadow-xs">
+            <div class="d-flex justify-content-around flex-wrap">
+                <Link :href="route('educator.dashboard')" class="text-decoration-none small text-center px-1" :class="isRouteActive('/educator/dashboard') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-desktop d-block mb-1"></i> Dashboard
                 </Link>
-                <Link :href="route('educator.modules.index')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/modules') ? 'fw-bold text-dark' : 'text-muted'">
+                <Link :href="route('educator.modules.index')" class="text-decoration-none small text-center px-1" :class="isRouteActive('/educator/modules') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-book-open d-block mb-1"></i> Modules
                 </Link>
-                <Link :href="route('educator.quizzes.index')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/quizzes') ? 'fw-bold text-dark' : 'text-muted'">
+                <Link :href="route('educator.quizzes.index')" class="text-decoration-none small text-center px-1" :class="isRouteActive('/educator/quizzes') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-tasks d-block mb-1"></i> Quiz Banks
                 </Link>
-                <Link :href="route('educator.performance.index')" class="text-decoration-none small text-center" :class="isRouteActive('/educator/performance') ? 'fw-bold text-dark' : 'text-muted'">
+                <Link :href="route('educator.performance.index')" class="text-decoration-none small text-center px-1" :class="isRouteActive('/educator/performance') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-user-graduate d-block mb-1"></i> Students
+                </Link>
+                <Link :href="route('educator.certificate.edit')" class="text-decoration-none small text-center px-1" :class="isRouteActive('/educator/certificate') ? 'fw-bold text-dark' : 'text-muted'">
+                    <i class="fas fa-certificate d-block mb-1"></i> Certificates
                 </Link>
             </div>
         </div>

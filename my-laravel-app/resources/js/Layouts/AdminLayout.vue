@@ -11,7 +11,7 @@
                 </Link>
 
                 <!-- Center: Navigation Tabs with Icons Above Text -->
-                <div class="d-none d-md-flex mx-auto align-items-center gap-4">
+                <div class="d-none d-lg-flex mx-auto align-items-center gap-4">
                     <Link 
                         :href="route('admin.dashboard')" 
                         class="text-decoration-none text-center small transition-all" 
@@ -107,7 +107,7 @@
         </nav>
 
         <!-- Sub-nav for Mobile Screens -->
-        <div class="bg-white border-bottom d-md-none py-2 px-3 shadow-xs">
+        <div class="bg-white border-bottom d-lg-none py-2 px-3 shadow-xs">
             <div class="d-flex justify-content-around">
                 <Link :href="route('admin.dashboard')" class="text-decoration-none small text-center" :class="isRouteActive('/admin/dashboard') ? 'fw-bold text-dark' : 'text-muted'">
                     <i class="fas fa-chart-pie d-block mb-1"></i> Dashboard
