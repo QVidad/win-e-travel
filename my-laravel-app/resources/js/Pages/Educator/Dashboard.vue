@@ -99,9 +99,16 @@
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="badge rounded-pill px-3 py-1" :class="mod.status === 'published' ? 'bg-success' : 'bg-warning text-dark'">
+                                    <button 
+                                        @click.prevent="toggleStatus(mod)"
+                                        class="btn btn-sm rounded-pill px-3 py-1 fw-bold border-0 shadow-sm transition-all text-white" 
+                                        :class="mod.status === 'published' ? 'btn-success' : 'btn-warning text-dark'"
+                                        :disabled="mod.isToggling"
+                                        title="Click to toggle Published/Draft"
+                                    >
+                                        <span v-if="mod.isToggling"><i class="fas fa-spinner fa-spin me-1"></i></span>
                                         {{ mod.status === 'published' ? 'Published' : 'Draft' }}
-                                    </span>
+                                    </button>
                                     <Link :href="route('educator.modules.edit', mod.id)" class="btn btn-sm btn-outline-secondary rounded-circle ms-1">
                                         <i class="fas fa-edit"></i>
                                     </Link>
@@ -159,7 +166,7 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, useRouter } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
 
 defineProps({
@@ -172,6 +179,18 @@ defineProps({
         default: () => [],
     },
 });
+
+const router = useRouter();
+
+const toggleStatus = (mod) => {
+    mod.isToggling = true;
+    router.patch(route('educator.modules.toggle', mod.id), {}, {
+        preserveScroll: true,
+        onFinish: () => {
+            mod.isToggling = false;
+        }
+    });
+};
 </script>
 
 <style scoped>

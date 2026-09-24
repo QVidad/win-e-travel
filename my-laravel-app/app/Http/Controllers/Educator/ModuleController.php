@@ -254,6 +254,30 @@ class ModuleController extends Controller
     }
 
     /**
+     * Toggle module status between published and draft.
+     */
+    public function toggleStatus(Request $request, string $id): RedirectResponse
+    {
+        $module = CourseModule::findOrFail($id);
+        
+        $newStatus = $module->status === 'published' ? 'draft' : 'published';
+        
+        if ($newStatus === 'published' && $module->type !== 'town_chapter') {
+            $bankCount = \App\Models\QuizQuestion::where('module_id', $id)->count();
+            if ($module->quiz_question_count > $bankCount) {
+                return redirect()->back()->with('error', "Cannot publish: Module requires {$module->quiz_question_count} questions but only {$bankCount} exist in the bank.");
+            }
+        }
+        
+        $module->update(['status' => $newStatus]);
+        
+        Cache::forget('published_student_modules');
+        Cache::forget('published_student_modules_foundation');
+
+        return redirect()->back()->with('success', "Module set to {$newStatus} successfully.");
+    }
+
+    /**
      * Remove the specified module.
      */
     public function destroy(Request $request, string $id): RedirectResponse

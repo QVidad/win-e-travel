@@ -41,7 +41,7 @@ class HandleInertiaRequests extends Middleware
                 
                 return true; // TEMP UNLOCK FOR TESTING
                 
-                $townsCount = \App\Models\Town::where('status', 'published')->count();
+                $townsCount = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
                 $completedTownsCount = \App\Models\ModuleProgress::where('user_id', $request->user()->id)
                     ->whereHas('courseModule', function ($q) {
                         $q->where('type', 'town_chapter');
@@ -53,6 +53,8 @@ class HandleInertiaRequests extends Middleware
             },
             'flash' => [
                 'gamification' => $request->session()->get('gamification'),
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
             ],
         ];
     }

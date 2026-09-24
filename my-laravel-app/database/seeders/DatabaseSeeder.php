@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             DestinationSeeder::class,
             AchievementSeeder::class,
             ContentSectionSeeder::class,
+            SimulationSeeder::class,
         ]);
     }
 }

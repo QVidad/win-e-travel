@@ -41,10 +41,7 @@
                 <div v-if="!simulationStarted" class="row justify-content-center">
                     <div class="col-lg-8">
                         <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white mt-4">
-                            <img src="/assets/images/facilitator-female.jpg" alt="Guide Maria" class="rounded-circle mx-auto mb-4 shadow border-4 border-warning" style="width: 130px; height: 130px; object-fit: cover;">
-                            <h3 class="fw-bold text-dark mb-1">Guide Maria</h3>
-                            <h5 class="text-success fw-bold d-block mb-4">Your AI Tour Facilitator</h5>
-                            
+                            <h4 class="fw-bold text-dark mb-4">Tour Guiding Simulation</h4>
                             <div class="p-4 bg-light rounded-4 text-start mb-4 border">
                                 <h5 class="fw-bold mb-3"><i class="fas fa-info-circle text-primary me-2"></i>Simulation Instructions</h5>
                                 <p class="mb-2 fs-5"><strong>1.</strong> When you start, your camera and microphone will activate automatically.</p>

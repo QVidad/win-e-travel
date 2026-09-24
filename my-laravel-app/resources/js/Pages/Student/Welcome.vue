@@ -18,59 +18,11 @@
                             Your journey to becoming a certified tour guide starts here. Let's set up your training experience.
                         </p>
                     </div>
-                    <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                        <button class="btn btn-gold btn-lg shadow-sm" @click="speakWelcomeMessage">
-                            <i class="fas" :class="isSpeaking ? 'fa-square' : 'fa-volume-up'" me-2></i>
-                            {{ isSpeaking ? 'Stop Listening' : 'Listen to Welcome' }}
-                        </button>
-                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Avatar Selection Section -->
-        <section class="py-5 bg-light border-bottom">
-            <div class="container">
-                <div class="text-center mb-4">
-                    <h3 class="fw-bold mb-2">Choose Your Training Facilitator</h3>
-                    <p class="text-muted">Select who will guide you through your training journey</p>
-                </div>
-                <div class="row justify-content-center g-4">
-                    <div class="col-md-5">
-                        <div 
-                            class="avatar-selection-card d-flex flex-column align-items-center justify-content-center text-center bg-white shadow-sm" 
-                            :class="{ 'selected': selectedAvatar === 'male' }" 
-                            @click="selectAvatar('male')"
-                        >
-                            <img src="/assets/images/facilitator-male.jpg" alt="Male Facilitator" class="avatar-image">
-                            <h5 class="fw-bold mb-2">
-                                <i class="fas fa-male text-primary me-2"></i>Male Facilitator
-                            </h5>
-                            <p class="text-muted small mb-0">Deep, clear voice guidance</p>
-                            <div class="mt-3" style="min-height: 32px;">
-                                <i v-if="selectedAvatar === 'male'" class="fas fa-check-circle text-success fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div 
-                            class="avatar-selection-card d-flex flex-column align-items-center justify-content-center text-center bg-white shadow-sm" 
-                            :class="{ 'selected': selectedAvatar === 'female' }" 
-                            @click="selectAvatar('female')"
-                        >
-                            <img src="/assets/images/facilitator-female.jpg" alt="Female Facilitator" class="avatar-image">
-                            <h5 class="fw-bold mb-2">
-                                <i class="fas fa-female text-danger me-2"></i>Female Facilitator
-                            </h5>
-                            <p class="text-muted small mb-0">Warm, engaging voice guidance</p>
-                            <div class="mt-3" style="min-height: 32px;">
-                                <i v-if="selectedAvatar === 'female'" class="fas fa-check-circle text-success fa-2x"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+
 
         <!-- Main Welcome Content -->
         <main class="py-5">
@@ -85,9 +37,6 @@
                                         <i class="fas fa-info-circle text-success me-2"></i>
                                         Welcome to the Tour Guiding Training App
                                     </h3>
-                                    <button class="btn btn-sm btn-outline-mmsu ms-2 flex-shrink-0" @click="speakWelcomeText">
-                                        <i class="fas fa-play me-1"></i>Read Aloud
-                                    </button>
                                 </div>
                                 <div>
                                     <p class="lead">Tour guiding is more than just leading people from one place to another — it's about bringing destinations to life, sharing meaningful stories, and ensuring travelers have memorable, safe, and enjoyable experiences.</p>
@@ -144,9 +93,6 @@
                                         <i class="fas fa-graduation-cap text-warning me-2"></i>
                                         After this training, you will gain:
                                     </h3>
-                                    <button class="btn btn-sm btn-outline-mmsu" @click="speakSkillsText">
-                                        <i class="fas fa-play me-1"></i>Read Aloud
-                                    </button>
                                 </div>
                                 <div>
                                     <div class="skill-tag"><i class="fas fa-sync-alt me-2 text-success"></i>Adaptability</div>
@@ -312,34 +258,13 @@ const page = usePage();
 const userName = computed(() => page.props.auth?.user?.name || 'Trainee');
 const currentYear = new Date().getFullYear();
 
-// Facilitator selection persisted to localStorage
-const selectedAvatar = ref('male');
-
 onMounted(() => {
-    const saved = localStorage.getItem('selectedAvatar');
-    if (saved) {
-        selectedAvatar.value = saved;
-    } else {
-        localStorage.setItem('selectedAvatar', 'male');
-    }
     window.addEventListener('scroll', handleScroll);
-
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.onvoiceschanged = () => {
-            window.speechSynthesis.getVoices();
-        };
-    }
 });
 
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
-    stopSpeech();
 });
-
-const selectAvatar = (gender) => {
-    selectedAvatar.value = gender;
-    localStorage.setItem('selectedAvatar', gender);
-};
 
 // Scroll progress bar
 const scrollProgress = ref(0);
@@ -349,81 +274,6 @@ const handleScroll = () => {
         scrollProgress.value = (window.scrollY / totalHeight) * 100;
     }
 };
-
-// Web Speech API Text-to-Speech
-const isSpeaking = ref(false);
-
-const stopSpeech = () => {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        isSpeaking.value = false;
-    }
-};
-
-const speakText = (text) => {
-    if (!('speechSynthesis' in window)) return;
-    stopSpeech();
-
-    if (!text) return;
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-
-    if (selectedAvatar.value === 'female') {
-        // Find a female voice (Chrome/Edge/Safari support names like Zira, Samantha, Victoria, Google UK English Female, etc.)
-        const femaleVoice = voices.find(v => 
-            v.lang.startsWith('en') && 
-            (v.name.toLowerCase().includes('female') || 
-             v.name.toLowerCase().includes('zira') || 
-             v.name.toLowerCase().includes('samantha') || 
-             v.name.toLowerCase().includes('victoria') ||
-             v.name.toLowerCase().includes('google us english'))
-        );
-        if (femaleVoice) utterance.voice = femaleVoice;
-        utterance.pitch = 1.3; // Higher pitch for female voice
-    } else {
-        // Find a male voice (David, Mark, Guy, Google US English Male, etc.)
-        const maleVoice = voices.find(v => 
-            v.lang.startsWith('en') && 
-            (v.name.toLowerCase().includes('male') || 
-             v.name.toLowerCase().includes('david') || 
-             v.name.toLowerCase().includes('mark') ||
-             v.name.toLowerCase().includes('guy'))
-        );
-        if (maleVoice) utterance.voice = maleVoice;
-        utterance.pitch = 0.85; // Deeper pitch for male voice
-    }
-
-    utterance.rate = 0.95;
-    utterance.onstart = () => { isSpeaking.value = true; };
-    utterance.onend = () => { isSpeaking.value = false; };
-    utterance.onerror = () => { isSpeaking.value = false; };
-
-    window.speechSynthesis.speak(utterance);
-};
-
-const toggleSpeech = () => {
-    if (isSpeaking.value) {
-        stopSpeech();
-    } else {
-        speakWelcomeMessage();
-    }
-};
-
-const speakWelcomeMessage = () => {
-    const text = `Welcome, ${userName.value}! Your journey to becoming a certified tour guide starts here. Choose your training facilitator and let's set up your training experience.`;
-    speakText(text);
-};
-
-const speakWelcomeText = () => {
-    const text = "Welcome to the Tour Guiding Training App. Tour guiding is more than just leading people from one place to another — it's about bringing destinations to life, sharing meaningful stories, and ensuring travelers have memorable, safe, and enjoyable experiences. As a tour guide, you are not only the bridge between visitors and culture, but also an ambassador of your community and its heritage.";
-    speakText(text);
-};
-
-const speakSkillsText = () => {
-    const text = "After this training, you will gain: Adaptability, Communication Skills, Crisis Management, Cultural and Historical Knowledge, Customer Service, Empathy, Integrity, Professionalism, and Respect.";
-    speakText(text);
-};
 </script>
 
 <style scoped>
@@ -432,33 +282,7 @@ const speakSkillsText = () => {
     padding: 60px 0;
 }
 
-.avatar-selection-card {
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 3px solid transparent;
-    border-radius: 20px;
-    padding: 20px;
-}
 
-.avatar-selection-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-}
-
-.avatar-selection-card.selected {
-    border-color: var(--mmsu-gold, #d4a017);
-    background-color: rgba(212, 160, 23, 0.05) !important;
-}
-
-.avatar-image {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 15px auto;
-    display: block;
-    border: 4px solid var(--mmsu-gold, #d4a017);
-}
 
 .step-number {
     width: 35px;

@@ -91,7 +91,7 @@
                 </div>
 
                 <!-- Progress Overview Card -->
-                <div v-if="progress.continueModule" class="progress-overview-card mb-4" style="border-left: 4px solid var(--bs-success);">
+                <div v-if="progress.continueModule && progress.hasStarted" class="progress-overview-card mb-4" style="border-left: 4px solid var(--bs-success);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
                         <div class="d-flex align-items-center gap-3 flex-grow-1">
                             <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 60px; height: 60px;">

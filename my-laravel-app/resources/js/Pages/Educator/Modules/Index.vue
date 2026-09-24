@@ -84,9 +84,16 @@
                                 </div>
                             </div>
 
-                            <span class="badge rounded-pill px-3 py-1" :class="mod.status === 'published' ? 'bg-success text-white' : 'bg-warning text-dark'">
+                            <button 
+                                @click.prevent="toggleStatus(mod)"
+                                class="btn btn-sm rounded-pill px-3 py-1 fw-bold border-0 shadow-sm transition-all" 
+                                :class="mod.status === 'published' ? 'btn-success text-white' : 'btn-warning text-dark'"
+                                :disabled="mod.isToggling"
+                                title="Click to toggle Published/Draft"
+                            >
+                                <span v-if="mod.isToggling"><i class="fas fa-spinner fa-spin me-1"></i></span>
                                 {{ mod.status === 'published' ? 'Published' : 'Draft' }}
-                            </span>
+                            </button>
                         </div>
 
                         <!-- Module Title & Category/Description -->
@@ -254,6 +261,16 @@ const deleteModule = (mod) => {
             preserveScroll: true,
         });
     }
+};
+
+const toggleStatus = (mod) => {
+    mod.isToggling = true;
+    router.patch(route('educator.modules.toggle', mod.id), {}, {
+        preserveScroll: true,
+        onFinish: () => {
+            mod.isToggling = false;
+        }
+    });
 };
 
 const moveModule = (index, direction) => {

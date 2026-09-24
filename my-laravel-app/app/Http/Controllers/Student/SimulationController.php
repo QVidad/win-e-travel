@@ -14,7 +14,19 @@ class SimulationController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
-        $towns = \App\Models\Town::where('status', 'published')->orderBy('order')->get();
+        $publishedModules = \App\Models\CourseModule::where('type', 'town_chapter')
+            ->where('status', 'published')
+            ->get()
+            ->keyBy('code');
+
+        $towns = \App\Models\Town::where('status', 'published')
+            ->orderBy('order')
+            ->get()
+            ->filter(function ($town) use ($publishedModules) {
+                return $publishedModules->has('town-' . $town->slug);
+            })
+            ->values();
+
         $totalTowns = $towns->count();
 
         $completedTowns = \App\Models\ModuleProgress::where('user_id', $user->id)

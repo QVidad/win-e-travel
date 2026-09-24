@@ -232,22 +232,30 @@
                 </div>
 
                     <!-- Quiz Settings -->
-                    <div v-if="module.type !== 'town_chapter'" class="row g-4 mb-4 pt-4 border-top">
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold text-dark">Module Quick Check Quiz (Questions)</label>
-                            <div class="input-group">
-                                <input 
-                                    v-model.number="form.quiz_question_count" 
-                                    type="number" 
-                                    min="0" 
-                                    :max="questionBankCount"
-                                    class="form-control rounded-start-3" 
-                                >
-                                <span class="input-group-text bg-light text-muted rounded-end-3">
-                                    of {{ questionBankCount }} available in bank
-                                </span>
+                    <div v-if="module.type !== 'town_chapter'" class="mb-4 pt-4 border-top">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-dark">Module Quick Check Quiz (Questions)</label>
+                                <div class="input-group">
+                                    <input 
+                                        v-model.number="form.quiz_question_count" 
+                                        type="number" 
+                                        min="0" 
+                                        :max="questionBankCount"
+                                        class="form-control rounded-start-3" 
+                                    >
+                                    <span class="input-group-text bg-light text-muted rounded-end-3">
+                                        of {{ questionBankCount }} available in bank
+                                    </span>
+                                </div>
+                                <small class="text-muted d-block mt-1">Set to 0 if this module shouldn't have a final quiz.</small>
                             </div>
-                            <small class="text-muted d-block mt-1">Set to 0 if this module shouldn't have a final quiz.</small>
+                        </div>
+                        <div class="d-flex gap-2 align-items-start mt-3 p-2 rounded-3 bg-light border border-primary border-opacity-25" style="background-color: #f8fbff !important;">
+                            <i class="fas fa-info-circle text-primary mt-1"></i>
+                            <div class="small text-dark" style="font-size: 0.8rem; line-height: 1.4;">
+                                <strong>New Module?</strong> Leave this at 0, add questions in the Quiz Bank first, then return here to set the count.
+                            </div>
                         </div>
                     </div>
 
@@ -462,7 +470,7 @@
                                 </span>
                             </div>
 
-                            <div class="row g-3 align-items-center">
+                            <div class="row g-3 align-items-center mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold text-dark mb-1">
                                         Number of Quiz Questions <span class="text-danger">*</span>
@@ -496,6 +504,13 @@
                                             {{ currentLessonBankCount }} in bank vs {{ lessonForm.quiz_question_count || 0 }} requested.
                                         </small>
                                     </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2 align-items-start p-2 rounded-3 bg-light border border-primary border-opacity-25" style="background-color: #f8fbff !important;">
+                                <i class="fas fa-info-circle text-primary mt-1"></i>
+                                <div class="small text-dark" style="font-size: 0.8rem; line-height: 1.4;">
+                                    <strong>New Lesson?</strong> Leave this at 0, add questions in the Quiz Bank first, then return here to set the count.
                                 </div>
                             </div>
                         </div>
