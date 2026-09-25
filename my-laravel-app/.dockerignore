@@ -1,0 +1,16 @@
+node_modules
+vendor
+.git
+.gitignore
+.editorconfig
+.env
+.env.*
+!.env.example
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/public/*
+.phpunit.result.cache
+npm-debug.log
+docker-compose*.override.yml
