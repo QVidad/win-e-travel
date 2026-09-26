@@ -101,6 +101,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 require __DIR__.'/auth.php';
 
 Route::get('/setup-db', function () {
-    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-    return 'Database seeded successfully! You can now login with admin@winetravel.com';
+    $data = json_decode(file_get_contents(database_path('data.json')), true);
+    foreach ($data as $table => $rows) {
+        if (!empty($rows)) {
+            \Illuminate\Support\Facades\DB::table($table)->delete();
+            $chunks = array_chunk($rows, 50);
+            foreach ($chunks as $chunk) {
+                \Illuminate\Support\Facades\DB::table($table)->insert((array) $chunk);
+            }
+        }
+    }
+    return 'Database copied successfully! You can now login with your previous accounts.';
 });
