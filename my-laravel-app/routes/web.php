@@ -100,7 +100,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
 require __DIR__.'/auth.php';
 
-Route::get('/debug-final-boss', [\App\Http\Controllers\Student\SimulationController::class, 'debugFinalBoss']);
+Route::get('/debug-final-boss', [\App\Http\Controllers\Student\DebugController::class, 'debugFinalBoss']);
 Route::get('/wipe-progress', function () {
     \Illuminate\Support\Facades\DB::table('module_progress')->truncate();
     \Illuminate\Support\Facades\DB::table('user_achievements')->truncate();
