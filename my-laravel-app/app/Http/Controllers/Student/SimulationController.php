@@ -202,19 +202,21 @@ class SimulationController extends Controller
 
         $townSimulations = collect();
         if ($townSlugs->isNotEmpty()) {
-            $townSimulations = \App\Models\Simulation::where('type', 'town')
+            $rawSims = \App\Models\Simulation::where('type', 'town')
                 ->whereHas('town', function($q) use ($townSlugs) {
                     $q->whereIn('slug', $townSlugs);
                 })
+                ->orderBy('updated_at', 'desc')
                 ->get();
+            $townSimulations = $rawSims->unique('town_id')->values();
         }
 
         // Fallback for demo mode if no completed towns
         if ($townSimulations->isEmpty()) {
-            $townSimulations = \App\Models\Simulation::where('type', 'town')
-                ->inRandomOrder()
-                ->take(5)
+            $rawSims = \App\Models\Simulation::where('type', 'town')
+                ->orderBy('updated_at', 'desc')
                 ->get();
+            $townSimulations = $rawSims->unique('town_id')->take(5)->values();
         }
 
         $finalScenarios = [];
