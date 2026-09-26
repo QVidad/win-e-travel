@@ -13,7 +13,6 @@ class DebugController extends Controller
         $townSimulations = \App\Models\Simulation::where('type', 'town')
             ->orderBy('updated_at', 'desc')
             ->get();
-        $townSimulations = $townSimulations->unique('town_id')->values();
         
         $debug = [];
         foreach ($townSimulations as $ts) {
