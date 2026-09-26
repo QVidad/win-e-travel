@@ -411,6 +411,7 @@
                                                         style="font-size: 0.7rem; border-radius: 50rem 0 0 50rem;" 
                                                         placeholder="type alias..." 
                                                         @keydown.enter.prevent="addManualAlias($event, kw)"
+                                                        @blur="addManualAlias($event, kw)"
                                                     >
                                                     <button type="button" class="btn btn-outline-secondary py-0 px-2" style="border-radius: 0 50rem 50rem 0; border-color: rgba(108, 117, 125, 0.25);" @click="addManualAlias($event, kw)">
                                                         <i class="fas fa-plus" style="font-size: 0.6rem;"></i>
