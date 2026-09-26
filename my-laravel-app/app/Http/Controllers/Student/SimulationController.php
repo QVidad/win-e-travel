@@ -124,7 +124,25 @@ class SimulationController extends Controller
                         $keywords[] = ['word' => $word, 'points' => 10];
                     }
                 } else if (is_array($scenario['keywords'])) {
-                    $keywords = $scenario['keywords'];
+                    foreach ($scenario['keywords'] as $kw) {
+                        if (is_array($kw) && isset($kw['word'])) {
+                            $keywords[] = $kw;
+                        } else if (is_string($kw)) {
+                            $keywords[] = ['word' => $kw, 'points' => 10, 'aliases' => []];
+                        }
+                    }
+                }
+            }
+
+            if (empty($keywords)) {
+                $fallbackWords = array_values(array_filter(explode(' ', trim(preg_replace('/[^a-zA-Z0-9\s]/', '', $scenario['title'] ?? '')))));
+                foreach ($fallbackWords as $fw) {
+                    if (strlen($fw) >= 4) {
+                        $keywords[] = ['word' => $fw, 'points' => 10, 'aliases' => []];
+                    }
+                }
+                if (empty($keywords)) {
+                    $keywords[] = ['word' => 'Tourist', 'points' => 10, 'aliases' => []];
                 }
             }
 
@@ -221,7 +239,27 @@ class SimulationController extends Controller
                             $keywords[] = ['word' => $word, 'points' => 10, 'aliases' => []];
                         }
                     } else if (is_array($scenario['keywords'])) {
-                        $keywords = $scenario['keywords'];
+                        // Ensure all elements are actually properly formatted objects
+                        foreach ($scenario['keywords'] as $kw) {
+                            if (is_array($kw) && isset($kw['word'])) {
+                                $keywords[] = $kw;
+                            } else if (is_string($kw)) {
+                                $keywords[] = ['word' => $kw, 'points' => 10, 'aliases' => []];
+                            }
+                        }
+                    }
+                }
+                
+                // Fallback just in case keywords got wiped out or corrupted in the DB
+                if (empty($keywords)) {
+                    $fallbackWords = array_values(array_filter(explode(' ', trim(preg_replace('/[^a-zA-Z0-9\s]/', '', $scenario['title'] ?? '')))));
+                    foreach ($fallbackWords as $fw) {
+                        if (strlen($fw) >= 4) {
+                            $keywords[] = ['word' => $fw, 'points' => 10, 'aliases' => []];
+                        }
+                    }
+                    if (empty($keywords)) {
+                        $keywords[] = ['word' => 'Tourist', 'points' => 10, 'aliases' => []];
                     }
                 }
 
