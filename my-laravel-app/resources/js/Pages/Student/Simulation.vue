@@ -538,47 +538,57 @@ const renderCanvasOverlay = () => {
             const x = width - insetWidth - 15;
             const y = height - insetHeight - 55;
 
+            let segmentationSuccess = false;
+            
             if (isSegmenterReady.value && imageSegmenter) {
-                if (webcamVideo.value.currentTime !== lastVideoTime) {
-                    lastVideoTime = webcamVideo.value.currentTime;
-                    const startTimeMs = performance.now();
-                    const segmentation = imageSegmenter.segmentForVideo(webcamVideo.value, startTimeMs);
-                    
-                    if (segmentation && segmentation.categoryMask) {
-                        const mask = segmentation.categoryMask;
-                        maskCanvas.width = mask.width;
-                        maskCanvas.height = mask.height;
+                try {
+                    if (webcamVideo.value.currentTime !== lastVideoTime) {
+                        lastVideoTime = webcamVideo.value.currentTime;
+                        const startTimeMs = performance.now();
+                        const segmentation = imageSegmenter.segmentForVideo(webcamVideo.value, startTimeMs);
                         
-                        personCanvas.width = mask.width;
-                        personCanvas.height = mask.height;
-
-                        const maskArray = mask.getAsUint8Array();
-                        const imageData = maskCtx.createImageData(mask.width, mask.height);
-                        
-                        for (let i = 0; i < maskArray.length; i++) {
-                            const isPerson = maskArray[i] === 0; // 0 is person in this model, 255 is background
-                            const offset = i * 4;
-                            imageData.data[offset] = 0;
-                            imageData.data[offset + 1] = 0;
-                            imageData.data[offset + 2] = 0;
-                            imageData.data[offset + 3] = isPerson ? 255 : 0;
+                        if (segmentation && segmentation.categoryMask) {
+                            const mask = segmentation.categoryMask;
+                            maskCanvas.width = mask.width;
+                            maskCanvas.height = mask.height;
+                            
+                            personCanvas.width = mask.width;
+                            personCanvas.height = mask.height;
+    
+                            const maskArray = mask.getAsUint8Array();
+                            const imageData = maskCtx.createImageData(mask.width, mask.height);
+                            
+                            for (let i = 0; i < maskArray.length; i++) {
+                                const isPerson = maskArray[i] === 0; // 0 is person in this model, 255 is background
+                                const offset = i * 4;
+                                imageData.data[offset] = 0;
+                                imageData.data[offset + 1] = 0;
+                                imageData.data[offset + 2] = 0;
+                                imageData.data[offset + 3] = isPerson ? 255 : 0;
+                            }
+                            maskCtx.putImageData(imageData, 0, 0);
+    
+                            personCtx.clearRect(0, 0, personCanvas.width, personCanvas.height);
+                            personCtx.drawImage(maskCanvas, 0, 0);
+                            personCtx.globalCompositeOperation = 'source-in';
+                            personCtx.drawImage(webcamVideo.value, 0, 0, personCanvas.width, personCanvas.height);
+                            personCtx.globalCompositeOperation = 'source-over';
                         }
-                        maskCtx.putImageData(imageData, 0, 0);
-
-                        personCtx.clearRect(0, 0, personCanvas.width, personCanvas.height);
-                        personCtx.drawImage(maskCanvas, 0, 0);
-                        personCtx.globalCompositeOperation = 'source-in';
-                        personCtx.drawImage(webcamVideo.value, 0, 0, personCanvas.width, personCanvas.height);
-                        personCtx.globalCompositeOperation = 'source-over';
                     }
+    
+                    // Draw the segmented person onto main canvas
+                    if (personCanvas.width > 0) {
+                        ctx.drawImage(personCanvas, x, y, insetWidth, insetHeight);
+                        segmentationSuccess = true;
+                    }
+                } catch (e) {
+                    console.error("Segmentation error on current frame:", e);
+                    segmentationSuccess = false;
                 }
-
-                // Draw the segmented person onto main canvas
-                if (personCanvas.width > 0) {
-                    ctx.drawImage(personCanvas, x, y, insetWidth, insetHeight);
-                }
-            } else {
-                // Fallback while segmenter is loading
+            }
+            
+            // Fallback if segmenter isn't ready or crashed
+            if (!segmentationSuccess) {
                 ctx.save();
                 ctx.strokeStyle = '#ffd700';
                 ctx.lineWidth = 3;
