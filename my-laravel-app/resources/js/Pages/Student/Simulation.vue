@@ -406,7 +406,15 @@ const initSegmenter = async () => {
         const vision = await FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
         );
-        const delegate = "CPU"; // Use CPU universally as GPU delegate fails on many devices (especially when mobile users request 'Desktop site')
+        
+        // Detect touch devices (phones/tablets) robustly, even if "Desktop site" is requested
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        if (isTouchDevice) {
+            isSegmenterReady.value = false;
+            return;
+        }
+        
+        const delegate = "CPU"; // Use CPU universally as GPU delegate fails on many devices
 
         imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
             baseOptions: {
@@ -434,7 +442,11 @@ onMounted(() => {
         speechSupported.value = true;
         recognition = new SpeechRecognition();
         recognition.continuous = true;
-        recognition.interimResults = true; // Turn back on since our logic now handles mobile correctly
+        
+        // Detect touch devices robustly to disable buggy interim results on Android/Samsung
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        recognition.interimResults = !isTouchDevice; 
+        
         recognition.lang = 'en-PH';
 
         recognition.onstart = () => {
@@ -571,7 +583,7 @@ const renderCanvasOverlay = () => {
                             const imageData = maskCtx.createImageData(mask.width, mask.height);
                             
                             for (let i = 0; i < maskArray.length; i++) {
-                                const isPerson = maskArray[i] > 0; // Fix: > 0 is person, 0 is background
+                                const isPerson = maskArray[i] === 0; // Fix: Desktop model uses 0 for person and 255 for background
                                 const offset = i * 4;
                                 imageData.data[offset] = 0;
                                 imageData.data[offset + 1] = 0;
