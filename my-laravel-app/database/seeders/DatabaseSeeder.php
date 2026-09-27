@@ -21,12 +21,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
-            CourseModuleSeeder::class,
-            TownSeeder::class,
-            DestinationSeeder::class,
-            AchievementSeeder::class,
-            ContentSectionSeeder::class,
-            // SimulationSeeder::class, // Disabled per user request
         ]);
     }
 }
