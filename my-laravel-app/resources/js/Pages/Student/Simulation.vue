@@ -557,8 +557,17 @@ const renderCanvasOverlay = () => {
         if (webcamVideo.value.readyState === webcamVideo.value.HAVE_ENOUGH_DATA) {
             const videoWidth = webcamVideo.value.videoWidth;
             const videoHeight = webcamVideo.value.videoHeight;
-            const insetWidth = width * 0.45; // Increased slightly for better presence
-            const insetHeight = (insetWidth / videoWidth) * videoHeight;
+            
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            let insetWidth = width * (isTouchDevice ? 0.28 : 0.45); // Smaller presence on phones
+            let insetHeight = (insetWidth / videoWidth) * videoHeight;
+            
+            // Prevent the camera box from taking up more than 35% of the screen height on mobile portrait
+            if (insetHeight > height * 0.35) {
+                insetHeight = height * 0.35;
+                insetWidth = (insetHeight / videoHeight) * videoWidth;
+            }
+            
             const x = width - insetWidth - 15;
             const y = height - insetHeight - 55;
 
