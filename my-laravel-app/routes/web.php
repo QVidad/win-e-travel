@@ -110,15 +110,12 @@ Route::get('/wipe-progress', function () {
     return 'All student progress has been wiped successfully!';
 });
 
+Route::get('/create-symlink', function () {
+    \Illuminate\Support\Facades\Artisan::call('storage:link');
+    return "Storage symlink created successfully! Refresh your certificate page and the images should now load.";
+});
+
 Route::get('/hard-reset', function () {
-    \Illuminate\Support\Facades\DB::table('simulations')->truncate();
-    if (\Illuminate\Support\Facades\Schema::hasTable('simulation_scenarios')) {
-        \Illuminate\Support\Facades\DB::table('simulation_scenarios')->truncate();
-    }
-    \Illuminate\Support\Facades\DB::table('module_progress')->truncate();
-    \Illuminate\Support\Facades\DB::table('user_achievements')->truncate();
-    if (\Illuminate\Support\Facades\Schema::hasTable('simulation_user')) {
-        \Illuminate\Support\Facades\DB::table('simulation_user')->truncate();
-    }
-    return "All simulations, keywords, and student progress have been completely wiped. Only the 3 base users, blank towns, and blank modules remain. You can now build everything from scratch.";
+    \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
+    return "Database has been completely wiped and re-seeded from scratch. Only the 3 base users have been created. EVERYTHING else is completely erased.";
 });
