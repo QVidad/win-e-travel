@@ -119,6 +119,14 @@ Route::get('/create-symlink', function () {
     }
 });
 
+Route::get('/storage/{path}', function ($path) {
+    $filePath = storage_path('app/public/' . $path);
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+    return response()->file($filePath);
+})->where('path', '.*');
+
 Route::get('/hard-reset', function () {
     \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
     return "Database has been completely wiped and re-seeded from scratch. Only the 3 base users have been created. EVERYTHING else is completely erased.";
