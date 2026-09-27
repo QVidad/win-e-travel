@@ -406,10 +406,14 @@ const initSegmenter = async () => {
         const vision = await FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
         );
+        // Use CPU for mobile (stable) and GPU for desktop (faster)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const delegate = isMobile ? "CPU" : "GPU";
+
         imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
             baseOptions: {
                 modelAssetPath: "/assets/models/selfie_segmenter.tflite",
-                delegate: "CPU" // CPU is much more stable on mobile browsers
+                delegate: delegate
             },
             runningMode: "VIDEO",
             outputCategoryMask: true,
