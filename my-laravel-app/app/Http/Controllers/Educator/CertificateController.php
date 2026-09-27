@@ -48,35 +48,31 @@ class CertificateController extends Controller
         $setting->description = $validated['description'] ?? '';
 
         if ($request->hasFile('university_logo')) {
-            if ($setting->university_logo_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->university_logo_path));
-            }
-            $path = $request->file('university_logo')->store('certificates', 'public');
-            $setting->university_logo_path = '/storage/' . $path;
+            $file = $request->file('university_logo');
+            $filename = time() . '_uni.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/certificates'), $filename);
+            $setting->university_logo_path = '/uploads/certificates/' . $filename;
         }
 
         if ($request->hasFile('college_logo')) {
-            if ($setting->college_logo_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->college_logo_path));
-            }
-            $path = $request->file('college_logo')->store('certificates', 'public');
-            $setting->college_logo_path = '/storage/' . $path;
+            $file = $request->file('college_logo');
+            $filename = time() . '_college.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/certificates'), $filename);
+            $setting->college_logo_path = '/uploads/certificates/' . $filename;
         }
 
         if ($request->hasFile('signature_image')) {
-            if ($setting->signature_image_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->signature_image_path));
-            }
-            $path = $request->file('signature_image')->store('certificates', 'public');
-            $setting->signature_image_path = '/storage/' . $path;
+            $file = $request->file('signature_image');
+            $filename = time() . '_sig.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/certificates'), $filename);
+            $setting->signature_image_path = '/uploads/certificates/' . $filename;
         }
 
         if ($request->hasFile('background_image')) {
-            if ($setting->background_image_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->background_image_path));
-            }
-            $path = $request->file('background_image')->store('certificates', 'public');
-            $setting->background_image_path = '/storage/' . $path;
+            $file = $request->file('background_image');
+            $filename = time() . '_bg.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/certificates'), $filename);
+            $setting->background_image_path = '/uploads/certificates/' . $filename;
         }
 
         $setting->save();
