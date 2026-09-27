@@ -91,7 +91,23 @@
                 </div>
 
                 <!-- Progress Overview Card -->
-                <div v-if="progress.continueModule && progress.hasStarted" class="progress-overview-card mb-4" style="border-left: 4px solid var(--bs-success);">
+                <div v-if="progress.simulationsCompleted > 0" class="progress-overview-card mb-4" style="border-left: 4px solid var(--bs-warning); background: linear-gradient(135deg, #fffdf2 0%, #fff 100%);">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
+                        <div class="d-flex align-items-center gap-3 flex-grow-1">
+                            <div class="bg-warning text-dark rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 60px; height: 60px;">
+                                <i class="fas fa-certificate fa-xl"></i>
+                            </div>
+                            <div class="flex-grow-1" style="max-width: 500px;">
+                                <h5 class="fw-bold mb-1 text-dark">Congratulations!</h5>
+                                <p class="text-muted mb-0">You have successfully completed all training modules and the final virtual tour.</p>
+                            </div>
+                        </div>
+                        <Link :href="route('achievements.index')" class="btn btn-warning px-4 py-2 rounded-pill fw-bold shadow-sm">
+                            View Your Certificate <i class="fas fa-award ms-2"></i>
+                        </Link>
+                    </div>
+                </div>
+                <div v-else-if="progress.continueModule && progress.hasStarted" class="progress-overview-card mb-4" style="border-left: 4px solid var(--bs-success);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
                         <div class="d-flex align-items-center gap-3 flex-grow-1">
                             <div class="bg-success text-white rounded-circle p-3 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 60px; height: 60px;">
