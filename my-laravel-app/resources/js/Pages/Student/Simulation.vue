@@ -406,9 +406,15 @@ const initSegmenter = async () => {
         const vision = await FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
         );
-        // Use CPU for mobile (stable) and GPU for desktop (faster)
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const delegate = isMobile ? "CPU" : "GPU";
+        
+        // Skip AI segmentation on mobile for stability. Fallback will render raw webcam.
+        if (isMobile) {
+            isSegmenterReady.value = false;
+            return;
+        }
+
+        const delegate = "GPU";
 
         imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
             baseOptions: {
@@ -434,7 +440,11 @@ onMounted(() => {
         speechSupported.value = true;
         recognition = new SpeechRecognition();
         recognition.continuous = true;
-        recognition.interimResults = true;
+        
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // Turn off interim results on mobile to prevent Android Chrome duplication bugs
+        recognition.interimResults = !isMobile;
+        
         recognition.lang = 'en-PH';
 
         recognition.onstart = () => {
