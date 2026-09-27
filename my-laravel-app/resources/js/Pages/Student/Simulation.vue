@@ -409,7 +409,7 @@ const initSegmenter = async () => {
         imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
             baseOptions: {
                 modelAssetPath: "/assets/models/selfie_segmenter.tflite",
-                delegate: "GPU"
+                delegate: "CPU" // CPU is much more stable on mobile browsers
             },
             runningMode: "VIDEO",
             outputCategoryMask: true,
@@ -439,12 +439,15 @@ onMounted(() => {
 
         recognition.onresult = (event) => {
             if (isResetting.value) return;
-            let current = '';
-            for (let i = 0; i < event.results.length; i++) {
-                current += event.results[i][0].transcript;
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscriptBuffer.value += event.results[i][0].transcript + ' ';
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
             }
-
-            spokenTranscript.value = (finalTranscriptBuffer.value + ' ' + current).trim();
+            spokenTranscript.value = (finalTranscriptBuffer.value + interimTranscript).trim();
             parseKeywordsFromTranscript(spokenTranscript.value);
         };
 
@@ -458,9 +461,7 @@ onMounted(() => {
 
         recognition.onend = () => {
             isListening.value = false;
-            if (!isResetting.value) {
-                finalTranscriptBuffer.value = spokenTranscript.value;
-            }
+            // Removed finalTranscriptBuffer update here since it's now handled incrementally in onresult
         };
     }
 });
