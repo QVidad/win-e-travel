@@ -406,15 +406,7 @@ const initSegmenter = async () => {
         const vision = await FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
         );
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Skip AI segmentation on mobile for stability. Fallback will render raw webcam.
-        if (isMobile) {
-            isSegmenterReady.value = false;
-            return;
-        }
-
-        const delegate = "GPU";
+        const delegate = "CPU"; // Use CPU universally as GPU delegate fails on many devices (especially when mobile users request 'Desktop site')
 
         imageSegmenter = await ImageSegmenter.createFromOptions(vision, {
             baseOptions: {
@@ -431,6 +423,8 @@ const initSegmenter = async () => {
     }
 };
 
+let lastProcessedIndex = -1; // Track the last final result index to prevent duplication
+
 // Web Speech API Initialization
 onMounted(() => {
     initSegmenter();
@@ -440,15 +434,12 @@ onMounted(() => {
         speechSupported.value = true;
         recognition = new SpeechRecognition();
         recognition.continuous = true;
-        
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        // Turn off interim results on mobile to prevent Android Chrome duplication bugs
-        recognition.interimResults = !isMobile;
-        
+        recognition.interimResults = true; // Turn back on since our logic now handles mobile correctly
         recognition.lang = 'en-PH';
 
         recognition.onstart = () => {
             isListening.value = true;
+            lastProcessedIndex = -1; // Reset on start
         };
 
         recognition.onresult = (event) => {
@@ -456,7 +447,10 @@ onMounted(() => {
             let interimTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
-                    finalTranscriptBuffer.value += event.results[i][0].transcript + ' ';
+                    if (i > lastProcessedIndex) {
+                        finalTranscriptBuffer.value += event.results[i][0].transcript + ' ';
+                        lastProcessedIndex = i;
+                    }
                 } else {
                     // Mobile chrome bug: Appends multiple non-final results. Only take the most recent one.
                     if (i === event.results.length - 1) {
