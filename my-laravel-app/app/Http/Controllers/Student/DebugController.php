@@ -10,6 +10,20 @@ class DebugController extends Controller
 {
     public function debugFinalBoss()
     {
+        // CLEANUP DUPLICATES: Keep only the FIRST simulation (lowest ID) for each town, 
+        // to match what Educator Panel edits. Delete the rest.
+        $towns = \App\Models\Town::all();
+        foreach ($towns as $town) {
+            $sims = \App\Models\Simulation::where('town_id', $town->id)->where('type', 'town')->orderBy('id', 'asc')->get();
+            if ($sims->count() > 1) {
+                // Keep the first one, delete the rest
+                $first = $sims->shift();
+                foreach ($sims as $duplicate) {
+                    $duplicate->delete();
+                }
+            }
+        }
+
         $townSimulations = \App\Models\Simulation::where('type', 'town')
             ->orderBy('updated_at', 'desc')
             ->get();
