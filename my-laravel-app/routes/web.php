@@ -131,3 +131,8 @@ Route::get('/hard-reset', function () {
     \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
     return "Database has been completely wiped and re-seeded from scratch. Only the 3 base users have been created. EVERYTHING else is completely erased.";
 });
+
+Route::get('/safe-migrate', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    return "Database has been safely migrated to support the new image system without deleting any data!";
+});

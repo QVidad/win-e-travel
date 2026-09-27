@@ -32,8 +32,8 @@ class ProfileController extends Controller
         $request->user()->fill($request->validated());
 
         if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $request->user()->avatar = '/asset-storage/' . $path;
+            $file = $request->file('avatar');
+            $request->user()->avatar = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
         }
 
         if ($request->user()->isDirty('email')) {
