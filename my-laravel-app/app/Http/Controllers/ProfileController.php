@@ -33,7 +33,7 @@ class ProfileController extends Controller
 
         if ($request->hasFile('avatar')) {
             $path = $request->file('avatar')->store('avatars', 'public');
-            $request->user()->avatar = '/storage/' . $path;
+            $request->user()->avatar = '/asset-storage/' . $path;
         }
 
         if ($request->user()->isDirty('email')) {
