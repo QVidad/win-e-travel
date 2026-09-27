@@ -416,8 +416,8 @@ const initSegmenter = async () => {
                 delegate: delegate
             },
             runningMode: "VIDEO",
-            outputCategoryMask: true,
-            outputConfidenceMasks: false
+            outputCategoryMask: false,
+            outputConfidenceMasks: true
         });
         isSegmenterReady.value = true;
     } catch (e) {
@@ -552,24 +552,24 @@ const renderCanvasOverlay = () => {
                         const startTimeMs = performance.now();
                         const segmentation = imageSegmenter.segmentForVideo(webcamVideo.value, startTimeMs);
                         
-                        if (segmentation && segmentation.categoryMask) {
-                            const mask = segmentation.categoryMask;
+                        if (segmentation && segmentation.confidenceMasks && segmentation.confidenceMasks.length > 0) {
+                            const mask = segmentation.confidenceMasks[0];
                             maskCanvas.width = mask.width;
                             maskCanvas.height = mask.height;
                             
                             personCanvas.width = mask.width;
                             personCanvas.height = mask.height;
     
-                            const maskArray = mask.getAsUint8Array();
+                            const maskArray = mask.getAsFloat32Array();
                             const imageData = maskCtx.createImageData(mask.width, mask.height);
                             
                             for (let i = 0; i < maskArray.length; i++) {
-                                const isPerson = maskArray[i] === 0; // 0 is person in this model, 255 is background
                                 const offset = i * 4;
                                 imageData.data[offset] = 0;
                                 imageData.data[offset + 1] = 0;
                                 imageData.data[offset + 2] = 0;
-                                imageData.data[offset + 3] = isPerson ? 255 : 0;
+                                // Confidence mask outputs 0.0 to 1.0 (1.0 = person)
+                                imageData.data[offset + 3] = maskArray[i] * 255; 
                             }
                             maskCtx.putImageData(imageData, 0, 0);
     
