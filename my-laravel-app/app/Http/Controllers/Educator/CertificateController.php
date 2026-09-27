@@ -49,34 +49,34 @@ class CertificateController extends Controller
 
         if ($request->hasFile('university_logo')) {
             if ($setting->university_logo_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->university_logo_path));
+                Storage::disk('public')->delete(str_replace('/asset-storage/', '', $setting->university_logo_path));
             }
             $path = $request->file('university_logo')->store('certificates', 'public');
-            $setting->university_logo_path = '/storage/' . $path;
+            $setting->university_logo_path = '/asset-storage/' . $path;
         }
 
         if ($request->hasFile('college_logo')) {
             if ($setting->college_logo_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->college_logo_path));
+                Storage::disk('public')->delete(str_replace('/asset-storage/', '', $setting->college_logo_path));
             }
             $path = $request->file('college_logo')->store('certificates', 'public');
-            $setting->college_logo_path = '/storage/' . $path;
+            $setting->college_logo_path = '/asset-storage/' . $path;
         }
 
         if ($request->hasFile('signature_image')) {
             if ($setting->signature_image_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->signature_image_path));
+                Storage::disk('public')->delete(str_replace('/asset-storage/', '', $setting->signature_image_path));
             }
             $path = $request->file('signature_image')->store('certificates', 'public');
-            $setting->signature_image_path = '/storage/' . $path;
+            $setting->signature_image_path = '/asset-storage/' . $path;
         }
 
         if ($request->hasFile('background_image')) {
             if ($setting->background_image_path) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $setting->background_image_path));
+                Storage::disk('public')->delete(str_replace('/asset-storage/', '', $setting->background_image_path));
             }
             $path = $request->file('background_image')->store('certificates', 'public');
-            $setting->background_image_path = '/storage/' . $path;
+            $setting->background_image_path = '/asset-storage/' . $path;
         }
 
         $setting->save();

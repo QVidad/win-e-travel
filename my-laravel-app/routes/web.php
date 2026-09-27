@@ -119,7 +119,7 @@ Route::get('/create-symlink', function () {
     }
 });
 
-Route::get('/storage/{path}', function ($path) {
+Route::get('/asset-storage/{path}', function ($path) {
     $filePath = storage_path('app/public/' . $path);
     if (!file_exists($filePath)) {
         abort(404);
