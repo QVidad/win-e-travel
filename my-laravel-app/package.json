@@ -23,6 +23,7 @@
     "dependencies": {
         "@mediapipe/tasks-vision": "^1.0.1",
         "@vueup/vue-quill": "^1.5.5",
+        "html2pdf.js": "^0.14.0",
         "leaflet": "^1.9.4"
     }
 }

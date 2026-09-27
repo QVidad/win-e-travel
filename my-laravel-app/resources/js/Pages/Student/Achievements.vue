@@ -190,7 +190,7 @@
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary rounded-pill px-4" @click="showCertificateModal = false">Close</button>
                         <button type="button" class="btn btn-success rounded-pill px-4" @click="downloadCertificate">
-                            <i class="fas fa-print me-1"></i> Print / Save PDF
+                            <i class="fas fa-download me-1"></i> Download PDF
                         </button>
                     </div>
                 </div>
@@ -279,48 +279,21 @@ const certificateCode = computed(() => {
     return `CERT-${userId}-${year}-${hash}`;
 });
 
-const downloadCertificate = () => {
-    // Use outerHTML to capture the background image and container-type styles on the main div
-    const printContent = document.getElementById('certificate-print-area').outerHTML;
-    const originalContent = document.body.innerHTML;
-    
-    // Add print styles dynamically
-    const printStyles = `
-        <style>
-            @page {
-                size: A4 landscape;
-                margin: 0;
-            }
-            @media print {
-                body {
-                    margin: 0;
-                    padding: 0;
-                    -webkit-print-color-adjust: exact !important;
-                    print-color-adjust: exact !important;
-                    background-color: white;
-                }
-                #print-section {
-                    width: 297mm;
-                    height: 210mm;
-                    margin: 0;
-                    padding: 0;
-                    display: block;
-                }
-                #certificate-print-area {
-                    max-width: none !important;
-                    max-height: none !important;
-                    width: 297mm !important;
-                    height: 210mm !important;
-                    margin: 0 !important;
-                }
-            }
-        </style>
-    `;
+import html2pdf from 'html2pdf.js';
 
-    document.body.innerHTML = printStyles + '<div id="print-section">' + printContent + '</div>';
-    window.print();
-    document.body.innerHTML = originalContent;
-    location.reload(); // Reload to restore Vue bindings after modifying DOM
+const downloadCertificate = () => {
+    const element = document.getElementById('certificate-print-area');
+    
+    const opt = {
+        margin:       0,
+        filename:     `WIN_e_Travel_Certificate_${certificateCode.value}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 3, useCORS: true, letterRendering: true },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+    };
+
+    // New Promise-based usage:
+    html2pdf().set(opt).from(element).save();
 };
 </script>
 
