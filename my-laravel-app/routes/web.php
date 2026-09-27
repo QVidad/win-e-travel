@@ -111,8 +111,12 @@ Route::get('/wipe-progress', function () {
 });
 
 Route::get('/create-symlink', function () {
-    \Illuminate\Support\Facades\Artisan::call('storage:link');
-    return "Storage symlink created successfully! Refresh your certificate page and the images should now load.";
+    try {
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        return "Storage symlink created successfully! Refresh your certificate page and the images should now load.";
+    } catch (\Exception $e) {
+        return "Error creating symlink: " . $e->getMessage();
+    }
 });
 
 Route::get('/hard-reset', function () {
