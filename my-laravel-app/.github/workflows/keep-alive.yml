@@ -1,0 +1,15 @@
+name: Keep Render App Awake
+
+on:
+  schedule:
+    # This runs the action every 14 minutes
+    - cron: '*/14 * * * *'
+  # This allows you to trigger it manually from the GitHub UI if needed
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the Render URL
+        run: curl -s "https://win-e-travel.onrender.com/" > /dev/null
