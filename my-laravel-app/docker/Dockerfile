@@ -1,6 +1,6 @@
 FROM php:8.4-fpm
 
-RUN sed -i 's/9000/9820/' /usr/local/etc/php-fpm.d/zz-docker.conf
+# RUN sed -i 's/9000/9820/' /usr/local/etc/php-fpm.d/zz-docker.conf
 
 WORKDIR /var/www/win/my-laravel-app
 
