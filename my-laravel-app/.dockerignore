@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /vendor
 /node_modules
 /public/build
@@ -6,3 +7,21 @@
 /storage/framework/views/*
 /storage/framework/sessions/*
 /storage/logs/*
+=======
+node_modules
+vendor
+.git
+.gitignore
+.editorconfig
+.env
+.env.*
+!.env.example
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/public/*
+.phpunit.result.cache
+npm-debug.log
+docker-compose*.override.yml
+>>>>>>> 5753c9b72ca505f327750c5f8bb56094d3107d65
