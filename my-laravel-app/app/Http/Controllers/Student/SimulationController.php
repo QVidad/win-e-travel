@@ -14,18 +14,21 @@ class SimulationController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
+        $isEducatorOrAdmin = in_array($user->role, ['educator', 'admin']);
         
-        // Progression Lock Check
-        $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
-        $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
-            ->whereHas('courseModule', function ($q) {
-                $q->where('type', 'town_chapter');
-            })
-            ->where('passed', true)
-            ->count();
-            
-        if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
-            return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+        // Progression Lock Check (Students only)
+        if (!$isEducatorOrAdmin) {
+            $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
+            $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+                ->whereHas('courseModule', function ($q) {
+                    $q->where('type', 'town_chapter');
+                })
+                ->where('passed', true)
+                ->count();
+                
+            if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
+                return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+            }
         }
         $publishedModules = \App\Models\CourseModule::where('type', 'town_chapter')
             ->where('status', 'published')
@@ -66,6 +69,8 @@ class SimulationController extends Controller
             'totalTowns' => $totalTowns,
             'finalSimulationId' => $finalSimulation ? $finalSimulation->id : null,
             'finalSimPassed' => $finalSimPassed,
+            'isEducatorOrAdmin' => $isEducatorOrAdmin,
+            'isFinalBossUnlocked' => $isEducatorOrAdmin || ($totalTowns > 0 && $completedTowns >= $totalTowns),
         ]);
     }
 
@@ -73,36 +78,39 @@ class SimulationController extends Controller
     {
         $simulation = \App\Models\Simulation::with('town')->findOrFail($id);
         $user = \Illuminate\Support\Facades\Auth::user();
+        $isEducatorOrAdmin = in_array($user->role, ['educator', 'admin']);
         
-        // Progression Lock Check ONLY for final boss
-        if ($simulation->type === 'final') {
-            $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
-            $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
-                ->whereHas('courseModule', function ($q) {
-                    $q->where('type', 'town_chapter');
-                })
-                ->where('passed', true)
-                ->count();
-                
-            if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
-                return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+        // Progression Lock Check ONLY for students
+        if (!$isEducatorOrAdmin) {
+            if ($simulation->type === 'final') {
+                $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
+                $townsCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+                    ->whereHas('courseModule', function ($q) {
+                        $q->where('type', 'town_chapter');
+                    })
+                    ->where('passed', true)
+                    ->count();
+                    
+                if ($townsTotal > 0 && $townsCompleted < $townsTotal) {
+                    return redirect()->route('dashboard')->with('error', 'You must complete all Dare to Discover towns first.');
+                }
             }
-        }
 
-        $module = null;
-        if ($simulation->type === 'town' && $simulation->town) {
-            $module = \App\Models\CourseModule::where('code', 'town-' . $simulation->town->slug)->first();
-            if (!$module) {
-                $module = \App\Models\CourseModule::where('code', 'like', 'town-' . $simulation->town->slug . '%')->first();
-            }
-            
-            if ($module) {
-                $progress = \App\Models\ModuleProgress::where('user_id', \Illuminate\Support\Facades\Auth::id())
-                    ->where('course_module_id', $module->id)
-                    ->first();
+            $module = null;
+            if ($simulation->type === 'town' && $simulation->town) {
+                $module = \App\Models\CourseModule::where('code', 'town-' . $simulation->town->slug)->first();
+                if (!$module) {
+                    $module = \App\Models\CourseModule::where('code', 'like', 'town-' . $simulation->town->slug . '%')->first();
+                }
                 
-                if (!$progress) {
-                    return redirect()->route('dare-to-discover.show', $simulation->town->slug)->with('error', 'You must visit the town chapter first to unlock this simulation.');
+                if ($module) {
+                    $progress = \App\Models\ModuleProgress::where('user_id', \Illuminate\Support\Facades\Auth::id())
+                        ->where('course_module_id', $module->id)
+                        ->first();
+                    
+                    if (!$progress) {
+                        return redirect()->route('dare-to-discover.show', $simulation->town->slug)->with('error', 'You must visit the town chapter first to unlock this simulation.');
+                    }
                 }
             }
         }

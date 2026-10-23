@@ -20,8 +20,15 @@
                 backgroundPosition: module?.cover_image_position || 'center'
             }">
                 <div class="town-hero-overlay">
-                    <span v-if="isCompleted" class="badge bg-success mb-2 px-3 py-2 rounded-pill"><i class="fas fa-check-circle me-1"></i>Completed</span>
-                    <span v-else class="badge bg-warning text-dark mb-2 px-3 py-2 rounded-pill"><i class="fas fa-clock me-1"></i>In Progress</span>
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-compass text-warning me-1"></i> MUNICIPALITY
+                        </span>
+                        <span class="stage-status-pill" :class="isCompleted ? 'status-completed' : 'status-progress'">
+                            <span class="status-indicator-dot"></span>
+                            {{ isCompleted ? 'Mastered' : 'In Progress' }}
+                        </span>
+                    </div>
                     <h1 class="display-5 fw-bold mb-2">{{ module?.title || town.name }}</h1>
                     <p class="lead mb-0">{{ module?.subtitle || town.title || town.description }}</p>
                 </div>
@@ -116,13 +123,9 @@
                     </div>
 
                     <!-- Completed / Launch Simulation Button -->
-                    <button v-if="isCompleted" disabled class="btn btn-success simulation-btn w-100 shadow-sm text-center text-white fs-5 py-3">
-                        <i class="fas fa-check-circle me-2"></i>
-                        Passed the {{ town.name }} Simulation
-                    </button>
-                    <Link v-else-if="town.simulation" :href="route('adventure-awaits.show', town.simulation.id)" class="btn btn-primary simulation-btn w-100 shadow-sm text-center text-white text-decoration-none fs-5 py-3">
-                        <i class="fas fa-play me-2"></i>
-                        Launch {{ town.name }} Simulation
+                    <Link v-if="town.simulation" :href="route('adventure-awaits.show', town.simulation.id)" class="btn simulation-btn w-100 shadow-sm text-center text-white text-decoration-none fs-5 py-3" :class="isCompleted ? 'btn-success' : 'btn-primary'">
+                        <i :class="isCompleted ? 'fas fa-redo me-2' : 'fas fa-play me-2'"></i>
+                        {{ isCompleted ? 'Replay ' + town.name + ' Simulation' : 'Launch ' + town.name + ' Simulation' }}
                     </Link>
                     <button v-else disabled class="btn btn-secondary simulation-btn w-100 shadow-sm text-center text-white fs-5 py-3">
                         <i class="fas fa-lock me-2"></i>

@@ -31,11 +31,24 @@
 
             <div v-if="activeView === 'module'">
                 <!-- Hero Banner -->
-                <div class="welcome-banner text-white mb-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 30px; padding: 35px 40px;">
-                    <div class="row align-items-center position-relative z-1">
-                        <div class="col-md-10">
-                            <h2 class="fw-bold mb-2 display-6">Module {{ module.id }}: {{ module.title }}</h2>
-                            <p class="fs-5  mb-0">Complete all {{ lessons.length }} lessons to unlock the End-of-Module Evaluation</p>
+                <!-- Hero Banner -->
+                <div class="welcome-banner text-white mb-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 24px; padding: 26px 30px;">
+                    <div class="banner-watermark" aria-hidden="true">
+                        <i class="fas fa-book-reader"></i>
+                    </div>
+                    <div class="row align-items-center position-relative z-1 g-3">
+                        <div class="col-12 col-md-10">
+                            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                <span class="stage-tag-pill">
+                                    <i class="fas fa-book-open text-warning me-1"></i> FOUNDATION MODULE
+                                </span>
+                                <span class="stage-status-pill status-progress">
+                                    <span class="status-indicator-dot"></span>
+                                    {{ lessons.length }} Lessons Available
+                                </span>
+                            </div>
+                            <h1 class="banner-title fw-bold mb-1">Module {{ module.id }}: {{ module.title }}</h1>
+                            <p class="banner-desc mb-0 opacity-90">Complete all {{ lessons.length }} lessons to unlock the End-of-Module Evaluation.</p>
                         </div>
                     </div>
                 </div>
@@ -97,8 +110,8 @@
                         v-for="(lesson, index) in lessons" 
                         :key="index"
                         class="card border-0 shadow-sm rounded-4 transition-all"
-                        :class="index + 1 <= unlockedLessonLevel ? 'cursor-pointer hover-lift' : ' bg-light-subtle'"
-                        :style="index + 1 > unlockedLessonLevel ? 'cursor: not-allowed;' : ''"
+                        :class="(isEducatorOrAdmin || index + 1 <= unlockedLessonLevel) ? 'cursor-pointer hover-lift' : ' bg-light-subtle'"
+                        :style="(!isEducatorOrAdmin && index + 1 > unlockedLessonLevel) ? 'cursor: not-allowed;' : ''"
                         @click="openLessonTopic(index)"
                     >
                         <div class="card-body p-4 d-flex align-items-center justify-content-between">
@@ -117,7 +130,7 @@
                             </div>
                             <div class="text-dark fs-5 d-flex align-items-center">
                                 <i v-if="getAssessmentDetails(index)?.passed" class="fas fa-check-circle text-success fs-4"></i>
-                                <i v-else-if="index + 1 <= unlockedLessonLevel" class="fas fa-chevron-right text-dark fs-5"></i>
+                                <i v-else-if="isEducatorOrAdmin || index + 1 <= unlockedLessonLevel" class="fas fa-chevron-right text-dark fs-5"></i>
                                 <span v-else class="badge rounded-pill fw-bold" style="background: rgba(108, 117, 125, 0.85); color: white; padding: 6px 14px; font-size: 0.85rem;">
                                     Locked <i class="fas fa-lock ms-1"></i>
                                 </span>
@@ -128,20 +141,20 @@
                     <!-- End-of-Module Evaluation -->
                     <div 
                         class="card border-0 shadow-sm rounded-4 transition-all mt-2"
-                        :class="isEvaluationUnlocked ? 'cursor-pointer hover-lift' : ''"
-                        :style="isEvaluationUnlocked ? 'background: linear-gradient(90deg, #8b93d6 0%, #9b88c4 100%); cursor: pointer;' : 'background-color: #8fa0aa; cursor: not-allowed;'"
+                        :class="(isEducatorOrAdmin || isEvaluationUnlocked) ? 'cursor-pointer hover-lift' : ''"
+                        :style="(isEducatorOrAdmin || isEvaluationUnlocked) ? 'background: linear-gradient(90deg, #8b93d6 0%, #9b88c4 100%); cursor: pointer;' : 'background-color: #8fa0aa; cursor: not-allowed;'"
                         @click="startFinalEvaluation"
                     >
                         <div class="card-body p-4 d-flex align-items-center justify-content-between text-white">
                             <div>
                                 <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
-                                    <i class="fas fa-trophy" :class="isEvaluationUnlocked ? 'text-warning' : 'text-white'"></i> 
+                                    <i class="fas fa-trophy" :class="(isEducatorOrAdmin || isEvaluationUnlocked) ? 'text-warning' : 'text-white'"></i> 
                                     End-of-Module Evaluation
                                 </h5>
                                 <p class="mb-0  small">{{ props.module.questions?.length || 0 }} questions • 90% required to pass and unlock next module</p>
                             </div>
                             <div class="fs-4 d-flex align-items-center">
-                                <i v-if="isEvaluationUnlocked" class="fas fa-play-circle"></i>
+                                <i v-if="isEducatorOrAdmin || isEvaluationUnlocked" class="fas fa-play-circle"></i>
                                 <span v-else class="badge rounded-pill fw-bold" style="background: rgba(108, 117, 125, 0.85); color: white; padding: 6px 14px; font-size: 0.85rem;">
                                     Locked <i class="fas fa-lock ms-1"></i>
                                 </span>
@@ -155,12 +168,17 @@
             <div v-else-if="activeView === 'lesson_info'">
                 <!-- Top Hero Banner for Lesson matching system UI design -->
                 <div class="welcome-banner text-white mb-4 shadow-sm position-relative overflow-hidden" 
-                    :style="lessons[activeLessonIndex]?.cover_image ? `background: url('${lessons[activeLessonIndex].cover_image}') ${lessons[activeLessonIndex].cover_image_position || 'center'} / cover; border-radius: 30px; padding: 35px 40px;` : 'background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 30px; padding: 35px 40px;'">
+                    :style="lessons[activeLessonIndex]?.cover_image ? `background: url('${lessons[activeLessonIndex].cover_image}') ${lessons[activeLessonIndex].cover_image_position || 'center'} / cover; border-radius: 24px; padding: 26px 30px;` : 'background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 24px; padding: 26px 30px;'">
                     <div v-if="lessons[activeLessonIndex]?.cover_image" class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.6);"></div>
-                    <div class="row align-items-center position-relative z-1">
+                    <div class="row align-items-center position-relative z-1 g-3">
                         <div class="col-md-9 col-lg-10">
-                            <h2 class="fw-bold mb-2 display-6 text-white">{{ currentLessonTopic.title }}</h2>
-                            <p class="fs-5  mb-0">Module {{ module.id }}: {{ module.title }} • Lesson {{ activeLessonIndex + 1 }} of {{ lessons.length }}</p>
+                            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                <span class="stage-tag-pill">
+                                    <i class="fas fa-bookmark text-warning me-1"></i> LESSON {{ activeLessonIndex + 1 }} OF {{ lessons.length }}
+                                </span>
+                            </div>
+                            <h1 class="banner-title fw-bold mb-1 text-white">{{ currentLessonTopic.title }}</h1>
+                            <p class="banner-desc mb-0 opacity-90">Module {{ module.id }}: {{ module.title }}</p>
                         </div>
                         <div class="col-md-3 col-lg-2 text-md-end mt-3 mt-md-0">
                             <!-- Bigger Circular Score Donut Meter without outer box or text label -->
@@ -454,7 +472,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Link, router, Head } from '@inertiajs/vue3';
+import { Link, router, Head, usePage } from '@inertiajs/vue3';
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
@@ -524,7 +542,13 @@ const lessons = computed(() => {
     }));
 });
 
+const isEducatorOrAdmin = computed(() => {
+    const role = usePage().props.auth?.user?.role;
+    return ['educator', 'admin'].includes(role);
+});
+
 const isEvaluationUnlocked = computed(() => {
+    if (isEducatorOrAdmin.value) return true;
     return lessons.value.length > 0 && unlockedLessonLevel.value > lessons.value.length;
 });
 
@@ -629,7 +653,7 @@ const loadQuestionsForQuiz = (questionsArray, limit = null) => {
 };
 
 const openLessonTopic = (index) => {
-    if (index + 1 <= unlockedLessonLevel.value) {
+    if (isEducatorOrAdmin.value || index + 1 <= unlockedLessonLevel.value) {
         activeLessonIndex.value = index;
         activeView.value = 'lesson_info';
     } else {
@@ -661,7 +685,7 @@ const markLessonCompleteWithoutQuiz = () => {
 
 const startLessonQuizFromTopic = () => {
     const details = getAssessmentDetails(activeLessonIndex.value);
-    if (details && details.passed) {
+    if (!isEducatorOrAdmin.value && details && details.passed) {
         alert(`You have already passed this Quick Check with a score of ${details.correctCount}/${details.totalQuestions}. Passed exams cannot be retaken.`);
         return;
     }
@@ -689,7 +713,7 @@ const startFinalEvaluation = () => {
         return;
     }
     const key = 'final';
-    if (completedAttempts.value[key] && completedAttempts.value[key].passed) {
+    if (!isEducatorOrAdmin.value && completedAttempts.value[key] && completedAttempts.value[key].passed) {
         alert(`You have already passed the End-of-Module Evaluation with a score of ${completedAttempts.value[key].correctCount}/${completedAttempts.value[key].totalQuestions}. Passed exams cannot be retaken.`);
         return;
     }

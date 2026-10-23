@@ -1,18 +1,60 @@
 <template>
     <EducatorLayout>
-        <!-- Dark Green Hero Banner -->
-        <div 
-            class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
-        >
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
-                        <i class="fas fa-certificate me-2 opacity-75"></i>Certificate Editor
+        <!-- Dark Green Hero Banner (Refined 2-Column Responsive Layout) -->
+        <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm text-white">
+            <!-- Subtle Watermark Icon for Background Depth -->
+            <div class="banner-watermark" aria-hidden="true">
+                <i class="fas fa-certificate"></i>
+            </div>
+
+            <div class="row align-items-center g-3 position-relative z-1">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-award text-warning me-1"></i> CREDENTIAL ISSUANCE
+                        </span>
+                        <span class="stage-status-pill status-completed">
+                            <span class="status-indicator-dot"></span>
+                            Live MMSU Template
+                        </span>
+                        <button 
+                            type="button" 
+                            class="stage-tag-pill border-0 text-white shadow-xs" 
+                            style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                            @click="triggerTutorial(5)"
+                            title="How Certificate Setup Works"
+                        >
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> Certificate Guide
+                        </button>
+                    </div>
+
+                    <h1 class="banner-title fw-bold mb-1">
+                        Certificate Editor
                     </h1>
-                    <p class="mb-0 text-white fst-italic fs-6 opacity-90">
-                        "Design the official completion certificate awarded to students."
+                    <p class="banner-desc mb-0 opacity-90">
+                        Design the official completion certificate awarded to graduating students.
                     </p>
+                </div>
+
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="banner-progress-card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="progress-card-label">Signer & Template</span>
+                            <span class="badge bg-warning text-dark fw-bold rounded-pill px-2.5">MMSU Official</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-white-50 small mb-3" style="font-size: 0.76rem;">
+                            <span>Signer: {{ form.signer_name || 'Designated Dean' }}</span>
+                            <span>{{ form.signer_title || 'College Dean' }}</span>
+                        </div>
+                        <button 
+                            @click="submit" 
+                            class="btn btn-warning w-100 py-2 rounded-pill fw-bold text-dark shadow-sm border-0 d-flex align-items-center justify-content-center gap-2"
+                            :disabled="form.processing"
+                        >
+                            <i class="fas fa-save"></i>
+                            <span>{{ form.processing ? 'Saving Changes...' : 'Save Configuration' }}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -209,6 +251,10 @@ const submit = () => {
         preserveScroll: true,
     });
 };
+
+const triggerTutorial = (step = 5) => {
+    window.dispatchEvent(new CustomEvent('win:open-educator-tutorial', { detail: { step } }));
+};
 </script>
 
 <style scoped>
@@ -224,5 +270,25 @@ const submit = () => {
     overflow: hidden;
     padding: 15px;
     background-color: #fff;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (max-width: 576px) {
+    .welcome-banner {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    .banner-title {
+        font-size: 1.4rem;
+    }
 }
 </style>

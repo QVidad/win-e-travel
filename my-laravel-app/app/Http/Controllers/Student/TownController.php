@@ -12,18 +12,21 @@ class TownController extends Controller
     public function index(): Response|\Illuminate\Http\RedirectResponse
     {
         $user = \Illuminate\Support\Facades\Auth::user();
+        $isEducatorOrAdmin = in_array($user->role, ['educator', 'admin']);
         
-        // Progression Lock Check
-        $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
-        $foundationCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
-            ->whereHas('courseModule', function ($q) {
-                $q->where('type', 'foundation');
-            })
-            ->where('passed', true)
-            ->count();
-            
-        if ($foundationTotal > 0 && $foundationCompleted < $foundationTotal) {
-            return redirect()->route('dashboard')->with('error', 'You must complete all Go Beyond Books foundation modules first.');
+        // Progression Lock Check (Students only)
+        if (!$isEducatorOrAdmin) {
+            $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
+            $foundationCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+                ->whereHas('courseModule', function ($q) {
+                    $q->where('type', 'foundation');
+                })
+                ->where('passed', true)
+                ->count();
+                
+            if ($foundationTotal > 0 && $foundationCompleted < $foundationTotal) {
+                return redirect()->route('dashboard')->with('error', 'You must complete all Go Beyond Books foundation modules first.');
+            }
         }
         
         $publishedModules = \App\Models\CourseModule::with('lessons')
@@ -73,7 +76,7 @@ class TownController extends Controller
         $isNextAvailable = true; // The first town is always available initially
 
         // Sequentially determine status
-        $mappedTowns = $towns->map(function ($town) use (&$completedCount, &$isNextAvailable, $progressByCode) {
+        $mappedTowns = $towns->map(function ($town) use (&$completedCount, &$isNextAvailable, $progressByCode, $isEducatorOrAdmin) {
             $code = 'town-' . $town->slug;
             $prog = $progressByCode[$code] ?? null;
             
@@ -82,6 +85,8 @@ class TownController extends Controller
             if ($isCompleted) {
                 $status = 'completed';
                 $completedCount++;
+            } else if ($isEducatorOrAdmin) {
+                $status = 'available';
             } else {
                 if ($isNextAvailable) {
                     $status = 'available';
@@ -99,24 +104,28 @@ class TownController extends Controller
         return Inertia::render('Student/Towns/Index', [
             'towns' => $mappedTowns,
             'completedCount' => $completedCount,
+            'isEducatorOrAdmin' => $isEducatorOrAdmin,
         ]);
     }
 
     public function show(string $slug): Response|\Illuminate\Http\RedirectResponse
     {
         $user = \Illuminate\Support\Facades\Auth::user();
+        $isEducatorOrAdmin = in_array($user->role, ['educator', 'admin']);
         
-        // Progression Lock Check
-        $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
-        $foundationCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
-            ->whereHas('courseModule', function ($q) {
-                $q->where('type', 'foundation');
-            })
-            ->where('passed', true)
-            ->count();
-            
-        if ($foundationTotal > 0 && $foundationCompleted < $foundationTotal) {
-            return redirect()->route('dashboard')->with('error', 'You must complete all Go Beyond Books foundation modules first.');
+        // Progression Lock Check (Students only)
+        if (!$isEducatorOrAdmin) {
+            $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
+            $foundationCompleted = \App\Models\ModuleProgress::where('user_id', $user->id)
+                ->whereHas('courseModule', function ($q) {
+                    $q->where('type', 'foundation');
+                })
+                ->where('passed', true)
+                ->count();
+                
+            if ($foundationTotal > 0 && $foundationCompleted < $foundationTotal) {
+                return redirect()->route('dashboard')->with('error', 'You must complete all Go Beyond Books foundation modules first.');
+            }
         }
 
         $town = Town::with(['destinations' => function ($query) {

@@ -1,24 +1,60 @@
 <template>
     <EducatorLayout>
-        <!-- Hero Banner Section -->
-        <div 
-            class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
-        >
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
-                        <i class="fas fa-tasks me-2 opacity-75"></i>Quiz Question Banks
+        <!-- Hero Banner Section (Refined 2-Column Responsive Layout) -->
+        <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm text-white">
+            <!-- Subtle Watermark Icon for Background Depth -->
+            <div class="banner-watermark" aria-hidden="true">
+                <i class="fas fa-tasks"></i>
+            </div>
+
+            <div class="row align-items-center g-3 position-relative z-1">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-tasks text-warning me-1"></i> ASSESSMENT ENGINE
+                        </span>
+                        <span class="stage-status-pill status-completed">
+                            <span class="status-indicator-dot"></span>
+                            80% Passing Rule Enforced
+                        </span>
+                        <button 
+                            type="button" 
+                            class="stage-tag-pill border-0 text-white shadow-xs" 
+                            style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                            @click="triggerTutorial(4)"
+                            title="How Quiz Banks & Evaluations Work"
+                        >
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> Assessment Guide
+                        </button>
+                    </div>
+
+                    <h1 class="banner-title fw-bold mb-1">
+                        Quiz Question Banks
                     </h1>
-                    <p class="mb-0 text-white fst-italic fs-6 opacity-90">
+                    <p class="banner-desc mb-0 opacity-90">
                         Manage multiple-choice question banks and correct answer keys for Foundation Modules. (Town Chapters are simulation-based).
                     </p>
                 </div>
 
-                <button @click="openAddModal" class="btn btn-warning px-4 py-2.5 rounded-pill fw-bold text-dark shadow-sm border-0 d-flex align-items-center gap-2">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Add Question</span>
-                </button>
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="banner-progress-card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="progress-card-label">Bank Capacity</span>
+                            <span class="badge bg-warning text-dark fw-bold rounded-pill px-2.5">{{ totalQuestionsCount }} Questions</span>
+                        </div>
+                        <div class="d-flex justify-content-between text-white-50 small mb-3" style="font-size: 0.76rem;">
+                            <span>Quick Checks & Evaluations</span>
+                            <span>{{ modules.length }} Modules</span>
+                        </div>
+                        <button 
+                            @click="openAddModal" 
+                            class="btn btn-warning w-100 py-2 rounded-pill fw-bold text-dark shadow-sm border-0 d-flex align-items-center justify-content-center gap-2"
+                        >
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add New Question</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -492,6 +528,10 @@ const deleteQuestion = (id) => {
         });
     }
 };
+
+const triggerTutorial = (step = 4) => {
+    window.dispatchEvent(new CustomEvent('win:open-educator-tutorial', { detail: { step } }));
+};
 </script>
 
 <style scoped>
@@ -528,5 +568,25 @@ const deleteQuestion = (id) => {
 }
 .bg-light-subtle {
     background-color: #f8f9fa !important;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (max-width: 576px) {
+    .welcome-banner {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    .banner-title {
+        font-size: 1.4rem;
+    }
 }
 </style>

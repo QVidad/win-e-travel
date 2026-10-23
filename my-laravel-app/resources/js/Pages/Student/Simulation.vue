@@ -4,22 +4,56 @@
         <div class="simulation-container py-4">
             <div class="container">
                 <!-- Page Header matching overall design -->
-                <div class="welcome-banner mb-4">
-                    <div class="row align-items-center">
-                        <div class="col-lg-8">
-                            <h2 class="display-6 fw-bold mb-3">
-                                <i class="fas fa-mountain me-2"></i>
+                <!-- Page Header (Refined Layout & Watermark Depth) -->
+                <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm">
+                    <!-- Subtle Watermark Icon for Background Depth (Preserves Ocean Blue Gradient) -->
+                    <div class="banner-watermark" aria-hidden="true">
+                        <i class="fas fa-mountain"></i>
+                    </div>
+
+                    <div class="row align-items-center g-3 position-relative z-1">
+                        <div class="col-12 col-md-7 col-lg-8">
+                            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                <span class="stage-tag-pill">
+                                    <i class="fas fa-vr-cardboard text-warning me-1"></i> SIMULATION ARENA
+                                </span>
+                                <span class="stage-status-pill status-progress">
+                                    <span class="status-indicator-dot"></span>
+                                    Live Virtual Tour
+                                </span>
+                            </div>
+                            <h1 class="banner-title fw-bold mb-1">
                                 Adventure Awaits
-                            </h2>
-                            <p class="mb-0 opacity-90 fs-5">Live Virtual Tour Guiding Simulation Engine</p>
+                            </h1>
+                            <p class="banner-desc mb-0 opacity-90">
+                                Live Virtual Tour Guiding Simulation & Speech Evaluation.
+                            </p>
                         </div>
-                        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                            <div class="d-flex justify-content-lg-end">
-                                <div class="text-center">
-                                    <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
-                                        <span class="progress-percentage fs-4">{{ satisfactionScore }}%</span>
+                        <div class="col-12 col-md-5 col-lg-4">
+                            <div class="banner-progress-card">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="overall-progress-circle flex-shrink-0" :style="progressCircleStyle">
+                                        <span class="progress-percentage">{{ satisfactionScore }}%</span>
                                     </div>
-                                    <span class="small fw-bold text-white opacity-75">Tourist Satisfaction</span>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="progress-card-label">Satisfaction</span>
+                                            <span class="progress-card-percent fw-bold">{{ satisfactionScore }}%</span>
+                                        </div>
+                                        <div class="progress banner-mini-track mb-1">
+                                            <div 
+                                                class="progress-bar bg-warning" 
+                                                role="progressbar" 
+                                                :style="{ width: `${satisfactionScore}%` }"
+                                                :aria-valuenow="satisfactionScore" 
+                                                aria-valuemin="0" 
+                                                aria-valuemax="100"
+                                            ></div>
+                                        </div>
+                                        <span class="small text-white-50 text-truncate d-block" style="font-size: 0.76rem;">
+                                            Tourist Feedback & Score
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -864,31 +898,31 @@ const proceedNextStep = () => {
 
 .welcome-banner {
     background: linear-gradient(135deg, #01579b 0%, #0277bd 100%);
-    border-radius: 30px;
-    padding: 40px;
+    border-radius: 24px;
+    padding: 26px 30px;
     color: white;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
     position: relative;
     overflow: hidden;
 }
 
 .overall-progress-circle {
-    width: 100px;
-    height: 100px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: conic-gradient(#ffc107 0deg 0deg, rgba(255,255,255,0.2) 0deg 360deg);
     position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .overall-progress-circle::before {
     content: '';
     position: absolute;
-    width: 80px;
-    height: 80px;
+    width: 44px;
+    height: 44px;
     background-color: #0277bd; /* matching banner */
     border-radius: 50%;
 }
@@ -897,6 +931,41 @@ const proceedNextStep = () => {
     position: relative;
     font-weight: 800;
     color: white;
+    font-size: 0.82rem;
+}
+
+@media (max-width: 768px) {
+    .welcome-banner {
+        padding: 18px 16px !important;
+        border-radius: 20px !important;
+        margin-bottom: 20px !important;
+    }
+    .banner-watermark {
+        font-size: 90px !important;
+        right: -10px !important;
+        bottom: -15px !important;
+    }
+    .banner-title {
+        font-size: 1.35rem !important;
+    }
+    .banner-desc {
+        font-size: 0.85rem !important;
+    }
+    .banner-progress-card {
+        padding: 10px 14px !important;
+        border-radius: 14px !important;
+    }
+    .overall-progress-circle {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    .overall-progress-circle::before {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    .progress-percentage {
+        font-size: 0.75rem !important;
+    }
 }
 
 .simulation-steps {

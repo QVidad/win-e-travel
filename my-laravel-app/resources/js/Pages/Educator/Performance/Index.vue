@@ -2,19 +2,69 @@
     <EducatorLayout>
         <Head title="Student Performance & Quiz Analytics" />
 
-        <!-- Hero Banner Section -->
-        <div 
-            class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
-        >
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
-                        <i class="fas fa-chart-line me-2 opacity-75"></i>Student Performance & Quiz Analytics
+        <!-- Hero Banner Section (Refined 2-Column Responsive Layout) -->
+        <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm text-white">
+            <!-- Subtle Watermark Icon for Background Depth -->
+            <div class="banner-watermark" aria-hidden="true">
+                <i class="fas fa-chart-line"></i>
+            </div>
+
+            <div class="row align-items-center g-3 position-relative z-1">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-user-graduate text-warning me-1"></i> STUDENT PERFORMANCE ANALYTICS
+                        </span>
+                        <span class="stage-status-pill status-completed">
+                            <span class="status-indicator-dot"></span>
+                            Pass Rate: {{ quizPassRate || 0 }}%
+                        </span>
+                        <button 
+                            type="button" 
+                            class="stage-tag-pill border-0 text-white shadow-xs" 
+                            style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                            @click="triggerTutorial(5)"
+                            title="How Student Analytics Work"
+                        >
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> Analytics Guide
+                        </button>
+                    </div>
+
+                    <h1 class="banner-title fw-bold mb-1">
+                        Student Performance & Quiz Analytics
                     </h1>
-                    <p class="mb-0 text-white fst-italic fs-6 opacity-90">
+                    <p class="banner-desc mb-0 opacity-90">
                         Track class mastery, average assessment scores, and module pass rates.
                     </p>
+                </div>
+
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="banner-progress-card">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="overall-progress-circle flex-shrink-0" :style="averageScoreCircleStyle">
+                                <span class="progress-percentage">{{ classAverageScore || 0 }}%</span>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="progress-card-label">Class Average</span>
+                                    <span class="progress-card-percent fw-bold">{{ classAverageScore || 0 }}%</span>
+                                </div>
+                                <div class="progress banner-mini-track mb-1">
+                                    <div 
+                                        class="progress-bar bg-warning" 
+                                        role="progressbar" 
+                                        :style="{ width: `${classAverageScore || 0}%` }"
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100"
+                                    ></div>
+                                </div>
+                                <div class="d-flex justify-content-between text-white-50" style="font-size: 0.72rem;">
+                                    <span>{{ completedCertificates || 0 }} Certified</span>
+                                    <span>{{ (roster || []).length }} Trainees</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -347,6 +397,18 @@ const getScoreBadgeColor = (score, isBgClass = false) => {
     if (score >= 75) return isBgClass ? 'bg-warning' : 'text-warning';
     return isBgClass ? 'bg-danger' : 'text-danger';
 };
+
+const averageScoreCircleStyle = computed(() => {
+    const score = props.classAverageScore || 0;
+    const degrees = (score / 100) * 360;
+    return {
+        background: `conic-gradient(#ffc107 0deg ${degrees}deg, rgba(255,255,255,0.2) ${degrees}deg 360deg)`
+    };
+});
+
+const triggerTutorial = (step = 5) => {
+    window.dispatchEvent(new CustomEvent('win:open-educator-tutorial', { detail: { step } }));
+};
 </script>
 
 <style scoped>
@@ -369,5 +431,63 @@ const getScoreBadgeColor = (score, isBgClass = false) => {
 .nav-pills .nav-link.active {
     background-color: #0d4b38 !important;
     border-color: #0d4b38 !important;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.overall-progress-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.overall-progress-circle::after {
+    content: '';
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #0e3d29;
+}
+
+.progress-percentage {
+    position: relative;
+    z-index: 1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: white;
+}
+
+@media (max-width: 576px) {
+    .welcome-banner {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    .banner-title {
+        font-size: 1.4rem;
+    }
+    .overall-progress-circle {
+        width: 48px;
+        height: 48px;
+    }
+    .overall-progress-circle::after {
+        width: 36px;
+        height: 36px;
+    }
+    .progress-percentage {
+        font-size: 0.65rem;
+    }
 }
 </style>

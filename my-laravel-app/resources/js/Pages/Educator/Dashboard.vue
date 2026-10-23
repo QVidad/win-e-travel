@@ -1,27 +1,70 @@
 <template>
     <EducatorLayout>
-        <!-- Dark Green Hero Banner -->
-        <div 
-            class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
-        >
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
-                        <i class="fas fa-desktop me-2 opacity-75"></i>Faculty CMS & Curriculum Control
+        <!-- Dark Green Hero Banner (Refined 2-Column Responsive Layout & Watermark Depth) -->
+        <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm text-white">
+            <!-- Subtle Watermark Icon for Background Depth (Preserves Green Gradient) -->
+            <div class="banner-watermark" aria-hidden="true">
+                <i class="fas fa-desktop"></i>
+            </div>
+
+            <div class="row align-items-center g-3 position-relative z-1">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> FACULTY CMS CONTROL
+                        </span>
+                        <span class="stage-status-pill status-completed">
+                            <span class="status-indicator-dot"></span>
+                            Curriculum Active
+                        </span>
+                        <button 
+                            type="button" 
+                            class="stage-tag-pill border-0 text-white shadow-xs" 
+                            style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                            @click="triggerTutorial(1)"
+                            title="How Educator CMS Works"
+                        >
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> How It Works
+                        </button>
+                    </div>
+
+                    <h1 class="banner-title fw-bold mb-1">
+                        Faculty CMS & Curriculum Control
                     </h1>
-                    <p class="mb-0 text-white fst-italic fs-6 opacity-90">
-                        "Manage curriculum modules, assessment question banks, and monitor student completion progress."
+                    <p class="banner-desc mb-0 opacity-90">
+                        Manage curriculum modules, assessment question banks, and monitor student completion progress.
                     </p>
                 </div>
 
-                <div class="d-flex gap-2">
-                    <Link :href="route('educator.modules.index')" class="btn btn-warning px-4 py-2 rounded-pill fw-bold text-dark shadow-sm border-0">
-                        <i class="fas fa-edit me-1"></i> Edit Content
-                    </Link>
-                    <Link :href="route('educator.quizzes.index')" class="btn btn-outline-light px-4 py-2 rounded-pill fw-bold shadow-sm">
-                        <i class="fas fa-tasks me-1"></i> Quiz Banks
-                    </Link>
+                <div class="col-12 col-md-5 col-lg-4">
+                    <!-- Frosted Glass Progress Card -->
+                    <div class="banner-progress-card">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="overall-progress-circle flex-shrink-0" :style="progressCircleStyle">
+                                <span class="progress-percentage">{{ stats.publishedModulesCount || 0 }}/{{ stats.totalModules || 0 }}</span>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="progress-card-label">Published Modules</span>
+                                    <span class="progress-card-percent fw-bold">{{ publishedPercent }}%</span>
+                                </div>
+                                <div class="progress banner-mini-track mb-1">
+                                    <div 
+                                        class="progress-bar bg-warning" 
+                                        role="progressbar" 
+                                        :style="{ width: `${publishedPercent}%` }"
+                                        :aria-valuenow="publishedPercent" 
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100"
+                                    ></div>
+                                </div>
+                                <div class="d-flex justify-content-between text-white-50" style="font-size: 0.72rem;">
+                                    <span>{{ stats.totalQuestions || 0 }} Questions</span>
+                                    <span>{{ stats.totalStudentAttempts || 0 }} Attempts</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -127,10 +170,11 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import EducatorLayout from '@/Layouts/EducatorLayout.vue';
 
-defineProps({
+const props = defineProps({
     stats: {
         type: Object,
         default: () => ({ totalModules: 0, totalQuestions: 0, totalStudentAttempts: 0, publishedModulesCount: 0, draftModulesCount: 0 }),
@@ -141,7 +185,21 @@ defineProps({
     },
 });
 
-// Using imported router directly
+const publishedPercent = computed(() => {
+    if (!props.stats.totalModules || props.stats.totalModules === 0) return 0;
+    return Math.round(((props.stats.publishedModulesCount || 0) / props.stats.totalModules) * 100);
+});
+
+const progressCircleStyle = computed(() => {
+    const degrees = (publishedPercent.value / 100) * 360;
+    return {
+        background: `conic-gradient(#ffc107 0deg ${degrees}deg, rgba(255,255,255,0.2) ${degrees}deg 360deg)`
+    };
+});
+
+const triggerTutorial = (step = 1) => {
+    window.dispatchEvent(new CustomEvent('win:open-educator-tutorial', { detail: { step } }));
+};
 
 const toggleStatus = (mod) => {
     mod.isToggling = true;
@@ -152,6 +210,15 @@ const toggleStatus = (mod) => {
         }
     });
 };
+
+onMounted(() => {
+    // Automatically launch educator tutorial for first-time educators
+    if (!localStorage.getItem('win_has_seen_educator_tutorial')) {
+        setTimeout(() => {
+            triggerTutorial(1);
+        }, 600);
+    }
+});
 </script>
 
 <style scoped>
@@ -161,5 +228,63 @@ const toggleStatus = (mod) => {
 .hover-lift:hover {
     transform: translateY(-2px);
     transition: all 0.2s ease-in-out;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.overall-progress-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.overall-progress-circle::after {
+    content: '';
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: #0e3d29;
+}
+
+.progress-percentage {
+    position: relative;
+    z-index: 1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: white;
+}
+
+@media (max-width: 576px) {
+    .welcome-banner {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    .banner-title {
+        font-size: 1.4rem;
+    }
+    .overall-progress-circle {
+        width: 48px;
+        height: 48px;
+    }
+    .overall-progress-circle::after {
+        width: 36px;
+        height: 36px;
+    }
+    .progress-percentage {
+        font-size: 0.65rem;
+    }
 }
 </style>

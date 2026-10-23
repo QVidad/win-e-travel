@@ -1,53 +1,67 @@
 <template>
     <EducatorLayout>
-        <!-- Dark Green Gradient Hero Banner Section -->
-        <div 
-            class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
-        >
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <Link :href="route('educator.modules.index')" class="text-decoration-none text-white-50 small fw-bold mb-2 d-inline-block">
-                        <i class="fas fa-arrow-left me-1"></i> Back to Modules List
-                    </Link>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
-                        <i class="fas fa-edit me-2 opacity-75"></i>{{ form.title }}
-                    </h1>
-                    <div class="d-flex align-items-center gap-2">
-                        <span 
-                            class="badge rounded-pill px-3 py-1 fw-bold fs-8 text-dark shadow-sm" 
-                            :class="module.type === 'foundation' ? 'bg-info' : 'bg-success'"
-                        >
-                            {{ module.type === 'foundation' ? 'Foundation Module' : 'Town Chapter' }}
+        <!-- Dark Green Gradient Hero Banner Section (Refined 2-Column Responsive Layout) -->
+        <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm text-white">
+            <!-- Subtle Watermark Icon for Background Depth -->
+            <div class="banner-watermark" aria-hidden="true">
+                <i class="fas fa-edit"></i>
+            </div>
+
+            <div class="row align-items-center g-3 position-relative z-1">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <Link :href="route('educator.modules.index')" class="stage-tag-pill text-decoration-none text-white shadow-xs" style="background: rgba(255, 255, 255, 0.22) !important;">
+                            <i class="fas fa-arrow-left me-1"></i> Modules List
+                        </Link>
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-layer-group text-warning me-1"></i>
+                            {{ module.type === 'foundation' ? 'FOUNDATION MODULE' : 'TOWN CHAPTER' }}
                         </span>
-                        <span class="badge rounded-pill px-3 py-1 fw-bold fs-8 border border-white text-white">
+                        <span class="stage-status-pill" :class="form.status === 'published' ? 'status-completed' : 'status-progress'">
+                            <span class="status-indicator-dot"></span>
                             {{ form.status === 'published' ? 'Published' : 'Draft' }}
                         </span>
+                        <button 
+                            type="button" 
+                            class="stage-tag-pill border-0 text-white shadow-xs" 
+                            style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                            @click="triggerTutorial(3)"
+                            title="How to Edit Lessons & Topics"
+                        >
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> Lesson Guide
+                        </button>
                     </div>
+
+                    <h1 class="banner-title fw-bold mb-1">
+                        {{ form.title }}
+                    </h1>
+                    <p class="banner-desc mb-0 opacity-90">
+                        <span v-if="module.updated_by && module.updated_by.name">
+                            Last edited by <strong>{{ module.updated_by.name }}</strong> on {{ formatDate(module.last_modified_at || module.updated_at) }}
+                        </span>
+                        <span v-else>
+                            Last modified on {{ formatDate(module.updated_at) }}
+                        </span>
+                    </p>
                 </div>
 
-                <!-- Action Switcher -->
-                <div class="d-flex align-items-center gap-3">
-                    <div class="text-end d-none d-md-block me-3">
-                        <small class="text-white-50 fs-8 d-block">
-                            <i class="fas fa-history me-1"></i>
-                            <span v-if="module.updated_by && module.updated_by.name">
-                                Last edited by <strong>{{ module.updated_by.name }}</strong><br>on {{ formatDate(module.last_modified_at || module.updated_at) }}
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="banner-progress-card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="progress-card-label">Module Actions</span>
+                            <span class="badge rounded-pill px-2.5" :class="form.status === 'published' ? 'bg-success text-white' : 'bg-warning text-dark'">
+                                {{ form.status === 'published' ? 'Live' : 'Hidden' }}
                             </span>
-                            <span v-else>
-                                Last modified on<br>{{ formatDate(module.updated_at) }}
-                            </span>
-                        </small>
+                        </div>
+                        <button 
+                            @click="submit" 
+                            class="btn btn-warning w-100 py-2 rounded-pill fw-bold text-dark shadow-sm border-0 d-flex align-items-center justify-content-center gap-2"
+                            :disabled="form.processing"
+                        >
+                            <i class="fas fa-save"></i>
+                            <span>{{ form.processing ? 'Saving Changes...' : 'Save Changes' }}</span>
+                        </button>
                     </div>
-
-                    <button 
-                        @click="submit" 
-                        class="btn text-dark bg-white rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2" 
-                        :disabled="form.processing"
-                    >
-                        <i class="fas fa-save text-success"></i>
-                        <span>Save Changes</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -1036,6 +1050,10 @@ const deleteLesson = (lessonId) => {
         });
     }
 };
+
+const triggerTutorial = (step = 3) => {
+    window.dispatchEvent(new CustomEvent('win:open-educator-tutorial', { detail: { step } }));
+};
 </script>
 
 <style scoped>
@@ -1047,5 +1065,25 @@ const deleteLesson = (lessonId) => {
 }
 .max-h-75vh {
     max-height: 75vh;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (max-width: 576px) {
+    .welcome-banner {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    .banner-title {
+        font-size: 1.4rem;
+    }
 }
 </style>

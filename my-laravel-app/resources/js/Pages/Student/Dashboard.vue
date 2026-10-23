@@ -4,23 +4,65 @@
         <div class="dashboard-container">
             <div>
                 <!-- Welcome Banner matching dashboard.html -->
-                <div class="welcome-banner">
-                    <div class="row align-items-center">
-                        <div class="col-lg-8">
-                            <h1 class="display-5 fw-bold mb-3">
+                <!-- Welcome Banner (Refined Layout & Watermark Depth) -->
+                <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm">
+                    <!-- Subtle Watermark Icon for Background Depth (Preserves Green Gradient) -->
+                    <div class="banner-watermark" aria-hidden="true">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+
+                    <div class="row align-items-center g-3 position-relative z-1">
+                        <div class="col-12 col-md-7 col-lg-8">
+                            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                                <span class="stage-tag-pill">
+                                    <i class="fas fa-award text-warning me-1"></i> TRAINEE DASHBOARD
+                                </span>
+                                <span class="stage-status-pill" :class="overallPercent >= 100 ? 'status-completed' : 'status-progress'">
+                                    <span class="status-indicator-dot"></span>
+                                    {{ overallPercent >= 100 ? 'Journey Completed' : 'Active Training' }}
+                                </span>
+                                <button 
+                                    type="button" 
+                                    class="stage-tag-pill border-0 text-white shadow-xs" 
+                                    style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                                    @click="triggerTutorial"
+                                    title="View Interactive Tutorial"
+                                >
+                                    <i class="fas fa-gamepad text-warning me-1"></i> How It Works
+                                </button>
+                            </div>
+                            <h1 class="banner-title fw-bold mb-2">
                                 Welcome back, <span id="welcomeName">{{ $page.props.auth.user.name }}</span>! 👋
                             </h1>
-                            <p class="motivation-quote mb-0" id="motivationMessage">
+                            <p class="motivation-quote mb-0 opacity-90" id="motivationMessage">
                                 "{{ motivationQuote }}"
                             </p>
                         </div>
-                        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                            <div class="d-flex justify-content-lg-end">
-                                <div class="text-center">
-                                    <div class="overall-progress-circle mb-2 mx-auto" :style="progressCircleStyle">
-                                        <span class="progress-percentage fs-4">{{ overallPercent }}%</span>
+                        <div class="col-12 col-md-5 col-lg-4">
+                            <div class="banner-progress-card">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="overall-progress-circle flex-shrink-0" :style="progressCircleStyle">
+                                        <span class="progress-percentage">{{ overallPercent }}%</span>
                                     </div>
-                                    <span class="small fw-bold text-white opacity-75">Current Progress</span>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="progress-card-label">Current Progress</span>
+                                            <span class="progress-card-percent fw-bold">{{ overallPercent }}%</span>
+                                        </div>
+                                        <div class="progress banner-mini-track mb-1">
+                                            <div 
+                                                class="progress-bar bg-warning" 
+                                                role="progressbar" 
+                                                :style="{ width: `${overallPercent}%` }"
+                                                :aria-valuenow="overallPercent" 
+                                                aria-valuemin="0" 
+                                                aria-valuemax="100"
+                                            ></div>
+                                        </div>
+                                        <span class="small text-white-50 text-truncate d-block" style="font-size: 0.76rem;">
+                                            Overall Guide Progression
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -66,9 +108,18 @@
                                 <p class="text-muted small mb-0">Begin with <strong>Go Beyond Books</strong> to learn core tour guiding skills and unlock town chapters.</p>
                             </div>
                         </div>
-                        <Link :href="route('go-beyond-books.index')" class="btn btn-mmsu px-4 rounded-pill fw-bold">
-                            Start Module 1 <i class="fas fa-arrow-right ms-2"></i>
-                        </Link>
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <button 
+                                type="button" 
+                                class="btn btn-outline-success px-3 rounded-pill fw-bold"
+                                @click="triggerTutorial"
+                            >
+                                <i class="fas fa-gamepad me-1"></i> View Tutorial
+                            </button>
+                            <Link :href="route('go-beyond-books.index')" class="btn btn-mmsu px-4 rounded-pill fw-bold">
+                                Start Module 1 <i class="fas fa-arrow-right ms-2"></i>
+                            </Link>
+                        </div>
                     </div>
                 </div>
                 
@@ -240,7 +291,7 @@
 <script setup>
 import StudentLayout from '@/Layouts/StudentLayout.vue';
 import { ref, computed, onMounted } from 'vue';
-import { Link, Head } from '@inertiajs/vue3';
+import { Link, Head, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     towns: Array,
@@ -283,8 +334,16 @@ const maxTargetXp = computed(() => props.progress?.maxTargetXp ?? 1000);
 const adventureCompleted = computed(() => props.progress?.simulationsCompleted ?? 0);
 const simulationsTotal = computed(() => props.progress?.simulationsTotal ?? 0);
 
-const isDareToDiscoverLocked = computed(() => foundationTotal.value > 0 && foundationCompleted.value < foundationTotal.value);
-const isAdventureAwaitsLocked = computed(() => isDareToDiscoverLocked.value || (townsTotal.value > 0 && discoverCompleted.value < townsTotal.value));
+const isDareToDiscoverLocked = computed(() => {
+    const role = usePage().props.auth?.user?.role;
+    if (['educator', 'admin'].includes(role)) return false;
+    return foundationTotal.value > 0 && foundationCompleted.value < foundationTotal.value;
+});
+const isAdventureAwaitsLocked = computed(() => {
+    const role = usePage().props.auth?.user?.role;
+    if (['educator', 'admin'].includes(role)) return false;
+    return isDareToDiscoverLocked.value || (townsTotal.value > 0 && discoverCompleted.value < townsTotal.value);
+});
 
 const totalCompletedChapters = computed(() => props.progress?.completedChapters ?? (foundationCompleted.value + discoverCompleted.value + adventureCompleted.value));
 const overallPercent = computed(() => props.progress?.overallPercentage ?? Math.round((totalCompletedChapters.value / (props.progress?.totalChapters || 25)) * 100));
@@ -305,8 +364,19 @@ const quotes = [
 
 const motivationQuote = ref('');
 
+const triggerTutorial = () => {
+    window.dispatchEvent(new CustomEvent('win:open-tutorial'));
+};
+
 onMounted(() => {
     motivationQuote.value = quotes[Math.floor(Math.random() * quotes.length)];
+
+    // Automatically launch guided tutorial for newly registered / first-time students
+    if (!localStorage.getItem('win_has_seen_tutorial')) {
+        setTimeout(() => {
+            triggerTutorial();
+        }, 600);
+    }
 });
 </script>
 
@@ -464,24 +534,116 @@ onMounted(() => {
     transition: all 0.3s ease;
 }
 
+.banner-watermark {
+    position: absolute;
+    right: -10px;
+    bottom: -22px;
+    font-size: 135px;
+    color: rgba(255, 255, 255, 0.08);
+    transform: rotate(-12deg);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.stage-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.18) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    color: #ffffff !important;
+}
+
+.stage-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.stage-status-pill.status-progress {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fef08a !important;
+}
+
+.stage-status-pill.status-completed {
+    background: rgba(34, 197, 94, 0.25) !important;
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #86efac !important;
+}
+
+.status-indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+    display: inline-block;
+    box-shadow: 0 0 6px currentColor;
+}
+
+.banner-title {
+    font-size: 1.85rem;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.banner-progress-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 18px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.progress-card-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.progress-card-percent {
+    font-size: 0.95rem;
+    color: #ffc107;
+}
+
+.banner-mini-track {
+    height: 6px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
 .overall-progress-circle {
-    width: 100px;
-    height: 100px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: conic-gradient(#ffc107 0deg 0deg, rgba(255,255,255,0.2) 0deg 360deg);
     position: relative;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .overall-progress-circle::before {
     content: '';
     position: absolute;
-    width: 80px;
-    height: 80px;
-    background-color: #1a5f7a; /* matching banner */
+    width: 44px;
+    height: 44px;
+    background-color: #155566; /* harmonized deep teal */
     border-radius: 50%;
 }
 
@@ -489,6 +651,7 @@ onMounted(() => {
     position: relative;
     font-weight: 800;
     color: white;
+    font-size: 0.82rem;
 }
 
 .btn-outline-purple {
@@ -519,6 +682,49 @@ onMounted(() => {
     color: #fff;
     background-color: #1976d2;
     border-color: #1976d2;
+}
+
+@media (max-width: 768px) {
+    .welcome-banner {
+        padding: 18px 16px !important;
+        border-radius: 20px !important;
+        margin-bottom: 20px !important;
+    }
+    .banner-watermark {
+        font-size: 90px !important;
+        right: -10px !important;
+        bottom: -15px !important;
+    }
+    .banner-title {
+        font-size: 1.35rem !important;
+    }
+    .motivation-quote {
+        font-size: 0.82rem !important;
+    }
+    .banner-progress-card {
+        padding: 10px 14px !important;
+        border-radius: 14px !important;
+    }
+    .overall-progress-circle {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    .overall-progress-circle::before {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    .progress-percentage {
+        font-size: 0.75rem !important;
+    }
+    .progress-overview-card {
+        padding: 20px 16px !important;
+        border-radius: 16px !important;
+        margin-bottom: 20px !important;
+    }
+    .journey-stage-card {
+        padding: 20px 16px !important;
+        border-radius: 16px !important;
+    }
 }
 </style>
  

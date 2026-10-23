@@ -12,6 +12,7 @@ class FoundationController extends Controller
     public function index(): Response
     {
         $user = \Illuminate\Support\Facades\Auth::user();
+        $isEducatorOrAdmin = in_array($user->role, ['educator', 'admin']);
         
         $foundationModules = \App\Models\CourseModule::where('type', 'foundation')
             ->where('status', 'published')
@@ -28,25 +29,29 @@ class FoundationController extends Controller
             ->pluck('passed', 'course_module_id')
             ->toArray();
             
-        $unlockedLevel = 1;
-        foreach ($foundationModules as $index => $module) {
-            $isPassed = $progresses[$module->id] ?? false;
-            if ($isPassed) {
-                $unlockedLevel = $index + 2;
-            } else {
-                break;
+        $unlockedLevel = $isEducatorOrAdmin ? (count($foundationModules) + 1) : 1;
+        if (!$isEducatorOrAdmin) {
+            foreach ($foundationModules as $index => $module) {
+                $isPassed = $progresses[$module->id] ?? false;
+                if ($isPassed) {
+                    $unlockedLevel = $index + 2;
+                } else {
+                    break;
+                }
             }
         }
 
-        // Map tags
-        $foundationModules->map(function ($module) {
+        // Map tags and completion status
+        $foundationModules->map(function ($module) use ($progresses) {
             $module->tags = $module->lessons->pluck('title')->toArray();
+            $module->is_passed = (bool)($progresses[$module->id] ?? false);
             return $module;
         });
 
         return Inertia::render('Student/Foundation', [
             'foundationModules' => $foundationModules,
             'unlockedLevel' => $unlockedLevel,
+            'isEducatorOrAdmin' => $isEducatorOrAdmin,
         ]);
     }
 }

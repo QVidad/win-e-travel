@@ -9,64 +9,123 @@
             </Link>
         </div>
 
-        <!-- Student Profile Header -->
-        <div class="card border-0 shadow-sm mb-4 overflow-hidden text-white" style="border-radius: 20px;">
-            <div class="py-4 px-4 px-md-5" style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);">
-                <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
-                    <div class="d-flex align-items-center mb-3 mb-md-0">
-                        <img :src="student.avatar || '/assets/images/default-avatar.png'" class="rounded-circle shadow-sm me-4 border border-white border-3" style="width: 80px; height: 80px; object-fit: cover;">
-                        <div>
-                            <h2 class="fw-bold mb-1" style="font-weight: 800; letter-spacing: -0.5px;">{{ student.name }}</h2>
-                            <p class="text-white opacity-90 mb-0 fst-italic"><i class="fas fa-envelope me-2"></i>{{ student.email }}</p>
-                        </div>
-                    </div>
-                    <div class="text-center text-md-end">
-                        <p class="text-white opacity-75 small mb-1 text-uppercase fw-bold tracking-wide">MMSU Certificate Status</p>
-                        <span class="badge fs-6 px-4 py-2 rounded-pill shadow-sm" :class="student.status === 'Eligible' ? 'bg-success text-white border border-success' : 'bg-light text-dark'">
-                            <i class="fas fa-award me-2" v-if="student.status === 'Eligible'"></i>
-                            <i class="fas fa-hourglass-half me-2 text-warning" v-else></i>
-                            {{ student.status === 'Eligible' ? 'Certified' : 'In Progress' }}
-                        </span>
-                    </div>
-                </div>
+        <!-- Student Profile Header (Refined 2-Column Responsive Layout) -->
+        <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm text-white">
+            <!-- Subtle Watermark Icon for Background Depth -->
+            <div class="banner-watermark" aria-hidden="true">
+                <i class="fas fa-user-graduate"></i>
             </div>
-            
-            <!-- Timeline Metrics -->
-            <div class="card-body px-4 px-md-5 py-4 bg-white">
-                <div class="row g-4">
-                    <div class="col-md-3">
-                        <div class="d-flex flex-column">
-                            <span class="text-muted small fw-bold text-uppercase mb-1">Date Registered</span>
-                            <div class="d-flex align-items-center">
-                                <i class="far fa-calendar-alt text-primary me-2 fa-lg"></i>
-                                <span class="fw-medium text-dark">{{ student.date_registered }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3">
-                        <div class="d-flex flex-column">
-                            <span class="text-muted small fw-bold text-uppercase mb-1">Date Completed</span>
-                            <div class="d-flex align-items-center">
-                                <i class="far fa-calendar-check me-2 fa-lg" :class="student.date_completed ? 'text-success' : 'text-muted'"></i>
-                                <span class="fw-medium text-dark" v-if="student.date_completed">{{ student.date_completed }}</span>
-                                <span class="text-muted fst-italic" v-else>Ongoing</span>
-                            </div>
-                        </div>
+
+            <div class="row align-items-center g-3 position-relative z-1">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <Link :href="route('educator.performance.index')" class="stage-tag-pill text-decoration-none text-white shadow-xs" style="background: rgba(255, 255, 255, 0.22) !important;">
+                            <i class="fas fa-arrow-left me-1"></i> Roster
+                        </Link>
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-id-card text-warning me-1"></i> STUDENT AUDIT PROFILE
+                        </span>
+                        <span class="stage-status-pill" :class="student.status === 'Eligible' ? 'status-completed' : 'status-progress'">
+                            <span class="status-indicator-dot"></span>
+                            {{ student.status === 'Eligible' ? 'Certified Tour Guide' : 'Training In Progress' }}
+                        </span>
+                        <button 
+                            type="button" 
+                            class="stage-tag-pill border-0 text-white shadow-xs" 
+                            style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                            @click="triggerTutorial(5)"
+                            title="How Student Analytics Work"
+                        >
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> Analytics Guide
+                        </button>
                     </div>
 
-                    <div class="col-md-3">
-                        <div class="d-flex flex-column">
-                            <span class="text-muted small fw-bold text-uppercase mb-1">Progress</span>
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-tasks text-info me-2 fa-lg"></i>
-                                <span class="fw-medium text-dark">{{ summary.completed_count }} <span class="text-muted">/ {{ summary.total_count }} Modules</span></span>
-                            </div>
+                    <div class="d-flex align-items-center mt-2">
+                        <img :src="student.avatar || '/assets/images/default-avatar.png'" class="rounded-circle shadow-sm me-3 border border-white border-2" style="width: 64px; height: 64px; object-fit: cover;">
+                        <div>
+                            <h1 class="banner-title fw-bold mb-1">
+                                {{ student.name }}
+                            </h1>
+                            <p class="banner-desc mb-0 opacity-90">
+                                <i class="fas fa-envelope me-1.5"></i>{{ student.email }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="banner-progress-card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="progress-card-label">Certificate Status</span>
+                            <span class="badge rounded-pill px-2.5" :class="student.status === 'Eligible' ? 'bg-success text-white' : 'bg-warning text-dark'">
+                                {{ student.status === 'Eligible' ? 'Eligible' : 'In Progress' }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between text-white-50 small mb-2" style="font-size: 0.76rem;">
+                            <span>Progress Completion</span>
+                            <span class="text-warning fw-bold">{{ summary?.overall_percentage || 0 }}%</span>
+                        </div>
+                        <div class="progress banner-mini-track">
+                            <div 
+                                class="progress-bar bg-warning" 
+                                role="progressbar" 
+                                :style="{ width: `${summary?.overall_percentage || 0}%` }"
+                                aria-valuemin="0" 
+                                aria-valuemax="100"
+                            ></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+            
+            <!-- Timeline Metrics Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-body px-4 px-md-5 py-4">
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="text-muted small fw-bold text-uppercase mb-1">Date Registered</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="far fa-calendar-alt text-primary me-2 fa-lg"></i>
+                                    <span class="fw-medium text-dark">{{ student.date_registered }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="text-muted small fw-bold text-uppercase mb-1">Date Completed</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="far fa-calendar-check me-2 fa-lg" :class="student.date_completed ? 'text-success' : 'text-muted'"></i>
+                                    <span class="fw-medium text-dark" v-if="student.date_completed">{{ student.date_completed }}</span>
+                                    <span class="text-muted fst-italic" v-else>Ongoing</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="text-muted small fw-bold text-uppercase mb-1">Progress</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-tasks text-info me-2 fa-lg"></i>
+                                    <span class="fw-medium text-dark">{{ summary.completed_count }} <span class="text-muted">/ {{ summary.total_count }} Modules</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="text-muted small fw-bold text-uppercase mb-1">Evaluation Mastery</span>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-award text-warning me-2 fa-lg"></i>
+                                    <span class="fw-medium text-dark">{{ summary.overall_percentage || 0 }}% Score</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         <!-- Detailed Module Progress -->
         <div class="card border-0 shadow-sm rounded-4">
@@ -145,6 +204,10 @@ const getStatusBadgeClass = (status) => {
         default: return 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle';
     }
 };
+
+const triggerTutorial = (step = 5) => {
+    window.dispatchEvent(new CustomEvent('win:open-educator-tutorial', { detail: { step } }));
+};
 </script>
 
 <style scoped>
@@ -156,5 +219,25 @@ const getStatusBadgeClass = (status) => {
 }
 .table-hover tbody tr:hover {
     background-color: #f8f9fa;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (max-width: 576px) {
+    .welcome-banner {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    .banner-title {
+        font-size: 1.4rem;
+    }
 }
 </style>

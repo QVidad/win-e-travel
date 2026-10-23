@@ -35,7 +35,13 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'isDareToDiscoverUnlocked' => function () use ($request) {
-                if (!$request->user() || $request->user()->role !== 'student') {
+                if (!$request->user()) {
+                    return false;
+                }
+                if (in_array($request->user()->role, ['educator', 'admin'])) {
+                    return true;
+                }
+                if ($request->user()->role !== 'student') {
                     return false;
                 }
                 $foundationTotal = \App\Models\CourseModule::where('type', 'foundation')->where('status', 'published')->count();
@@ -48,7 +54,13 @@ class HandleInertiaRequests extends Middleware
                 return $completed >= $foundationTotal;
             },
             'isAdventureAwaitsUnlocked' => function () use ($request) {
-                if (!$request->user() || $request->user()->role !== 'student') {
+                if (!$request->user()) {
+                    return false;
+                }
+                if (in_array($request->user()->role, ['educator', 'admin'])) {
+                    return true;
+                }
+                if ($request->user()->role !== 'student') {
                     return false;
                 }
                 $townsTotal = \App\Models\CourseModule::where('type', 'town_chapter')->where('status', 'published')->count();
@@ -59,6 +71,9 @@ class HandleInertiaRequests extends Middleware
                         $q->where('type', 'town_chapter');
                     })->where('passed', true)->count();
                 return $completed >= $townsTotal;
+            },
+            'isEducatorView' => function () use ($request) {
+                return (bool) ($request->user() && in_array($request->user()->role, ['educator', 'admin']));
             },
             'flash' => [
                 'gamification' => $request->session()->get('gamification'),

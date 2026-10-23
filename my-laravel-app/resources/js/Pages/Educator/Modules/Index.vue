@@ -1,24 +1,66 @@
 <template>
     <EducatorLayout>
-        <!-- Dark Green Gradient Hero Banner Section -->
-        <div 
-            class="card border-0 text-white p-4 p-md-5 mb-4 shadow-sm" 
-            style="background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%); border-radius: 20px;"
-        >
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <h1 class="display-6 fw-bold mb-2 text-white" style="letter-spacing: -0.5px;">
-                        <i class="fas fa-book-open me-2 opacity-75"></i>Educator Course Content & Modules
+        <!-- Dark Green Gradient Hero Banner Section (Refined 2-Column Responsive Layout) -->
+        <div class="welcome-banner position-relative overflow-hidden mb-4 shadow-sm text-white">
+            <!-- Subtle Watermark Icon for Background Depth -->
+            <div class="banner-watermark" aria-hidden="true">
+                <i class="fas fa-book-open"></i>
+            </div>
+
+            <div class="row align-items-center g-3 position-relative z-1">
+                <div class="col-12 col-md-7 col-lg-8">
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                        <span class="stage-tag-pill">
+                            <i class="fas fa-layer-group text-warning me-1"></i> CURRICULUM ARCHITECTURE
+                        </span>
+                        <span class="stage-status-pill status-completed">
+                            <span class="status-indicator-dot"></span>
+                            {{ foundationModules.length + townModules.length }} Total Modules
+                        </span>
+                        <button 
+                            type="button" 
+                            class="stage-tag-pill border-0 text-white shadow-xs" 
+                            style="background: rgba(255, 255, 255, 0.22) !important; cursor: pointer;"
+                            @click="triggerTutorial(2)"
+                            title="How to Add & Organize Modules"
+                        >
+                            <i class="fas fa-chalkboard-teacher text-warning me-1"></i> How to Add Modules
+                        </button>
+                    </div>
+
+                    <h1 class="banner-title fw-bold mb-1">
+                        Educator Course Content & Modules
                     </h1>
-                    <p class="mb-0 text-white fst-italic fs-6 opacity-90">
-                        "Edit course text, configure draft/published visibility, and audit faculty updates across all modules."
+                    <p class="banner-desc mb-0 opacity-90">
+                        Edit course text, configure draft/published visibility, and audit faculty updates across all modules.
                     </p>
                 </div>
-                
-                <button @click="openCreateModal" class="btn btn-warning px-4 py-2.5 rounded-pill fw-bold text-dark shadow-sm border-0 d-flex align-items-center gap-2">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Create Module</span>
-                </button>
+
+                <div class="col-12 col-md-5 col-lg-4">
+                    <div class="banner-progress-card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="progress-card-label">Curriculum Balance</span>
+                            <span class="badge bg-warning text-dark fw-bold rounded-pill px-2.5">Active</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between text-white small mb-3">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <i class="fas fa-book-open text-warning"></i>
+                                <span>{{ foundationModules.length }} Foundation</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <i class="fas fa-map-marked-alt text-warning"></i>
+                                <span>{{ townModules.length }} Town Chapters</span>
+                            </div>
+                        </div>
+                        <button 
+                            @click="openCreateModal" 
+                            class="btn btn-warning w-100 py-2 rounded-pill fw-bold text-dark shadow-sm border-0 d-flex align-items-center justify-content-center gap-2"
+                        >
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Create New Module</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -316,6 +358,10 @@ const stripHtml = (html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     return doc.body.textContent || "";
 };
+
+const triggerTutorial = (step = 2) => {
+    window.dispatchEvent(new CustomEvent('win:open-educator-tutorial', { detail: { step } }));
+};
 </script>
 
 <style scoped>
@@ -327,5 +373,25 @@ const stripHtml = (html) => {
 }
 .hover-lift:hover {
     transform: translateY(-3px);
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #0a472e 0%, #1a5f7a 100%);
+    border-radius: 24px;
+    padding: 26px 30px;
+    color: white;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+@media (max-width: 576px) {
+    .welcome-banner {
+        padding: 20px 18px;
+        border-radius: 18px;
+    }
+    .banner-title {
+        font-size: 1.4rem;
+    }
 }
 </style>
